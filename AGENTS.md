@@ -1,10 +1,10 @@
 <claude-mem-context>
 # Memory Context
 
-# [OpenTruck] recent context, 2026-05-11 6:24pm GMT+8
+# [OpenTruck] recent context, 2026-05-11 6:34pm GMT+8
 
 No previous sessions found.
-</claude-mem-context>`
+`</claude-mem-context>``
 
 ## 每次会话开始时（上班打卡）
 
@@ -18,3 +18,7 @@ No previous sessions found.
 1. 更新 PROGRESS.md
 2. 跑 make check 确认一致状态
 3. 提交所有已完成的工作
+
+## 项目目标
+
+本项目需要重点参考sub2api的设计和代码，本项目的目标是构建一款社区共建的多租户的开源ai中转站

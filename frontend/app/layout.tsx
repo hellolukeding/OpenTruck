@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OpenTruck Dispatch Ledger",
-  description: "Operational dashboard for the OpenTruck AI gateway",
+  title: "OpenTruck Admin",
+  description: "OpenTruck multilingual admin dashboard",
 };
 
 export default function RootLayout({

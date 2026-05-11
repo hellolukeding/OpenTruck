@@ -1,8 +1,5 @@
-import { AdminDashboard } from "@/components/admin-dashboard";
-import { getAdminOverview } from "@/lib/admin-api";
+import { redirect } from "next/navigation";
 
-export default async function HomePage() {
-  const overview = await getAdminOverview();
-
-  return <AdminDashboard {...overview} />;
+export default function RootPage() {
+  redirect("/en");
 }
