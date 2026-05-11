@@ -3,7 +3,7 @@ import { KeyRound, RadioTower, Route, Users } from "lucide-react";
 import type { ApiKey, Node, NodeModel, Tenant } from "@/lib/admin-api";
 import type { DashboardDictionary } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type AdminOverviewProps = {
@@ -23,7 +23,6 @@ function statusVariant(status: string): "default" | "secondary" | "success" | "w
 
 function formatDate(value: string | null, fallback: string): string {
   if (!value) return fallback;
-
   return new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
@@ -70,142 +69,125 @@ export function AdminOverview({
 
   return (
     <>
-      <section className="grid gap-6 lg:grid-cols-[1.5fr_0.9fr]">
-        <Card className="glass-panel overflow-hidden">
-          <CardHeader className="gap-4 border-b border-black/5 bg-white/80">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-neutral-500">
-              {dictionary.heroKicker}
-            </p>
-            <CardTitle className="editorial-title text-5xl leading-[0.94] md:text-6xl">
-              {dictionary.heroTitle}
-            </CardTitle>
-            <CardDescription className="max-w-3xl text-base leading-7 text-neutral-600">
-              {dictionary.heroSummary}
-            </CardDescription>
-          </CardHeader>
-        </Card>
+      {/* Page Header */}
+      <div className="flex flex-col gap-sm">
+        <h1 className="font-headline-lg text-headline-lg text-primary">
+          {dictionary.overview.signalTitle}
+        </h1>
+        <p className="font-body-md text-body-md text-on-surface-variant">
+          {dictionary.overview.signalSummary}
+        </p>
+      </div>
 
-        <Card className="glass-panel bg-black text-white">
-          <CardHeader>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-              {dictionary.overview.signalLabel}
-            </p>
-            <CardTitle className="text-3xl text-white">
-              {dictionary.overview.signalTitle}
-            </CardTitle>
-            <CardDescription className="text-neutral-300">
-              {dictionary.overview.signalSummary}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm text-neutral-300">
-            <div className="flex items-center justify-between border-t border-white/10 pt-3">
-              <span>{dictionary.metrics.nodes}</span>
-              <span>{nodes.filter((node) => node.status === "active").length}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-white/10 pt-3">
-              <span>{dictionary.metrics.credentials}</span>
-              <span>{apiKeys.filter((apiKey) => apiKey.status === "active").length}</span>
-            </div>
-            <div className="flex items-center justify-between border-t border-white/10 pt-3">
-              <span>{dictionary.metrics.routes}</span>
-              <span>{nodeModels.filter((model) => model.status === "active").length}</span>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {/* Stats Grid */}
+      <section className="grid gap-md grid-cols-2 xl:grid-cols-4">
         {metrics.map((metric) => {
           const Icon = metric.icon;
-
           return (
-            <Card key={metric.label} className="glass-panel">
-              <CardContent className="p-5">
-                <div className="mb-6 flex items-center justify-between">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+            <Card key={metric.label}>
+              <CardContent className="p-lg flex flex-col gap-sm">
+                <div className="flex items-center justify-between">
+                  <span className="font-label-md text-label-md text-on-surface-variant">
                     {metric.label}
-                  </p>
-                  <Icon className="h-4 w-4 text-neutral-400" />
+                  </span>
+                  <Icon className="h-4 w-4 text-outline" />
                 </div>
-                <p className="editorial-title text-5xl leading-none text-black">
+                <span className="font-headline-lg text-headline-lg text-primary">
                   {metric.value}
-                </p>
-                <p className="mt-3 text-sm text-neutral-500">{metric.note}</p>
+                </span>
+                <span className="font-code-sm text-code-sm text-on-surface-variant">
+                  {metric.note}
+                </span>
               </CardContent>
             </Card>
           );
         })}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <Card className="glass-panel">
-          <CardHeader className="border-b border-black/5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-              {dictionary.overview.snapshotEyebrow}
-            </p>
-            <CardTitle className="editorial-title text-3xl leading-none text-black">
+      {/* Bottom Sections */}
+      <section className="grid gap-lg xl:grid-cols-[1.1fr_0.9fr]">
+        {/* Nodes Table */}
+        <Card>
+          <div className="p-md border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+            <h3 className="font-label-md text-label-md text-primary">
+              {dictionary.overview.snapshotEyebrow || "Node Snapshot"}
+            </h3>
+            <span className="font-code-sm text-code-sm text-on-surface-variant">
               {dictionary.overview.snapshotTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{dictionary.labels.name}</TableHead>
-                  <TableHead>{dictionary.labels.status}</TableHead>
-                  <TableHead>{dictionary.labels.region}</TableHead>
-                  <TableHead>{dictionary.labels.weight}</TableHead>
+            </span>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{dictionary.labels.name}</TableHead>
+                <TableHead>{dictionary.labels.health}</TableHead>
+                <TableHead>{dictionary.labels.region}</TableHead>
+                <TableHead>{dictionary.labels.weight}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {nodes.slice(0, 5).map((node) => (
+                <TableRow key={node.id}>
+                  <TableCell className="font-medium text-primary">{node.name}</TableCell>
+                  <TableCell>
+                    <Badge variant={statusVariant(node.health_status)}>
+                      {node.health_status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{node.region}</TableCell>
+                  <TableCell>{node.weight}</TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {nodes.slice(0, 5).map((node) => (
-                  <TableRow key={node.id}>
-                    <TableCell className="font-medium text-black">{node.name}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant(node.health_status)}>
-                        {node.health_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{node.region}</TableCell>
-                    <TableCell>{node.weight}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
+              ))}
+              {nodes.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center font-body-md text-body-md text-on-surface-variant py-xl"
+                  >
+                    No nodes configured.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </Card>
 
-        <Card className="glass-panel">
-          <CardHeader className="border-b border-black/5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-              {dictionary.overview.ledgerEyebrow}
-            </p>
-            <CardTitle className="editorial-title text-3xl leading-none text-black">
+        {/* API Keys Summary */}
+        <Card>
+          <div className="p-md border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+            <h3 className="font-label-md text-label-md text-primary">
+              {dictionary.overview.ledgerEyebrow || "Credential Ledger"}
+            </h3>
+            <span className="font-code-sm text-code-sm text-on-surface-variant">
               {dictionary.overview.ledgerTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {apiKeys.slice(0, 4).map((apiKey) => (
+            </span>
+          </div>
+          <div className="p-md flex flex-col gap-md">
+            {apiKeys.slice(0, 5).map((apiKey) => (
               <div
                 key={apiKey.id}
-                className="rounded-[1.2rem] border border-black/10 bg-neutral-50 p-4"
+                className="flex items-center justify-between border-b border-outline-variant pb-md last:border-0 last:pb-0"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-medium text-black">{apiKey.name}</p>
-                    <p className="mono mt-1 text-xs text-neutral-500">
-                      {apiKey.key_hash.slice(0, 16)}...
-                    </p>
-                  </div>
+                <div className="flex flex-col gap-xs">
+                  <span className="font-label-md text-label-md text-primary">{apiKey.name}</span>
+                  <span className="font-code-sm text-code-sm text-on-surface-variant">
+                    {apiKey.key_hash.slice(0, 16)}...
+                  </span>
+                </div>
+                <div className="flex items-center gap-sm">
+                  <span className="font-code-sm text-code-sm text-on-surface-variant">
+                    {formatDate(apiKey.last_used_at, dictionary.labels.never)}
+                  </span>
                   <Badge variant={statusVariant(apiKey.status)}>{apiKey.status}</Badge>
                 </div>
-                <p className="mt-3 text-sm text-neutral-500">
-                  {dictionary.labels.lastUsed}:{" "}
-                  {formatDate(apiKey.last_used_at, dictionary.labels.never)}
-                </p>
               </div>
             ))}
-          </CardContent>
+            {apiKeys.length === 0 && (
+              <p className="font-body-md text-body-md text-on-surface-variant text-center py-lg">
+                No API keys issued.
+              </p>
+            )}
+          </div>
         </Card>
       </section>
     </>

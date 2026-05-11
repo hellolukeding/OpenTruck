@@ -46,17 +46,17 @@ export function CreateApiKeyForm({
   }, [state.status]);
 
   return (
-    <Card className="glass-panel">
-      <CardHeader className="border-b border-black/5">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+    <Card>
+      <CardHeader>
+        <p className="font-label-md text-label-md text-on-surface-variant">
           {form.eyebrow}
         </p>
-        <CardTitle className="editorial-title text-3xl leading-none text-black">
+        <CardTitle className="font-headline-md text-headline-md text-primary">
           {form.title}
         </CardTitle>
         <CardDescription>{form.description}</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-5 p-6">
+      <CardContent className="grid gap-5 p-lg">
         <form ref={formRef} action={action} className="grid gap-5">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="grid gap-2">

@@ -15,10 +15,10 @@ export function FormStatus({ status, message }: FormStatusProps) {
   return (
     <div
       className={cn(
-        "rounded-[1rem] border px-4 py-3 text-sm",
+        "border px-4 py-3 text-sm",
         status === "success"
-          ? "border-emerald-600/20 bg-emerald-50 text-emerald-900"
-          : "border-red-600/20 bg-red-50 text-red-900",
+          ? "border-outline-variant bg-surface-container text-primary"
+          : "border-error bg-error-container text-on-error-container",
       )}
     >
       {message}

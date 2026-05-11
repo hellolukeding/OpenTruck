@@ -9,7 +9,7 @@ const Table = React.forwardRef<
   <div className="w-full overflow-auto">
     <table
       ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
+      className={cn("w-full text-left border-collapse", className)}
       {...props}
     />
   </div>
@@ -20,7 +20,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead ref={ref} className={cn("border-b border-outline-variant bg-surface-container-lowest", className)} {...props} />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -28,11 +28,7 @@ const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <tbody
-    ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
-    {...props}
-  />
+  <tbody ref={ref} className={className} {...props} />
 ));
 TableBody.displayName = "TableBody";
 
@@ -42,10 +38,7 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tr
     ref={ref}
-    className={cn(
-      "border-b border-black/5 transition-colors hover:bg-neutral-50",
-      className,
-    )}
+    className={cn("border-b border-outline-variant hover:bg-surface-container-low transition-colors", className)}
     {...props}
   />
 ));
@@ -57,10 +50,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <th
     ref={ref}
-    className={cn(
-      "h-12 px-4 text-left align-middle text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500",
-      className,
-    )}
+    className={cn("p-md font-label-md text-label-md text-on-surface-variant font-normal", className)}
     {...props}
   />
 ));
@@ -70,7 +60,7 @@ const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
 >(({ className, ...props }, ref) => (
-  <td ref={ref} className={cn("p-4 align-middle", className)} {...props} />
+  <td ref={ref} className={cn("p-md font-body-md text-body-md text-on-surface align-middle", className)} {...props} />
 ));
 TableCell.displayName = "TableCell";
 

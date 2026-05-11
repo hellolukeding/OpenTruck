@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenTruck API Documentation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined', sans-serif;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-surface": "#1a1c1c",
+                        "outline-variant": "#c4c7c7",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-container-high": "#e8e8e8",
+                        "tertiary-container": "#291800",
+                        "on-secondary-fixed-variant": "#004880",
+                        "background": "#f9f9f9",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#000000",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb94c",
+                        "surface-container": "#eeeeee",
+                        "secondary-container": "#87bcfe",
+                        "outline": "#747878",
+                        "inverse-on-surface": "#f0f1f1",
+                        "secondary-fixed": "#d2e4ff",
+                        "secondary": "#24619d",
+                        "primary-fixed": "#e5e2e1",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#444748",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#dadada",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#624000",
+                        "on-background": "#1a1c1c",
+                        "surface-tint": "#5f5e5e",
+                        "on-secondary-fixed": "#001c37",
+                        "surface-container-low": "#f3f3f4",
+                        "surface-bright": "#f9f9f9",
+                        "primary-fixed-dim": "#c9c6c5",
+                        "on-primary-container": "#858383",
+                        "primary": "#000000",
+                        "on-primary-fixed": "#1c1b1b",
+                        "inverse-surface": "#2f3131",
+                        "on-tertiary-fixed": "#291800",
+                        "on-tertiary-container": "#b37800",
+                        "on-secondary-container": "#004b84",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#c9c6c5",
+                        "secondary-fixed-dim": "#a1c9ff",
+                        "tertiary-fixed": "#ffddb2",
+                        "surface": "#f9f9f9",
+                        "primary-container": "#1c1b1b",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e2e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xxl": "64px",
+                        "md": "16px",
+                        "xl": "40px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist", "sans-serif"],
+                        "headline-lg-mobile": ["Geist", "sans-serif"],
+                        "code-sm": ["Geist", "monospace"],
+                        "headline-md": ["Geist", "sans-serif"],
+                        "body-md": ["Geist", "sans-serif"],
+                        "body-lg": ["Geist", "sans-serif"],
+                        "display": ["Geist", "sans-serif"],
+                        "headline-lg": ["Geist", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "500" }],
+                        "code-sm": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-body-md antialiased selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar -->
+<header class="bg-surface border-b border-surface-variant flex justify-between items-center w-full px-gutter py-sm max-w-container-max mx-auto docked full-width top-0 z-50">
+<div class="flex items-center gap-md">
+<span class="text-label-md font-bold tracking-tighter text-primary uppercase">OpenTruck</span>
+</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md active:opacity-80 transition-opacity" href="#">Models</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md text-label-md active:opacity-80 transition-opacity" href="#">API Docs</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md active:opacity-80 transition-opacity" href="#">Pricing</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md active:opacity-80 transition-opacity" href="#">Console</a>
+</nav>
+<div class="flex items-center gap-md">
+<button class="hidden md:flex items-center justify-center p-sm border border-surface-variant rounded-none hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant" data-icon="search">search</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container border border-surface-variant overflow-hidden flex-shrink-0">
+<img alt="User avatar" class="w-full h-full object-cover grayscale" data-alt="A highly detailed close-up portrait of an abstract monochromatic geometric face mask. The environment is sterile and brightly lit with laboratory white lighting. The aesthetic is modern corporate minimalism, utilizing strict black and white tones with zero soft gradients. The mood is clinical and precise." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlwkgTjee5Wwts05esdzgGBbPXXsRu1dAghlUzza5KHxoQaf7IXlRfHP7qmjiyvkMk8P5k31j3kEk1PXK-hzgET84ytNtbwBjrDjV7sP7PjK_mV1wVoLamXTdTnLp6dZ_Cqy7T9nhGCcS3z95oTjTFeD0EzSws50FHVlsKTbDH_yoxeXotnkUkK6Qq4sdXaH_Iy7GysKSAjjIXXQtpgVeagEMwiSJaVamaBjYilP71bUwEP3LMxCmLd5UWvkv6gRU42je2MkbSeNo"/>
+</div>
+<button class="md:hidden flex items-center justify-center p-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[24px]" data-icon="menu">menu</span>
+</button>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 flex w-full max-w-container-max mx-auto px-gutter py-xl gap-xl items-start">
+<!-- Left Navigation Tree -->
+<aside class="w-64 flex-shrink-0 hidden lg:flex flex-col gap-md sticky top-xl">
+<div class="flex flex-col gap-xs mb-md">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Getting Started</h3>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Introduction</a>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Authentication</a>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Pagination</a>
+</div>
+<div class="flex flex-col gap-xs">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest mb-sm">Endpoints</h3>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Models</a>
+<a class="font-label-md text-label-md text-primary bg-surface-container border-l-2 border-primary py-xs px-sm -ml-sm rounded-none" href="#">Chat Completions</a>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Embeddings</a>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Files</a>
+<a class="font-label-md text-label-md text-on-surface hover:text-primary py-xs px-sm -ml-sm rounded-none hover:bg-surface-container transition-colors" href="#">Fine-tuning</a>
+</div>
+</aside>
+<!-- Right Content Area -->
+<article class="flex-1 min-w-0 flex flex-col gap-xxl pb-xxl">
+<!-- Header Section -->
+<section class="flex flex-col gap-md border-b border-surface-variant pb-lg">
+<h1 class="font-display text-display text-primary tracking-tighter">Chat Completions</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                    Given a list of messages comprising a conversation, the model will return a generated response. This endpoint provides access to OpenTruck's highest-throughput intelligence nodes.
+                </p>
+<div class="mt-md flex items-center gap-sm bg-surface-container-lowest border border-surface-variant p-sm w-max rounded-none">
+<span class="font-code-sm text-code-sm font-bold text-primary bg-surface-container px-sm py-xs border border-surface-variant">POST</span>
+<span class="font-code-sm text-code-sm text-on-surface ml-sm">https://api.opentruck.network/v1/chat/completions</span>
+</div>
+</section>
+<!-- Grid Layout for Content / Code -->
+<div class="grid grid-cols-1 xl:grid-cols-[1fr_400px] gap-xl items-start">
+<!-- Left Column (Docs) -->
+<div class="flex flex-col gap-xl">
+<section class="flex flex-col gap-md">
+<h2 class="font-headline-md text-headline-md text-primary border-b border-surface-variant pb-sm">Request Body</h2>
+<table class="w-full text-left border-collapse mt-sm">
+<thead>
+<tr>
+<th class="font-label-md text-label-md text-on-surface-variant border-b border-surface-variant py-sm px-xs font-normal">Parameter</th>
+<th class="font-label-md text-label-md text-on-surface-variant border-b border-surface-variant py-sm px-xs font-normal">Description</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-body-md">
+<tr>
+<td class="border-b border-surface-variant py-md px-xs align-top w-1/3">
+<div class="flex flex-col gap-xs">
+<span class="font-code-sm text-code-sm font-bold text-primary">model</span>
+<div class="flex items-center gap-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container px-xs py-unit border border-surface-variant text-[11px] uppercase">string</span>
+<span class="font-code-sm text-code-sm text-error bg-error-container px-xs py-unit border border-[#ffdad6] text-[11px] uppercase">required</span>
+</div>
+</div>
+</td>
+<td class="border-b border-surface-variant py-md px-xs align-top text-on-surface-variant">
+                                        ID of the model to use. See the <a class="text-primary underline decoration-1 hover:bg-surface-container" href="#">model endpoint compatibility</a> table for details on which models work with the Chat API.
+                                    </td>
+</tr>
+<tr>
+<td class="border-b border-surface-variant py-md px-xs align-top">
+<div class="flex flex-col gap-xs">
+<span class="font-code-sm text-code-sm font-bold text-primary">messages</span>
+<div class="flex items-center gap-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container px-xs py-unit border border-surface-variant text-[11px] uppercase">array</span>
+<span class="font-code-sm text-code-sm text-error bg-error-container px-xs py-unit border border-[#ffdad6] text-[11px] uppercase">required</span>
+</div>
+</div>
+</td>
+<td class="border-b border-surface-variant py-md px-xs align-top text-on-surface-variant">
+                                        A list of messages comprising the conversation so far. Each message object requires a <code class="font-code-sm text-code-sm bg-surface-container border border-surface-variant px-unit">role</code> (system, user, assistant) and <code class="font-code-sm text-code-sm bg-surface-container border border-surface-variant px-unit">content</code>.
+                                    </td>
+</tr>
+<tr>
+<td class="border-b border-surface-variant py-md px-xs align-top">
+<div class="flex flex-col gap-xs">
+<span class="font-code-sm text-code-sm font-bold text-primary">temperature</span>
+<div class="flex items-center gap-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container px-xs py-unit border border-surface-variant text-[11px] uppercase">number</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container px-xs py-unit border border-surface-variant text-[11px] uppercase">optional</span>
+</div>
+</div>
+</td>
+<td class="border-b border-surface-variant py-md px-xs align-top text-on-surface-variant">
+                                        What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.<br/><br/>Defaults to <code class="font-code-sm text-code-sm bg-surface-container border border-surface-variant px-unit">1.0</code>.
+                                    </td>
+</tr>
+<tr>
+<td class="py-md px-xs align-top">
+<div class="flex flex-col gap-xs">
+<span class="font-code-sm text-code-sm font-bold text-primary">stream</span>
+<div class="flex items-center gap-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container px-xs py-unit border border-surface-variant text-[11px] uppercase">boolean</span>
+<span class="font-code-sm text-code-sm text-on-surface-variant bg-surface-container px-xs py-unit border border-surface-variant text-[11px] uppercase">optional</span>
+</div>
+</div>
+</td>
+<td class="py-md px-xs align-top text-on-surface-variant">
+                                        If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as data-only server-sent events as they become available.
+                                    </td>
+</tr>
+</tbody>
+</table>
+</section>
+</div>
+<!-- Right Column (Code Examples - Dark Mode Override as requested) -->
+<div class="flex flex-col gap-lg sticky top-xl">
+<!-- Request Example -->
+<div class="flex flex-col border border-primary bg-primary overflow-hidden rounded-none shadow-none">
+<div class="flex items-center justify-between px-md py-sm border-b border-on-primary-fixed-variant bg-primary">
+<div class="flex items-center gap-md">
+<button class="font-label-md text-label-md text-on-primary border-b border-on-primary pb-unit -mb-[9px]">curl</button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-outline-variant">Python</button>
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-outline-variant">Node.js</button>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase text-[10px] tracking-widest">Example Request</span>
+</div>
+<div class="p-md bg-primary text-on-primary font-code-sm text-code-sm overflow-x-auto">
+<pre class="leading-relaxed"><code>curl https://api.opentruck.network/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENTRUCK_API_KEY" \
+  -d '{
+    "model": "ot-intel-v4",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a helpful assistant."
+      },
+      {
+        "role": "user",
+        "content": "Initialize distribution sequence."
+      }
+    ]
+  }'</code></pre>
+</div>
+</div>
+<!-- Response Example -->
+<div class="flex flex-col border border-primary bg-primary overflow-hidden rounded-none shadow-none">
+<div class="flex items-center justify-between px-md py-sm border-b border-on-primary-fixed-variant bg-primary">
+<span class="font-label-md text-label-md text-on-primary">Response</span>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase text-[10px] tracking-widest">200 OK</span>
+</div>
+<div class="p-md bg-primary text-outline-variant font-code-sm text-code-sm overflow-x-auto">
+<pre class="leading-relaxed"><code>{
+  "id": "chatcmpl-123",
+  "object": "chat.completion",
+  "created": 1677652288,
+  "model": "ot-intel-v4",
+  "system_fingerprint": "fp_44709d6fcb",
+  "choices": [{
+    "index": 0,
+    "message": {
+      "role": "assistant",
+      "content": "Distribution sequence initialized. Awaiting secondary parameters.",
+    },
+    "logprobs": null,
+    "finish_reason": "stop"
+  }],
+  "usage": {
+    "prompt_tokens": 15,
+    "completion_tokens": 12,
+    "total_tokens": 27
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</article>
+</main>
+<!-- Footer -->
+<footer class="bg-surface border-t border-outline-variant flex flex-col md:flex-row justify-between items-center w-full px-gutter py-xl gap-md max-w-container-max mx-auto flat no shadows">
+<span class="font-code-sm text-code-sm text-on-surface-variant">© 2024 OpenTruck. Decentralized intelligence distribution.</span>
+<nav class="flex items-center gap-md">
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Privacy</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Terms</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Security</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Status</a>
+</nav>
+<span class="text-label-md font-bold text-primary uppercase tracking-tighter hidden md:block">OpenTruck</span>
+</footer>
+</body></html>

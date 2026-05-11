@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Developer Dashboard - OpenTruck</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "surface-container-highest": "#e2e2e2",
+                      "on-surface": "#1a1c1c",
+                      "outline-variant": "#c4c7c7",
+                      "on-primary-fixed-variant": "#474646",
+                      "surface-container-high": "#e8e8e8",
+                      "tertiary-container": "#291800",
+                      "on-secondary-fixed-variant": "#004880",
+                      "background": "#f9f9f9",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#000000",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-fixed-dim": "#ffb94c",
+                      "surface-container": "#eeeeee",
+                      "secondary-container": "#87bcfe",
+                      "outline": "#747878",
+                      "inverse-on-surface": "#f0f1f1",
+                      "secondary-fixed": "#d2e4ff",
+                      "secondary": "#24619d",
+                      "primary-fixed": "#e5e2e1",
+                      "on-primary": "#ffffff",
+                      "on-surface-variant": "#444748",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#dadada",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed-variant": "#624000",
+                      "on-background": "#1a1c1c",
+                      "surface-tint": "#5f5e5e",
+                      "on-secondary-fixed": "#001c37",
+                      "surface-container-low": "#f3f3f4",
+                      "surface-bright": "#f9f9f9",
+                      "primary-fixed-dim": "#c9c6c5",
+                      "on-primary-container": "#858383",
+                      "primary": "#000000",
+                      "on-primary-fixed": "#1c1b1b",
+                      "inverse-surface": "#2f3131",
+                      "on-tertiary-fixed": "#291800",
+                      "on-tertiary-container": "#b37800",
+                      "on-secondary-container": "#004b84",
+                      "on-tertiary": "#ffffff",
+                      "inverse-primary": "#c9c6c5",
+                      "secondary-fixed-dim": "#a1c9ff",
+                      "tertiary-fixed": "#ffddb2",
+                      "surface": "#f9f9f9",
+                      "primary-container": "#1c1b1b",
+                      "on-error": "#ffffff",
+                      "surface-variant": "#e2e2e2"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "lg": "24px",
+                      "xxl": "64px",
+                      "md": "16px",
+                      "xl": "40px",
+                      "xs": "4px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "unit": "4px",
+                      "sm": "8px"
+              },
+              "fontFamily": {
+                      "label-md": [
+                              "Geist"
+                      ],
+                      "headline-lg-mobile": [
+                              "Geist"
+                      ],
+                      "code-sm": [
+                              "Geist"
+                      ],
+                      "headline-md": [
+                              "Geist"
+                      ],
+                      "body-md": [
+                              "Geist"
+                      ],
+                      "body-lg": [
+                              "Geist"
+                      ],
+                      "display": [
+                              "Geist"
+                      ],
+                      "headline-lg": [
+                              "Geist"
+                      ]
+              },
+              "fontSize": {
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "code-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.1",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "500"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface border-b border-outline-variant full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-gutter py-sm max-w-container-max mx-auto">
+<div class="flex items-center gap-lg">
+<span class="text-label-md font-bold tracking-tighter text-primary">OpenTruck</span>
+<nav class="hidden md:flex gap-md">
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors duration-200" href="#">Models</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors duration-200" href="#">API Docs</a>
+<a class="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors duration-200" href="#">Pricing</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md text-label-md hover:text-primary transition-colors duration-200 active:opacity-80 transition-opacity" href="#">Console</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface border border-outline-variant text-label-md font-label-md rounded px-sm py-xs pl-8 focus:outline-none focus:border-primary focus:ring-0 w-48 transition-colors" placeholder="Search..." type="text"/>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5DGw73HDakHcgJwTwfS25VavvqcPGMzXZWAq4xxQaf5huhbky98oDSKOWpMwL_UBfKn0DYH_MIjjZ98DenYDHmVoBqEDJDqWIONv3kv6NjIqZt2shyG_g2hgwWCT74CuuJNCo6gLhkWUEupg-g3z3lhSAar_Q-4m8bFexQb47qV7z3__ntK5skuCDWJWrZfkGVdwUG2aikrL6t3Gdmong8Qhq5E5gKhmHcEUzcUqVMBE4_LOrDysz88Hy4t_UUPcmThNqm0oswsU"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 max-w-container-max mx-auto w-full">
+<!-- Side Navigation (Console specific) -->
+<aside class="hidden md:flex flex-col w-64 border-r border-outline-variant pt-lg pr-lg bg-background">
+<nav class="flex flex-col gap-sm">
+<a class="flex items-center gap-sm px-md py-sm bg-surface-container rounded-DEFAULT text-primary font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                    Overview
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low rounded-DEFAULT transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">key</span>
+                    API Keys
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low rounded-DEFAULT transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+                    Usage
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low rounded-DEFAULT transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                    Billing
+                </a>
+<a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-surface-container-low rounded-DEFAULT transition-colors font-label-md text-label-md" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                    Settings
+                </a>
+</nav>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 py-lg md:pl-lg px-gutter md:px-0">
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-xs">Overview</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Monitor your API usage and performance metrics.</p>
+</div>
+<button class="bg-primary text-on-primary px-md py-sm rounded-DEFAULT font-label-md text-label-md hover:opacity-90 transition-opacity">
+                    Generate New Key
+                </button>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-lg">
+<div class="bg-surface border border-outline-variant p-lg rounded-DEFAULT flex flex-col justify-between">
+<div class="flex justify-between items-start mb-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Requests (7d)</span>
+<span class="material-symbols-outlined text-outline">trending_up</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-primary">1.2M</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant mt-xs">+14.5% vs last week</div>
+</div>
+</div>
+<div class="bg-surface border border-outline-variant p-lg rounded-DEFAULT flex flex-col justify-between">
+<div class="flex justify-between items-start mb-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Cost (7d)</span>
+<span class="material-symbols-outlined text-outline">payments</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-primary">$452.80</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant mt-xs">+5.2% vs last week</div>
+</div>
+</div>
+<div class="bg-surface border border-outline-variant p-lg rounded-DEFAULT flex flex-col justify-between">
+<div class="flex justify-between items-start mb-md">
+<span class="font-label-md text-label-md text-on-surface-variant">Remaining Credit</span>
+<span class="material-symbols-outlined text-outline">account_balance_wallet</span>
+</div>
+<div>
+<div class="font-headline-lg text-headline-lg text-primary">$1,547.20</div>
+<div class="w-full bg-surface-container h-2 rounded-full mt-md overflow-hidden">
+<div class="bg-primary h-full w-[25%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Chart Section Placeholder -->
+<div class="bg-surface border border-outline-variant rounded-DEFAULT mb-lg">
+<div class="p-lg border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-primary">API Usage</h2>
+<select class="bg-surface border border-outline-variant text-label-md font-label-md rounded px-sm py-xs focus:outline-none focus:border-primary">
+<option>Last 7 days</option>
+<option>Last 30 days</option>
+<option>All time</option>
+</select>
+</div>
+<div class="p-lg h-64 flex items-end justify-between gap-sm items-stretch">
+<!-- Stylized Bar Chart using flex and background colors -->
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-surface-container hover:bg-outline-variant transition-colors rounded-t-DEFAULT h-[40%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">14k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-on-surface-variant mt-sm">Mon</div>
+</div>
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-surface-container hover:bg-outline-variant transition-colors rounded-t-DEFAULT h-[65%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">22k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-on-surface-variant mt-sm">Tue</div>
+</div>
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-surface-container hover:bg-outline-variant transition-colors rounded-t-DEFAULT h-[85%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">30k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-on-surface-variant mt-sm">Wed</div>
+</div>
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-primary hover:bg-primary-container transition-colors rounded-t-DEFAULT h-[100%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">35k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-primary font-bold mt-sm">Thu</div>
+</div>
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-surface-container hover:bg-outline-variant transition-colors rounded-t-DEFAULT h-[70%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">25k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-on-surface-variant mt-sm">Fri</div>
+</div>
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-surface-container hover:bg-outline-variant transition-colors rounded-t-DEFAULT h-[30%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">10k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-on-surface-variant mt-sm">Sat</div>
+</div>
+<div class="flex-1 flex flex-col justify-end group">
+<div class="w-full bg-surface-container hover:bg-outline-variant transition-colors rounded-t-DEFAULT h-[45%] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 font-code-sm text-code-sm bg-surface border border-outline-variant px-xs rounded">16k</div>
+</div>
+<div class="text-center font-code-sm text-code-sm text-on-surface-variant mt-sm">Sun</div>
+</div>
+</div>
+</div>
+<!-- Bento Grid Bottom Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-md mb-xxl">
+<!-- API Keys Table (Spans 2 columns) -->
+<div class="lg:col-span-2 bg-surface border border-outline-variant rounded-DEFAULT overflow-hidden">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+<h3 class="font-label-md text-label-md text-primary">Active API Keys</h3>
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md flex items-center gap-xs">
+                            View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-lowest">
+<th class="p-md font-label-md text-label-md text-on-surface-variant font-normal">Name</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant font-normal">Secret Key</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant font-normal">Created</th>
+<th class="p-md font-label-md text-label-md text-on-surface-variant font-normal text-right">Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
+<td class="p-md font-label-md text-label-md text-primary">Production App</td>
+<td class="p-md font-code-sm text-code-sm text-on-surface-variant">sk-...9f2a</td>
+<td class="p-md font-label-md text-label-md text-on-surface-variant">Oct 12, 2023</td>
+<td class="p-md text-right">
+<button class="font-label-md text-label-md text-primary border border-outline-variant px-sm py-xs rounded hover:bg-surface-container transition-colors">Manage</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="p-md font-label-md text-label-md text-primary">Development</td>
+<td class="p-md font-code-sm text-code-sm text-on-surface-variant">sk-...3b8c</td>
+<td class="p-md font-label-md text-label-md text-on-surface-variant">Nov 05, 2023</td>
+<td class="p-md text-right">
+<button class="font-label-md text-label-md text-primary border border-outline-variant px-sm py-xs rounded hover:bg-surface-container transition-colors">Manage</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Top Models Breakdown -->
+<div class="bg-surface border border-outline-variant rounded-DEFAULT flex flex-col">
+<div class="p-md border-b border-outline-variant bg-surface-container-lowest">
+<h3 class="font-label-md text-label-md text-primary">Top Models by Usage</h3>
+</div>
+<div class="p-md flex-1 flex flex-col gap-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-code-sm text-code-sm text-primary">ot-vision-v2</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">65%</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+<div class="flex items-center justify-between mt-sm">
+<div class="flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-outline"></div>
+<span class="font-code-sm text-code-sm text-primary">ot-text-fast</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">25%</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-outline h-full w-[25%]"></div>
+</div>
+<div class="flex items-center justify-between mt-sm">
+<div class="flex items-center gap-sm">
+<div class="w-2 h-2 rounded-full bg-surface-tint"></div>
+<span class="font-code-sm text-code-sm text-primary">ot-embed-large</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">10%</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-surface-tint h-full w-[10%]"></div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface border-t border-outline-variant w-full mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-gutter py-xl gap-md max-w-container-max mx-auto">
+<span class="font-code-sm text-code-sm text-on-surface-variant">© 2024 OpenTruck. Decentralized intelligence distribution.</span>
+<div class="flex gap-md">
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Privacy</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Terms</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Security</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant hover:text-primary underline decoration-1 transition-all duration-200" href="#">Status</a>
+</div>
+<span class="text-label-md font-bold text-primary">OpenTruck</span>
+</div>
+</footer>
+</body></html>

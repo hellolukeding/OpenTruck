@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pricing - OpenTruck</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-surface": "#1a1c1c",
+                        "outline-variant": "#c4c7c7",
+                        "on-primary-fixed-variant": "#474646",
+                        "surface-container-high": "#e8e8e8",
+                        "tertiary-container": "#291800",
+                        "on-secondary-fixed-variant": "#004880",
+                        "background": "#f9f9f9",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#000000",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb94c",
+                        "surface-container": "#eeeeee",
+                        "secondary-container": "#87bcfe",
+                        "outline": "#747878",
+                        "inverse-on-surface": "#f0f1f1",
+                        "secondary-fixed": "#d2e4ff",
+                        "secondary": "#24619d",
+                        "primary-fixed": "#e5e2e1",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#444748",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#dadada",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#624000",
+                        "on-background": "#1a1c1c",
+                        "surface-tint": "#5f5e5e",
+                        "on-secondary-fixed": "#001c37",
+                        "surface-container-low": "#f3f3f4",
+                        "surface-bright": "#f9f9f9",
+                        "primary-fixed-dim": "#c9c6c5",
+                        "on-primary-container": "#858383",
+                        "primary": "#000000",
+                        "on-primary-fixed": "#1c1b1b",
+                        "inverse-surface": "#2f3131",
+                        "on-tertiary-fixed": "#291800",
+                        "on-tertiary-container": "#b37800",
+                        "on-secondary-container": "#004b84",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#c9c6c5",
+                        "secondary-fixed-dim": "#a1c9ff",
+                        "tertiary-fixed": "#ffddb2",
+                        "surface": "#f9f9f9",
+                        "primary-container": "#1c1b1b",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e2e2e2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xxl": "64px",
+                        "md": "16px",
+                        "xl": "40px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "4px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "code-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "body-md": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "display": ["Geist"],
+                        "headline-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "500" }],
+                        "code-sm": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Geist', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-background w-full sticky top-0 z-50 border-b border-outline-variant dark:border-outline">
+<nav class="flex justify-between items-center w-full px-gutter py-sm max-w-container-max mx-auto">
+<div class="flex items-center gap-md">
+<span class="text-label-md font-bold tracking-tighter text-primary dark:text-on-primary-fixed uppercase">OpenTruck</span>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed transition-colors duration-200 active:opacity-80" href="#">Models</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed transition-colors duration-200 active:opacity-80" href="#">API Docs</a>
+<a class="font-label-md text-label-md text-primary dark:text-on-primary-fixed border-b-2 border-primary pb-1 hover:text-primary dark:hover:text-on-primary-fixed transition-colors duration-200 active:opacity-80" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-md">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed transition-colors duration-200 active:opacity-80 hidden md:inline-block" href="#">Console</a>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</div>
+</nav>
+</header>
+<main class="flex-grow w-full max-w-container-max mx-auto px-gutter py-xxl flex flex-col gap-xxl">
+<!-- Header Section -->
+<section class="flex flex-col gap-md max-w-[800px]">
+<h1 class="font-display text-display text-primary">Intelligence Pricing</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+                Transparent, zero-markup computational throughput. Scale from local prototyping to global distributed inference with absolute predictable costs.
+            </p>
+</section>
+<!-- Pay-as-you-go Banner -->
+<section class="w-full bg-surface-container-lowest border border-outline-variant rounded-none p-lg flex flex-col md:flex-row gap-xl items-start md:items-center">
+<div class="flex-grow flex flex-col gap-sm">
+<h2 class="font-headline-md text-headline-md text-primary flex items-center gap-xs">
+<span class="material-symbols-outlined" data-icon="data_usage" data-weight="fill" style="font-variation-settings: 'FILL' 1;">data_usage</span>
+                    Decentralized Pay-as-you-go
+                </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Our architecture routes your requests to the most efficient nodes globally. You pay strictly for the tokens processed and compute time consumed. No monthly minimums required for base network access.
+                </p>
+</div>
+<div class="w-full md:w-auto shrink-0 bg-background border border-outline-variant p-md flex flex-col gap-xs rounded-none">
+<div class="flex justify-between items-center gap-xl border-b border-outline-variant pb-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant">Network Base Rate</span>
+<span class="font-code-sm text-code-sm text-primary font-bold">$0.0002 / 1K tokens</span>
+</div>
+<div class="flex justify-between items-center gap-xl pt-xs">
+<span class="font-code-sm text-code-sm text-on-surface-variant">Avg Latency (Global)</span>
+<span class="font-code-sm text-code-sm text-primary font-bold">~45ms</span>
+</div>
+</div>
+</section>
+<!-- Pricing Tiers Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<!-- Developer Tier -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-none p-lg flex flex-col relative h-full">
+<div class="flex flex-col gap-xs mb-xl">
+<h3 class="font-headline-md text-headline-md text-primary">Developer</h3>
+<div class="flex items-baseline gap-xs">
+<span class="font-display text-display text-primary">$0</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/ month</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">For local testing and individual prototyping.</p>
+</div>
+<ul class="flex flex-col gap-md mb-xl flex-grow">
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">100K free tokens / month</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Community support</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Standard API limits (50 req/m)</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Access to base models</span>
+</li>
+</ul>
+<button class="w-full bg-transparent border border-primary text-primary font-label-md text-label-md py-sm px-md rounded-none hover:bg-surface-container-high transition-colors">
+                    Start Building
+                </button>
+</div>
+<!-- Pro Tier -->
+<div class="bg-surface-container-lowest border border-primary rounded-none p-lg flex flex-col relative h-full">
+<div class="absolute top-0 right-0 bg-primary text-on-primary font-code-sm text-code-sm px-sm py-[2px] rounded-none">
+                    RECOMMENDED
+                </div>
+<div class="flex flex-col gap-xs mb-xl">
+<h3 class="font-headline-md text-headline-md text-primary">Pro</h3>
+<div class="flex items-baseline gap-xs">
+<span class="font-display text-display text-primary">$49</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/ month</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">For production applications needing reliable scale.</p>
+</div>
+<ul class="flex flex-col gap-md mb-xl flex-grow">
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">10M included tokens / month</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Priority email support</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">High throughput limits (500 req/m)</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Access to premium &amp; fine-tuned models</span>
+</li>
+</ul>
+<button class="w-full bg-primary border border-primary text-on-primary font-label-md text-label-md py-sm px-md rounded-none hover:bg-surface-tint transition-colors">
+                    Upgrade to Pro
+                </button>
+</div>
+<!-- Enterprise Tier -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-none p-lg flex flex-col relative h-full bg-surface-bright">
+<div class="flex flex-col gap-xs mb-xl">
+<h3 class="font-headline-md text-headline-md text-primary">Enterprise</h3>
+<div class="flex items-baseline gap-xs">
+<span class="font-display text-display text-primary">Custom</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">Dedicated nodes and compliance for massive scale.</p>
+</div>
+<ul class="flex flex-col gap-md mb-xl flex-grow">
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Custom volume pricing</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">24/7 dedicated engineering support</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Unlimited API requests &amp; concurrency</span>
+</li>
+<li class="flex items-start gap-sm border-b border-outline-variant pb-sm last:border-0">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="check">check</span>
+<span class="font-body-md text-body-md text-primary">Dedicated node clustering &amp; SLA</span>
+</li>
+</ul>
+<button class="w-full bg-transparent border border-primary text-primary font-label-md text-label-md py-sm px-md rounded-none hover:bg-surface-container-high transition-colors">
+                    Contact Sales
+                </button>
+</div>
+</section>
+<!-- FAQ Section -->
+<section class="max-w-[800px] mt-xxl border-t border-outline-variant pt-xl">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-xl">Pricing FAQ</h2>
+<div class="flex flex-col border-b border-outline-variant">
+<div class="py-md flex flex-col gap-xs">
+<h4 class="font-label-md text-label-md text-primary font-bold">How are tokens calculated?</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Tokens are calculated based on both input (prompt) and output (completion). The total sum determines the credit deduction from your balance at the end of the request lifecycle.</p>
+</div>
+</div>
+<div class="flex flex-col border-b border-outline-variant">
+<div class="py-md flex flex-col gap-xs">
+<h4 class="font-label-md text-label-md text-primary font-bold">What happens if I hit my rate limit?</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">On the Developer tier, requests exceeding the limit will receive a 429 status code. Pro and Enterprise tiers feature burst capacity and automatic queuing to ensure successful throughput.</p>
+</div>
+</div>
+<div class="flex flex-col border-b border-outline-variant">
+<div class="py-md flex flex-col gap-xs">
+<h4 class="font-label-md text-label-md text-primary font-bold">Can I switch plans anytime?</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Yes. Upgrades take effect immediately, while downgrades are applied at the end of your current billing cycle. Prorated credits are automatically issued to your decentralized wallet.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface dark:bg-background w-full border-t border-outline-variant dark:border-outline mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-gutter py-xl gap-md max-w-container-max mx-auto">
+<div class="text-label-md font-bold text-primary dark:text-on-primary-fixed uppercase">
+                OpenTruck
+            </div>
+<div class="flex gap-lg flex-wrap justify-center">
+<a class="font-code-sm text-code-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed underline decoration-1 transition-all duration-200" href="#">Privacy</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed underline decoration-1 transition-all duration-200" href="#">Terms</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed underline decoration-1 transition-all duration-200" href="#">Security</a>
+<a class="font-code-sm text-code-sm text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-on-primary-fixed underline decoration-1 transition-all duration-200" href="#">Status</a>
+</div>
+<div class="font-code-sm text-code-sm text-on-surface-variant dark:text-outline-variant">
+                © 2024 OpenTruck. Decentralized intelligence distribution.
+            </div>
+</div>
+</footer>
+</body></html>
