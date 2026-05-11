@@ -1,0 +1,19 @@
+# 设计决策
+
+## 2026-05-11
+
+- 前端技术栈定为 `Next.js + TypeScript`
+- 后端技术栈定为 `Python + FastAPI`
+- 本地开发模式采用混合方案:
+  - `frontend/` 直接在宿主机运行
+  - `backend/` 直接在宿主机运行
+  - `PostgreSQL` 和 `Redis` 通过 Docker Compose 运行
+- 参考项目统一放在 `repo/` 目录下，不与主项目代码混放
+- 仓库根目录保留 `Makefile`，并用 `make check` 作为基础一致性检查入口
+- ORM 定为 `SQLAlchemy 2`
+- 数据库迁移工具定为 `Alembic`
+- 首批核心表先围绕网关最小闭环落地:
+  - `tenants`
+  - `api_keys`
+  - `nodes`
+  - `node_models`
