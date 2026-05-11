@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { AdminDashboard } from "@/components/admin-dashboard";
+import { AdminOverview } from "@/components/admin-overview";
+import { AdminShell } from "@/components/admin-shell";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
@@ -16,12 +17,18 @@ export default async function LocalePage({
   }
 
   const overview = await getAdminOverview();
+  const typedLocale = locale as Locale;
+  const dictionary = getDictionary(typedLocale);
 
   return (
-    <AdminDashboard
-      {...overview}
-      locale={locale as Locale}
-      dictionary={getDictionary(locale as Locale)}
-    />
+    <AdminShell
+      locale={typedLocale}
+      currentPath={`/${typedLocale}`}
+      dictionary={dictionary}
+      backendReachable={overview.backendReachable}
+      backendUrl={overview.backendUrl}
+    >
+      <AdminOverview {...overview} dictionary={dictionary} />
+    </AdminShell>
   );
 }

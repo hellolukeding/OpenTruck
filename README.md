@@ -28,3 +28,9 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
 - frontend uses `shadcn/ui`-style component primitives
 - frontend supports `en` and `zh-CN`
 - root route redirects to `/en`
+- admin console now includes overview plus resource routes for:
+  - `/{locale}/tenants`
+  - `/{locale}/nodes`
+  - `/{locale}/api-keys`
+  - `/{locale}/models`
+- visual direction is monochrome and OpenAI-like rather than decorative SaaS styling

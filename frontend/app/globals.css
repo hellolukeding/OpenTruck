@@ -57,7 +57,7 @@
   }
 
   .dashboard-grid {
-    @apply mx-auto flex w-full max-w-7xl flex-col gap-6;
+    @apply mx-auto grid w-full max-w-[1440px] gap-6;
   }
 
   .glass-panel {
