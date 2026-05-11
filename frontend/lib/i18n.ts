@@ -5,6 +5,12 @@ export type Locale = (typeof SUPPORTED_LOCALES)[number];
 export type DashboardDictionary = {
   languageLabel: string;
   languages: Record<Locale, string>;
+  status: {
+    active: string;
+    paused: string;
+    ok: string;
+    unknown: string;
+  };
   nav: {
     overview: string;
     tenants: string;
@@ -108,6 +114,51 @@ export type DashboardDictionary = {
       };
     };
   };
+  forms: {
+    common: {
+      submitting: string;
+    };
+    tenants: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      submit: string;
+      messages: {
+        success: string;
+      };
+    };
+    nodes: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      submit: string;
+      tagsPlaceholder: string;
+      messages: {
+        success: string;
+      };
+    };
+    apiKeys: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      submit: string;
+      selectTenant: string;
+      scopePlaceholder: string;
+      messages: {
+        success: string;
+      };
+    };
+    models: {
+      eyebrow: string;
+      title: string;
+      description: string;
+      submit: string;
+      selectNode: string;
+      messages: {
+        success: string;
+      };
+    };
+  };
   sections: {
     tenants: string;
     tenantsTitle: string;
@@ -127,6 +178,9 @@ export type DashboardDictionary = {
     tenant: string;
     lastUsed: string;
     fingerprint: string;
+    rawKey: string;
+    scope: string;
+    node: string;
     publicModel: string;
     externalModel: string;
     priority: string;
@@ -135,6 +189,10 @@ export type DashboardDictionary = {
     region: string;
     weight: string;
     concurrency: string;
+    baseUrl: string;
+    authType: string;
+    health: string;
+    tags: string;
     pricing: string;
     never: string;
   };
@@ -144,6 +202,12 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
   en: {
     languageLabel: "Language",
     languages: { en: "English", "zh-CN": "简体中文" },
+    status: {
+      active: "Active",
+      paused: "Paused",
+      ok: "OK",
+      unknown: "Unknown",
+    },
     nav: {
       overview: "Overview",
       tenants: "Tenants",
@@ -259,6 +323,55 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
         },
       },
     },
+    forms: {
+      common: {
+        submitting: "Submitting...",
+      },
+      tenants: {
+        eyebrow: "Create tenant",
+        title: "Register a new quota owner.",
+        description:
+          "Add a tenant before issuing keys or assigning budget. This is the smallest writable control-plane unit.",
+        submit: "Create tenant",
+        messages: {
+          success: "Tenant created successfully.",
+        },
+      },
+      nodes: {
+        eyebrow: "Register node",
+        title: "Bring a new upstream endpoint online.",
+        description:
+          "Create a node entry with routing metadata so it can later receive model bindings and traffic.",
+        submit: "Create node",
+        tagsPlaceholder: "priority, external, experimental",
+        messages: {
+          success: "Node created successfully.",
+        },
+      },
+      apiKeys: {
+        eyebrow: "Issue key",
+        title: "Create a credential for a tenant.",
+        description:
+          "The raw key is hashed on the backend. This surface only sends it once and never reads it back.",
+        submit: "Create API key",
+        selectTenant: "Select a tenant",
+        scopePlaceholder: "{\"models\": [\"gpt-4o-mini\"]}",
+        messages: {
+          success: "API key created successfully.",
+        },
+      },
+      models: {
+        eyebrow: "Publish route",
+        title: "Bind a public model to a node lane.",
+        description:
+          "Create a route record that maps the public model name to one upstream model on a selected node.",
+        submit: "Create model route",
+        selectNode: "Select a node",
+        messages: {
+          success: "Model route created successfully.",
+        },
+      },
+    },
     sections: {
       tenants: "Tenant registry",
       tenantsTitle: "Quota ownership",
@@ -278,6 +391,9 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       tenant: "Tenant",
       lastUsed: "Last used",
       fingerprint: "Fingerprint",
+      rawKey: "Raw key",
+      scope: "Scope JSON",
+      node: "Node",
       publicModel: "Public model",
       externalModel: "External model",
       priority: "Priority",
@@ -286,6 +402,10 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       region: "Region",
       weight: "Weight",
       concurrency: "Max concurrency",
+      baseUrl: "Base URL",
+      authType: "Auth type",
+      health: "Health",
+      tags: "Tags",
       pricing: "Pricing",
       never: "Never",
     },
@@ -293,6 +413,12 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
   "zh-CN": {
     languageLabel: "语言",
     languages: { en: "English", "zh-CN": "简体中文" },
+    status: {
+      active: "活跃",
+      paused: "暂停",
+      ok: "正常",
+      unknown: "未知",
+    },
     nav: {
       overview: "总览",
       tenants: "租户",
@@ -408,6 +534,55 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
         },
       },
     },
+    forms: {
+      common: {
+        submitting: "提交中...",
+      },
+      tenants: {
+        eyebrow: "创建租户",
+        title: "登记一个新的配额归属主体。",
+        description:
+          "在签发密钥或分配预算之前，先创建租户。它是当前控制面最小的可写业务单元。",
+        submit: "创建租户",
+        messages: {
+          success: "租户创建成功。",
+        },
+      },
+      nodes: {
+        eyebrow: "登记节点",
+        title: "让新的上游端点接入调度面。",
+        description:
+          "先写入节点和路由元信息，后续它才能挂接模型映射并接收流量。",
+        submit: "创建节点",
+        tagsPlaceholder: "priority, external, experimental",
+        messages: {
+          success: "节点创建成功。",
+        },
+      },
+      apiKeys: {
+        eyebrow: "签发密钥",
+        title: "为租户创建访问凭证。",
+        description:
+          "原始密钥只会在提交时发送一次，后端会做哈希处理，前端不会再回读明文。",
+        submit: "创建 API 密钥",
+        selectTenant: "选择租户",
+        scopePlaceholder: "{\"models\": [\"gpt-4o-mini\"]}",
+        messages: {
+          success: "API 密钥创建成功。",
+        },
+      },
+      models: {
+        eyebrow: "发布路由",
+        title: "把公开模型绑定到节点航道上。",
+        description:
+          "这里创建的是模型路由记录，用来把公开模型名映射到某个节点上的实际上游模型。",
+        submit: "创建模型路由",
+        selectNode: "选择节点",
+        messages: {
+          success: "模型路由创建成功。",
+        },
+      },
+    },
     sections: {
       tenants: "租户登记",
       tenantsTitle: "配额归属",
@@ -427,6 +602,9 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       tenant: "租户",
       lastUsed: "最近使用",
       fingerprint: "指纹",
+      rawKey: "原始密钥",
+      scope: "Scope JSON",
+      node: "节点",
       publicModel: "公开模型",
       externalModel: "上游模型",
       priority: "优先级",
@@ -435,6 +613,10 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       region: "区域",
       weight: "权重",
       concurrency: "最大并发",
+      baseUrl: "基础地址",
+      authType: "鉴权类型",
+      health: "健康度",
+      tags: "标签",
       pricing: "定价",
       never: "从未",
     },

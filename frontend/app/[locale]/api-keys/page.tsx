@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
+import { CreateApiKeyForm } from "@/components/create-api-key-form";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -39,6 +40,19 @@ export default async function ApiKeysPage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
+      <CreateApiKeyForm
+        form={dictionary.forms.apiKeys}
+        common={dictionary.forms.common}
+        labels={{
+          tenant: dictionary.labels.tenant,
+          status: dictionary.labels.status,
+          name: dictionary.labels.name,
+          rawKey: dictionary.labels.rawKey,
+          scope: dictionary.labels.scope,
+        }}
+        statusLabels={dictionary.status}
+        tenants={overview.tenants}
+      />
       <ResourceTableCard
         eyebrow={dictionary.resources.apiKeys.eyebrow}
         title={dictionary.resources.apiKeys.title}

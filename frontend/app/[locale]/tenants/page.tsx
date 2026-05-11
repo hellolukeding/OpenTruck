@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
+import { CreateTenantForm } from "@/components/create-tenant-form";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -28,6 +29,18 @@ export default async function TenantsPage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
+      <CreateTenantForm
+        form={dictionary.forms.tenants}
+        common={dictionary.forms.common}
+        labels={{
+          name: dictionary.labels.name,
+          status: dictionary.labels.status,
+          quota: dictionary.labels.quota,
+          rpm: dictionary.labels.rpm,
+          tpm: dictionary.labels.tpm,
+        }}
+        statusLabels={dictionary.status}
+      />
       <ResourceTableCard
         eyebrow={dictionary.resources.tenants.eyebrow}
         title={dictionary.resources.tenants.title}

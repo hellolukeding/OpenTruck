@@ -34,3 +34,4 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `/{locale}/api-keys`
   - `/{locale}/models`
 - visual direction is monochrome and OpenAI-like rather than decorative SaaS styling
+- resource pages now include create forms backed by real FastAPI admin POST endpoints

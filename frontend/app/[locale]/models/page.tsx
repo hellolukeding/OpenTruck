@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
+import { CreateNodeModelForm } from "@/components/create-node-model-form";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -28,6 +29,21 @@ export default async function ModelsPage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
+      <CreateNodeModelForm
+        form={dictionary.forms.models}
+        common={dictionary.forms.common}
+        labels={{
+          node: dictionary.labels.node,
+          publicModel: dictionary.labels.publicModel,
+          externalModel: dictionary.labels.externalModel,
+          input: dictionary.labels.input,
+          output: dictionary.labels.output,
+          priority: dictionary.labels.priority,
+          status: dictionary.labels.status,
+        }}
+        statusLabels={dictionary.status}
+        nodes={overview.nodes}
+      />
       <ResourceTableCard
         eyebrow={dictionary.resources.models.eyebrow}
         title={dictionary.resources.models.title}

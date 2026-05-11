@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
+import { CreateNodeForm } from "@/components/create-node-form";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -28,6 +29,22 @@ export default async function NodesPage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
+      <CreateNodeForm
+        form={dictionary.forms.nodes}
+        common={dictionary.forms.common}
+        labels={{
+          name: dictionary.labels.name,
+          baseUrl: dictionary.labels.baseUrl,
+          region: dictionary.labels.region,
+          status: dictionary.labels.status,
+          health: dictionary.labels.health,
+          authType: dictionary.labels.authType,
+          weight: dictionary.labels.weight,
+          concurrency: dictionary.labels.concurrency,
+          tags: dictionary.labels.tags,
+        }}
+        statusLabels={dictionary.status}
+      />
       <ResourceTableCard
         eyebrow={dictionary.resources.nodes.eyebrow}
         title={dictionary.resources.nodes.title}
