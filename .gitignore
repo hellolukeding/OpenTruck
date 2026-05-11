@@ -1,6 +1,7 @@
 repo/
 backend/.env
 backend/.venv/
+backend/*.egg-info/
 backend/**/__pycache__/
 frontend/.next/
 frontend/node_modules/
