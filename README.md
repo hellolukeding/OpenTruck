@@ -17,3 +17,8 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
 - run `frontend/` directly with Next.js
 - run `backend/` directly with FastAPI
 - run PostgreSQL and Redis with Docker Compose
+
+## Frontend Backend Target
+
+- `frontend/` reads admin data from `BACKEND_BASE_URL`
+- default fallback is `http://127.0.0.1:8000`
