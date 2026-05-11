@@ -30,3 +30,12 @@ class NodeModelRead(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+class NodeModelUpdate(BaseModel):
+    external_model: str | None = None
+    public_model: str | None = None
+    input_price: Decimal | None = None
+    output_price: Decimal | None = None
+    priority: int | None = None
+    status: str | None = None

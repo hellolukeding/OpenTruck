@@ -14,12 +14,14 @@ check:
 	python3 -m py_compile \
 		backend/app/main.py \
 		backend/app/api/deps.py \
+		backend/app/api/utils.py \
 		backend/app/api/routes/health.py \
 		backend/app/api/routes/models.py \
 		backend/app/api/routes/admin_tenants.py \
 		backend/app/api/routes/admin_nodes.py \
 		backend/app/api/routes/admin_api_keys.py \
 		backend/app/api/routes/admin_node_models.py \
+		backend/app/core/errors.py \
 		backend/app/core/settings.py \
 		backend/app/db/base.py \
 		backend/app/db/session.py \
@@ -32,5 +34,6 @@ check:
 		backend/app/schemas/node.py \
 		backend/app/schemas/api_key.py \
 		backend/app/schemas/node_model.py \
+		backend/app/schemas/error.py \
 		backend/alembic/env.py \
 		backend/alembic/versions/20260511_0001_initial_schema.py

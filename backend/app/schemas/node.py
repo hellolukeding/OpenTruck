@@ -35,3 +35,16 @@ class NodeRead(BaseModel):
     tags: list[str]
     created_at: datetime
     updated_at: datetime
+
+
+class NodeUpdate(BaseModel):
+    name: str | None = None
+    base_url: str | None = None
+    auth_type: str | None = None
+    auth_config: dict | None = None
+    region: str | None = None
+    status: str | None = None
+    health_status: str | None = None
+    weight: int | None = None
+    max_concurrency: int | None = None
+    tags: list[str] | None = None

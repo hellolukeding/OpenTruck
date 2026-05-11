@@ -26,3 +26,10 @@ class ApiKeyRead(BaseModel):
     last_used_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class ApiKeyUpdate(BaseModel):
+    name: str | None = None
+    raw_key: str | None = None
+    status: str | None = None
+    scope: dict | None = None

@@ -26,3 +26,11 @@ class TenantRead(BaseModel):
     rate_limit_tpm: int
     created_at: datetime
     updated_at: datetime
+
+
+class TenantUpdate(BaseModel):
+    name: str | None = None
+    status: str | None = None
+    quota_balance: Decimal | None = None
+    rate_limit_rpm: int | None = None
+    rate_limit_tpm: int | None = None
