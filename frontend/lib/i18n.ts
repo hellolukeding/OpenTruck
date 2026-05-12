@@ -8,8 +8,12 @@ export type DashboardDictionary = {
   status: {
     active: string;
     paused: string;
+    disabled: string;
     ok: string;
     unknown: string;
+    degraded: string;
+    down: string;
+    error: string;
   };
   nav: {
     overview: string;
@@ -205,8 +209,12 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
     status: {
       active: "Active",
       paused: "Paused",
+      disabled: "Disabled",
       ok: "OK",
       unknown: "Unknown",
+      degraded: "Degraded",
+      down: "Down",
+      error: "Error",
     },
     nav: {
       overview: "Overview",
@@ -416,8 +424,12 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
     status: {
       active: "活跃",
       paused: "暂停",
+      disabled: "禁用",
       ok: "正常",
       unknown: "未知",
+      degraded: "降级",
+      down: "离线",
+      error: "错误",
     },
     nav: {
       overview: "总览",

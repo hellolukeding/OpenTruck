@@ -2,16 +2,22 @@ import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
 import { CreateNodeForm } from "@/components/create-node-form";
+import { NodeRowActions } from "@/components/node-row-actions";
+import { PaginationControls } from "@/components/pagination-controls";
+import { ResourceFilters } from "@/components/resource-filters";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
-import { getAdminOverview } from "@/lib/admin-api";
+import { getAdminOverview, getNodesPage } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
 export default async function NodesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; search?: string; status?: string }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
 
   if (!isSupportedLocale(locale)) {
     notFound();
@@ -20,6 +26,17 @@ export default async function NodesPage({
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
   const overview = await getAdminOverview();
+  const page = Number(query.page ?? "1");
+  const status = query.status?.trim() || undefined;
+  const search = query.search?.trim() || undefined;
+  const nodePage = await getNodesPage({
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: 10,
+    status,
+    search,
+    sortBy: "created_at",
+    sortOrder: "desc",
+  });
 
   return (
     <AdminShell
@@ -45,6 +62,16 @@ export default async function NodesPage({
         }}
         statusLabels={dictionary.status}
       />
+      <ResourceFilters
+        locale={typedLocale}
+        path={`/${typedLocale}/nodes`}
+        search={search}
+        status={status}
+        statusOptions={[
+          { value: "active", label: dictionary.status.active },
+          { value: "disabled", label: dictionary.status.disabled },
+        ]}
+      />
       <ResourceTableCard
         eyebrow={dictionary.resources.nodes.eyebrow}
         title={dictionary.resources.nodes.title}
@@ -55,21 +82,21 @@ export default async function NodesPage({
         summary={[
           {
             label: dictionary.resources.nodes.summary.count,
-            value: overview.nodes.length,
+            value: nodePage.pagination.total,
             note: dictionary.resources.nodes.summary.countNote,
           },
           {
             label: dictionary.resources.nodes.summary.healthy,
-            value: overview.nodes.filter((node) => node.health_status === "ok").length,
+            value: nodePage.items.filter((node) => node.health_status === "ok").length,
             note: dictionary.resources.nodes.summary.healthyNote,
           },
           {
             label: dictionary.resources.nodes.summary.capacity,
-            value: overview.nodes.reduce((sum, node) => sum + node.max_concurrency, 0),
+            value: nodePage.items.reduce((sum, node) => sum + node.max_concurrency, 0),
             note: dictionary.resources.nodes.summary.capacityNote,
           },
         ]}
-        items={overview.nodes}
+        items={nodePage.items}
         columns={[
           {
             key: "name",
@@ -96,7 +123,18 @@ export default async function NodesPage({
             label: dictionary.labels.concurrency,
             render: (node) => node.max_concurrency,
           },
+          {
+            key: "actions",
+            label: "",
+            render: (node) => <NodeRowActions locale={typedLocale} node={node} />,
+          },
         ]}
+      />
+      <PaginationControls
+        locale={typedLocale}
+        path={`/${typedLocale}/nodes`}
+        pagination={nodePage.pagination}
+        query={{ search, status }}
       />
     </AdminShell>
   );

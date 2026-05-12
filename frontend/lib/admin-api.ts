@@ -50,6 +50,18 @@ export type NodeModel = {
   updated_at: string;
 };
 
+export type PaginationMeta = {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+};
+
+export type PaginatedResponse<T> = {
+  items: T[];
+  pagination: PaginationMeta;
+};
+
 export type AdminOverview = {
   tenants: Tenant[];
   nodes: Node[];
@@ -59,18 +71,22 @@ export type AdminOverview = {
   backendUrl: string;
 };
 
+export type ResourceQuery = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  region?: string;
+  healthStatus?: string;
+  tenantId?: string;
+  nodeId?: string;
+  publicModel?: string;
+};
+
 const BACKEND_BASE_URL =
   process.env.BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
-
-type PaginatedResponse<T> = {
-  items: T[];
-  pagination: {
-    total: number;
-    page: number;
-    page_size: number;
-    total_pages: number;
-  };
-};
 
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
@@ -89,6 +105,47 @@ function unwrapList<T>(payload: T[] | PaginatedResponse<T>): T[] {
     return payload;
   }
   return payload.items;
+}
+
+function buildResourceUrl(path: string, query: ResourceQuery = {}): string {
+  const searchParams = new URLSearchParams();
+
+  if (query.page) searchParams.set("page", String(query.page));
+  if (query.pageSize) searchParams.set("page_size", String(query.pageSize));
+  if (query.search) searchParams.set("search", query.search);
+  if (query.status) searchParams.set("status", query.status);
+  if (query.sortBy) searchParams.set("sort_by", query.sortBy);
+  if (query.sortOrder) searchParams.set("sort_order", query.sortOrder);
+  if (query.region) searchParams.set("region", query.region);
+  if (query.healthStatus) searchParams.set("health_status", query.healthStatus);
+  if (query.tenantId) searchParams.set("tenant_id", query.tenantId);
+  if (query.nodeId) searchParams.set("node_id", query.nodeId);
+  if (query.publicModel) searchParams.set("public_model", query.publicModel);
+
+  const queryString = searchParams.toString();
+  return queryString ? `${path}?${queryString}` : path;
+}
+
+async function fetchPaginated<T>(
+  path: string,
+  query: ResourceQuery = {},
+): Promise<PaginatedResponse<T>> {
+  const payload = await fetchJson<T[] | PaginatedResponse<T>>(buildResourceUrl(path, query));
+
+  if (Array.isArray(payload)) {
+    const pageSize = query.pageSize ?? payload.length;
+    return {
+      items: payload,
+      pagination: {
+        total: payload.length,
+        page: query.page ?? 1,
+        page_size: pageSize,
+        total_pages: pageSize > 0 ? Math.max(1, Math.ceil(payload.length / pageSize)) : 1,
+      },
+    };
+  }
+
+  return payload;
 }
 
 export async function getAdminOverview(): Promise<AdminOverview> {
@@ -118,4 +175,20 @@ export async function getAdminOverview(): Promise<AdminOverview> {
       backendUrl: BACKEND_BASE_URL,
     };
   }
+}
+
+export async function getTenantsPage(query: ResourceQuery = {}) {
+  return fetchPaginated<Tenant>("/admin/tenants", query);
+}
+
+export async function getNodesPage(query: ResourceQuery = {}) {
+  return fetchPaginated<Node>("/admin/nodes", query);
+}
+
+export async function getApiKeysPage(query: ResourceQuery = {}) {
+  return fetchPaginated<ApiKey>("/admin/api-keys", query);
+}
+
+export async function getNodeModelsPage(query: ResourceQuery = {}) {
+  return fetchPaginated<NodeModel>("/admin/node-models", query);
 }

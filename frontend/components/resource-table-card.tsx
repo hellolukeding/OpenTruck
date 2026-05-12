@@ -29,7 +29,7 @@ type ResourceTableCardProps<T> = {
 export function statusVariant(status: string): "default" | "secondary" | "success" | "warning" {
   const normalized = status.toLowerCase();
   if (normalized === "active" || normalized === "ok") return "success";
-  if (normalized === "unknown" || normalized === "paused") return "warning";
+  if (normalized === "unknown" || normalized === "degraded") return "warning";
   return "secondary";
 }
 

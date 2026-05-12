@@ -2,16 +2,22 @@ import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
 import { CreateTenantForm } from "@/components/create-tenant-form";
+import { PaginationControls } from "@/components/pagination-controls";
+import { ResourceFilters } from "@/components/resource-filters";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
-import { getAdminOverview } from "@/lib/admin-api";
+import { TenantRowActions } from "@/components/tenant-row-actions";
+import { getAdminOverview, getTenantsPage } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
 export default async function TenantsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; search?: string; status?: string }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
 
   if (!isSupportedLocale(locale)) {
     notFound();
@@ -20,6 +26,20 @@ export default async function TenantsPage({
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
   const overview = await getAdminOverview();
+  const page = Number(query.page ?? "1");
+  const status = query.status?.trim() || undefined;
+  const search = query.search?.trim() || undefined;
+  const tenantPage = await getTenantsPage({
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: 10,
+    status,
+    search,
+    sortBy: "created_at",
+    sortOrder: "desc",
+  });
+  const visibleBalance = tenantPage.items
+    .reduce((sum, tenant) => sum + Number(tenant.quota_balance), 0)
+    .toFixed(0);
 
   return (
     <AdminShell
@@ -41,6 +61,16 @@ export default async function TenantsPage({
         }}
         statusLabels={dictionary.status}
       />
+      <ResourceFilters
+        locale={typedLocale}
+        path={`/${typedLocale}/tenants`}
+        search={search}
+        status={status}
+        statusOptions={[
+          { value: "active", label: dictionary.status.active },
+          { value: "disabled", label: dictionary.status.disabled },
+        ]}
+      />
       <ResourceTableCard
         eyebrow={dictionary.resources.tenants.eyebrow}
         title={dictionary.resources.tenants.title}
@@ -51,23 +81,21 @@ export default async function TenantsPage({
         summary={[
           {
             label: dictionary.resources.tenants.summary.count,
-            value: overview.tenants.length,
+            value: tenantPage.pagination.total,
             note: dictionary.resources.tenants.summary.countNote,
           },
           {
             label: dictionary.resources.tenants.summary.active,
-            value: overview.tenants.filter((tenant) => tenant.status === "active").length,
+            value: tenantPage.items.filter((tenant) => tenant.status === "active").length,
             note: dictionary.resources.tenants.summary.activeNote,
           },
           {
             label: dictionary.resources.tenants.summary.balance,
-            value: overview.tenants
-              .reduce((sum, tenant) => sum + Number(tenant.quota_balance), 0)
-              .toFixed(0),
+            value: visibleBalance,
             note: dictionary.resources.tenants.summary.balanceNote,
           },
         ]}
-        items={overview.tenants}
+        items={tenantPage.items}
         columns={[
           {
             key: "name",
@@ -94,7 +122,18 @@ export default async function TenantsPage({
             label: dictionary.labels.tpm,
             render: (tenant) => tenant.rate_limit_tpm,
           },
+          {
+            key: "actions",
+            label: "",
+            render: (tenant) => <TenantRowActions locale={typedLocale} tenant={tenant} />,
+          },
         ]}
+      />
+      <PaginationControls
+        locale={typedLocale}
+        path={`/${typedLocale}/tenants`}
+        pagination={tenantPage.pagination}
+        query={{ search, status }}
       />
     </AdminShell>
   );

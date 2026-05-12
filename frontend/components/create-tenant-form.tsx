@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import {
   createTenantAction,
@@ -12,7 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CreateTenantForm({
   form,
@@ -26,7 +32,7 @@ export function CreateTenantForm({
     DashboardDictionary["labels"],
     "name" | "status" | "quota" | "rpm" | "tpm"
   >;
-  statusLabels: Pick<DashboardDictionary["status"], "active" | "paused">;
+  statusLabels: Pick<DashboardDictionary["status"], "active" | "disabled">;
 }) {
   const initialAdminActionState: AdminActionState = { status: "idle" };
   const formRef = useRef<HTMLFormElement>(null);
@@ -34,6 +40,7 @@ export function CreateTenantForm({
     createTenantAction,
     initialAdminActionState,
   );
+  const [tenantStatus, setTenantStatus] = useState("active");
 
   useEffect(() => {
     if (state.status === "success") {
@@ -61,10 +68,16 @@ export function CreateTenantForm({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="tenant-status">{labels.status}</Label>
-              <Select id="tenant-status" name="status" defaultValue="active">
-                <option value="active">{statusLabels.active}</option>
-                <option value="paused">{statusLabels.paused}</option>
+              <Select value={tenantStatus} onValueChange={setTenantStatus}>
+                <SelectTrigger id="tenant-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{statusLabels.active}</SelectItem>
+                  <SelectItem value="disabled">{statusLabels.disabled}</SelectItem>
+                </SelectContent>
               </Select>
+              <input type="hidden" name="status" value={tenantStatus} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="tenant-balance">{labels.quota}</Label>

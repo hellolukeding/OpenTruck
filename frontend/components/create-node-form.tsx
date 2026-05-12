@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { createNodeAction } from "@/lib/admin-actions";
 import type { AdminActionState } from "@/lib/admin-actions";
@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CreateNodeForm({
   form,
@@ -34,7 +40,7 @@ export function CreateNodeForm({
   >;
   statusLabels: Pick<
     DashboardDictionary["status"],
-    "active" | "paused" | "ok" | "unknown"
+    "active" | "disabled" | "ok" | "unknown" | "degraded" | "down" | "error"
   >;
 }) {
   const initialAdminActionState: AdminActionState = { status: "idle" };
@@ -43,6 +49,8 @@ export function CreateNodeForm({
     createNodeAction,
     initialAdminActionState,
   );
+  const [nodeStatus, setNodeStatus] = useState("active");
+  const [nodeHealth, setNodeHealth] = useState("unknown");
 
   useEffect(() => {
     if (state.status === "success") {
@@ -78,17 +86,32 @@ export function CreateNodeForm({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="node-status">{labels.status}</Label>
-              <Select id="node-status" name="status" defaultValue="active">
-                <option value="active">{statusLabels.active}</option>
-                <option value="paused">{statusLabels.paused}</option>
+              <Select value={nodeStatus} onValueChange={setNodeStatus}>
+                <SelectTrigger id="node-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{statusLabels.active}</SelectItem>
+                  <SelectItem value="disabled">{statusLabels.disabled}</SelectItem>
+                </SelectContent>
               </Select>
+              <input type="hidden" name="status" value={nodeStatus} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="node-health">{labels.health}</Label>
-              <Select id="node-health" name="health_status" defaultValue="unknown">
-                <option value="ok">{statusLabels.ok}</option>
-                <option value="unknown">{statusLabels.unknown}</option>
+              <Select value={nodeHealth} onValueChange={setNodeHealth}>
+                <SelectTrigger id="node-health">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ok">{statusLabels.ok}</SelectItem>
+                  <SelectItem value="unknown">{statusLabels.unknown}</SelectItem>
+                  <SelectItem value="degraded">{statusLabels.degraded}</SelectItem>
+                  <SelectItem value="down">{statusLabels.down}</SelectItem>
+                  <SelectItem value="error">{statusLabels.error}</SelectItem>
+                </SelectContent>
               </Select>
+              <input type="hidden" name="health_status" value={nodeHealth} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="node-auth">{labels.authType}</Label>

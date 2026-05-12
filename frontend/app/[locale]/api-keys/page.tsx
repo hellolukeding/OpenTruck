@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
+import { ApiKeyRowActions } from "@/components/api-key-row-actions";
 import { CreateApiKeyForm } from "@/components/create-api-key-form";
+import { PaginationControls } from "@/components/pagination-controls";
+import { ResourceFilters } from "@/components/resource-filters";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
-import { getAdminOverview } from "@/lib/admin-api";
+import { getAdminOverview, getApiKeysPage, getTenantsPage } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
 function formatDate(value: string | null, fallback: string): string {
@@ -19,10 +22,13 @@ function formatDate(value: string | null, fallback: string): string {
 
 export default async function ApiKeysPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; search?: string; status?: string }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
 
   if (!isSupportedLocale(locale)) {
     notFound();
@@ -31,6 +37,19 @@ export default async function ApiKeysPage({
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
   const overview = await getAdminOverview();
+  const tenantOptions = await getTenantsPage({ page: 1, pageSize: 100, sortBy: "name", sortOrder: "asc" });
+  const page = Number(query.page ?? "1");
+  const status = query.status?.trim() || undefined;
+  const search = query.search?.trim() || undefined;
+  const apiKeyPage = await getApiKeysPage({
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: 10,
+    status,
+    search,
+    sortBy: "created_at",
+    sortOrder: "desc",
+  });
+  const tenantMap = new Map(tenantOptions.items.map((tenant) => [tenant.id, tenant.name]));
 
   return (
     <AdminShell
@@ -51,7 +70,17 @@ export default async function ApiKeysPage({
           scope: dictionary.labels.scope,
         }}
         statusLabels={dictionary.status}
-        tenants={overview.tenants}
+        tenants={tenantOptions.items}
+      />
+      <ResourceFilters
+        locale={typedLocale}
+        path={`/${typedLocale}/api-keys`}
+        search={search}
+        status={status}
+        statusOptions={[
+          { value: "active", label: dictionary.status.active },
+          { value: "disabled", label: dictionary.status.disabled },
+        ]}
       />
       <ResourceTableCard
         eyebrow={dictionary.resources.apiKeys.eyebrow}
@@ -63,21 +92,21 @@ export default async function ApiKeysPage({
         summary={[
           {
             label: dictionary.resources.apiKeys.summary.count,
-            value: overview.apiKeys.length,
+            value: apiKeyPage.pagination.total,
             note: dictionary.resources.apiKeys.summary.countNote,
           },
           {
             label: dictionary.resources.apiKeys.summary.active,
-            value: overview.apiKeys.filter((key) => key.status === "active").length,
+            value: apiKeyPage.items.filter((key) => key.status === "active").length,
             note: dictionary.resources.apiKeys.summary.activeNote,
           },
           {
             label: dictionary.resources.apiKeys.summary.recent,
-            value: overview.apiKeys.filter((key) => key.last_used_at !== null).length,
+            value: apiKeyPage.items.filter((key) => key.last_used_at !== null).length,
             note: dictionary.resources.apiKeys.summary.recentNote,
           },
         ]}
-        items={overview.apiKeys}
+        items={apiKeyPage.items}
         columns={[
           {
             key: "name",
@@ -87,7 +116,7 @@ export default async function ApiKeysPage({
           {
             key: "tenant",
             label: dictionary.labels.tenant,
-            render: (apiKey) => apiKey.tenant_id,
+            render: (apiKey) => tenantMap.get(apiKey.tenant_id) ?? apiKey.tenant_id,
           },
           {
             key: "status",
@@ -109,7 +138,18 @@ export default async function ApiKeysPage({
             render: (apiKey) =>
               formatDate(apiKey.last_used_at, dictionary.labels.never),
           },
+          {
+            key: "actions",
+            label: "",
+            render: (apiKey) => <ApiKeyRowActions locale={typedLocale} apiKey={apiKey} />,
+          },
         ]}
+      />
+      <PaginationControls
+        locale={typedLocale}
+        path={`/${typedLocale}/api-keys`}
+        pagination={apiKeyPage.pagination}
+        query={{ search, status }}
       />
     </AdminShell>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import type { Node } from "@/lib/admin-api";
 import {
@@ -13,7 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CreateNodeModelForm({
   form,
@@ -34,7 +40,7 @@ export function CreateNodeModelForm({
     | "priority"
     | "status"
   >;
-  statusLabels: Pick<DashboardDictionary["status"], "active" | "paused">;
+  statusLabels: Pick<DashboardDictionary["status"], "active" | "disabled">;
   nodes: Node[];
 }) {
   const initialAdminActionState: AdminActionState = { status: "idle" };
@@ -43,6 +49,8 @@ export function CreateNodeModelForm({
     createNodeModelAction,
     initialAdminActionState,
   );
+  const [modelNodeId, setModelNodeId] = useState("");
+  const [modelStatus, setModelStatus] = useState("active");
 
   useEffect(() => {
     if (state.status === "success") {
@@ -66,16 +74,19 @@ export function CreateNodeModelForm({
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <div className="grid gap-2 md:col-span-2 xl:col-span-1">
               <Label htmlFor="node-model-node">{labels.node}</Label>
-              <Select id="node-model-node" name="node_id" required defaultValue="">
-                <option value="" disabled>
-                  {form.selectNode}
-                </option>
-                {nodes.map((node) => (
-                  <option key={node.id} value={node.id}>
-                    {node.name}
-                  </option>
-                ))}
+              <Select value={modelNodeId} onValueChange={setModelNodeId}>
+                <SelectTrigger id="node-model-node">
+                  <SelectValue placeholder={form.selectNode} />
+                </SelectTrigger>
+                <SelectContent>
+                  {nodes.map((node) => (
+                    <SelectItem key={node.id} value={node.id}>
+                      {node.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
+              <input type="hidden" name="node_id" value={modelNodeId} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="node-model-public">{labels.publicModel}</Label>
@@ -116,10 +127,16 @@ export function CreateNodeModelForm({
             </div>
             <div className="grid gap-2">
               <Label htmlFor="node-model-status">{labels.status}</Label>
-              <Select id="node-model-status" name="status" defaultValue="active">
-                <option value="active">{statusLabels.active}</option>
-                <option value="paused">{statusLabels.paused}</option>
+              <Select value={modelStatus} onValueChange={setModelStatus}>
+                <SelectTrigger id="node-model-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{statusLabels.active}</SelectItem>
+                  <SelectItem value="disabled">{statusLabels.disabled}</SelectItem>
+                </SelectContent>
               </Select>
+              <input type="hidden" name="status" value={modelStatus} />
             </div>
           </div>
 

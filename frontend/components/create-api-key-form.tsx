@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import type { Tenant } from "@/lib/admin-api";
 import {
@@ -13,7 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 export function CreateApiKeyForm({
@@ -29,7 +35,7 @@ export function CreateApiKeyForm({
     DashboardDictionary["labels"],
     "tenant" | "status" | "name" | "rawKey" | "scope"
   >;
-  statusLabels: Pick<DashboardDictionary["status"], "active" | "paused">;
+  statusLabels: Pick<DashboardDictionary["status"], "active" | "disabled">;
   tenants: Tenant[];
 }) {
   const initialAdminActionState: AdminActionState = { status: "idle" };
@@ -38,6 +44,8 @@ export function CreateApiKeyForm({
     createApiKeyAction,
     initialAdminActionState,
   );
+  const [apiKeyTenant, setApiKeyTenant] = useState("");
+  const [apiKeyStatus, setApiKeyStatus] = useState("active");
 
   useEffect(() => {
     if (state.status === "success") {
@@ -61,23 +69,32 @@ export function CreateApiKeyForm({
           <div className="grid gap-5 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="api-key-tenant">{labels.tenant}</Label>
-              <Select id="api-key-tenant" name="tenant_id" required defaultValue="">
-                <option value="" disabled>
-                  {form.selectTenant}
-                </option>
-                {tenants.map((tenant) => (
-                  <option key={tenant.id} value={tenant.id}>
-                    {tenant.name}
-                  </option>
-                ))}
+              <Select value={apiKeyTenant} onValueChange={setApiKeyTenant}>
+                <SelectTrigger id="api-key-tenant">
+                  <SelectValue placeholder={form.selectTenant} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tenants.map((tenant) => (
+                    <SelectItem key={tenant.id} value={tenant.id}>
+                      {tenant.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
+              <input type="hidden" name="tenant_id" value={apiKeyTenant} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="api-key-status">{labels.status}</Label>
-              <Select id="api-key-status" name="status" defaultValue="active">
-                <option value="active">{statusLabels.active}</option>
-                <option value="paused">{statusLabels.paused}</option>
+              <Select value={apiKeyStatus} onValueChange={setApiKeyStatus}>
+                <SelectTrigger id="api-key-status">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{statusLabels.active}</SelectItem>
+                  <SelectItem value="disabled">{statusLabels.disabled}</SelectItem>
+                </SelectContent>
               </Select>
+              <input type="hidden" name="status" value={apiKeyStatus} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="api-key-name">{labels.name}</Label>
