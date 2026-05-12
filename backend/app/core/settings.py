@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     gateway_upstream_timeout_seconds: float = 120.0
+    gateway_upstream_failure_threshold: int = 3
+    gateway_upstream_cooldown_seconds: int = 90
     openai_codex_base_url: str = "https://chatgpt.com/backend-api/codex/responses"
 
     postgres_host: str = "localhost"

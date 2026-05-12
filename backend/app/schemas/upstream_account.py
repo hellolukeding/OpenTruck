@@ -20,6 +20,7 @@ class UpstreamAccountCreate(BaseModel):
     email: EmailAddress | None = None
     plan_type: str | None = Field(default=None, min_length=1, max_length=64)
     client_id: str | None = Field(default=None, min_length=1, max_length=128)
+    priority: int = Field(default=100, ge=0, le=10_000)
     token_expires_at: datetime | None = None
     last_refreshed_at: datetime | None = None
     credentials: dict = Field(default_factory=dict)
@@ -35,8 +36,10 @@ class UpstreamAccountUpdate(BaseModel):
     email: EmailAddress | None = None
     plan_type: str | None = Field(default=None, min_length=1, max_length=64)
     client_id: str | None = Field(default=None, min_length=1, max_length=128)
+    priority: int | None = Field(default=None, ge=0, le=10_000)
     token_expires_at: datetime | None = None
     last_refreshed_at: datetime | None = None
+    cooldown_until: datetime | None = None
     credentials: dict | None = None
     extra: dict | None = None
 
@@ -56,8 +59,14 @@ class UpstreamAccountRead(BaseModel):
     email: str | None
     plan_type: str | None
     client_id: str | None
+    priority: int
     token_expires_at: datetime | None
     last_refreshed_at: datetime | None
+    last_used_at: datetime | None
+    last_error_at: datetime | None
+    last_error_code: str | None
+    consecutive_failures: int
+    cooldown_until: datetime | None
     extra: dict
     has_refresh_token: bool = False
     created_at: datetime

@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
@@ -32,8 +32,14 @@ class UpstreamAccount(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     email: Mapped[str | None] = mapped_column(String(320), index=True, nullable=True)
     plan_type: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     client_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    priority: Mapped[int] = mapped_column(Integer, default=100, nullable=False)
     token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_refreshed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    consecutive_failures: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    cooldown_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     credentials: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
     extra: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 

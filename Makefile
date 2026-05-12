@@ -50,4 +50,5 @@ check:
 		backend/app/schemas/upstream_account.py \
 		backend/alembic/env.py \
 		backend/alembic/versions/20260511_0001_initial_schema.py \
-		backend/alembic/versions/20260512_0002_oauth_upstream_accounts.py
+		backend/alembic/versions/20260512_0002_oauth_upstream_accounts.py \
+		backend/alembic/versions/20260512_0003_upstream_account_scheduling.py

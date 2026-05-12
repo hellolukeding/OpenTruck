@@ -55,6 +55,12 @@
 - 已用 `TestClient + external httpx mock` 验证 Chat Completions 请求转换、上游转发和响应逆向转换
 - 已支持 `chat/completions` 的首版 SSE 流式转换，可将 Responses SSE 事件翻译为 Chat Completions SSE
 - 已用 `TestClient + mock upstream stream response` 验证 `response.created / output_text.delta / completed` 到 `chat.completion.chunk` 的流式转换
+- 已为 `upstream_accounts` 增加调度字段：`priority`、`last_used_at`、`last_error_at`、`last_error_code`、`consecutive_failures`、`cooldown_until`
+- 已将租户内上游选择策略升级为“优先级 + 最久未使用”排序，并在转发前跳过冷却中的账号
+- 已接入上游 token 过期自动禁用、`429/5xx/网络错误` 冷却摘除，以及 `401/403` 禁用处理
+- 已在非流式与流式转发入口接入首版 failover，可在首个账号不可用时尝试下一个可用租户账号
+- 已用真实 Alembic 迁移执行 `20260512_0003_upstream_account_scheduling`
+- 已用 `TestClient + external httpx mock` 验证“过期账号自动禁用 -> 限流账号进入冷却 -> 下一健康账号接管请求”的主链路
 - 已在 `frontend/` 引入 `Auth.js`
 - 已新增 `/api/auth/[...nextauth]` 路由、`/auth/signin` 登录页与 `middleware` 保护控制台路由
 - 已将控制台 `/{locale}` 路由接到登录门禁，未登录访问会重定向到登录页并携带 `callbackUrl`
@@ -69,13 +75,13 @@
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
 - `chat/completions` 流式兼容层目前只覆盖首批常见 Responses 事件，后续还需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
-- 上游账号调度仍是最简单的“租户内取一个 active OAuth 账号”，还没有接入更完整的优先级、限流、故障摘除与粘性策略
+- 上游账号调度已补到首版优先级与故障摘除，但仍缺粘性会话、并发占位、租户级配额联动与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
 
 ## 下一步
 
-1. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
-2. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
-3. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
-4. 为上游账号选择补优先级、故障摘除、token 过期处理与更细的调度策略
+1. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建、refresh 与调度字段展示
+2. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
+3. 继续把上游账号调度往 `sub2api` 方向推进，补粘性会话、并发占位与更细的故障恢复策略
+4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证

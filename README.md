@@ -34,6 +34,7 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `GET/POST/PATCH/DELETE /admin/upstream-accounts`
   - `POST /admin/upstream-accounts/{id}/refresh`
 - OAuth sessions and upstream credentials are tenant-scoped so future gateway routing can pick accounts from a tenant-isolated pool
+- upstream accounts now include scheduler metadata such as `priority`, `last_used_at`, `consecutive_failures`, and `cooldown_until`
 
 ## Gateway API
 
@@ -49,7 +50,9 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `POST /chat/completions`
 - current routing behavior:
   - resolve tenant from the platform API key
-  - pick one active `openai/oauth` upstream account for that tenant
+  - prefer lower-priority and least-recently-used `openai/oauth` upstream accounts within that tenant
+  - automatically disable expired upstream tokens before routing
+  - place retryable upstream failures into cooldown and fail over to the next usable account when possible
   - forward the request to `chatgpt.com/backend-api/codex/responses`
 - current Chat Completions behavior:
   - non-streaming requests are translated to Responses API shape and translated back on the way out

@@ -36,7 +36,7 @@
 - 因为 `OpenTruck` 是多租户产品，`OAuth session` 与 `upstream account` 都必须带 `tenant_id`，避免不同租户之间复用或误用同一组 Codex 凭证
 - 上游账号首版单独建 `upstream_accounts` 资源，不直接复用 `nodes`；`nodes` 代表基础转发节点，`upstream_accounts` 代表可被调度的真实上游身份
 - 对外网关首版先只做 `responses` / `codex responses` 主链路，并以租户自己的 API Key 作为统一入口；`chat/completions` 等其它协议待后续通过适配层继续补齐
-- 首版上游调度先采用“租户内选择一个 active 的 `openai/oauth` 账号”的最小策略，先打通真实请求路径，再逐步补优先级、失败摘除和粘性会话
+- 上游账号调度继续沿 `sub2api` 的方向演进：当前版本已补 `priority`、`last_used_at`、`consecutive_failures`、`cooldown_until`，并会在转发前跳过过期账号、对 `429/5xx/网络错误` 做冷却摘除、对 `401/403` 做禁用处理；粘性会话与并发配额留到后续补齐
 - `chat/completions` 的兼容策略采用 `Chat Completions -> Responses -> Chat Completions` 的翻译模式，与 `sub2api` 保持同方向；当前已支持首版 SSE 流式转换，但仍按“小步覆盖事件类型”的策略逐步补齐
 - 前端登录注册优先采用 `Auth.js`，先用 OAuth 统一承接“登录 + 首次注册”，避免在主线早期再单独造密码体系
 - 控制台访问先通过 Next.js `middleware` 保护 `/{locale}` 路由，未登录用户统一跳转到 `/auth/signin`

@@ -30,8 +30,8 @@ def list_upstream_accounts(
     search: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
-    sort_by: str = Query(default="created_at"),
-    sort_order: SortOrder = Query(default="desc"),
+    sort_by: str = Query(default="priority"),
+    sort_order: SortOrder = Query(default="asc"),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[UpstreamAccountRead]:
     statement = select(UpstreamAccount)
@@ -65,6 +65,11 @@ def list_upstream_accounts(
                 "account_type": UpstreamAccount.account_type,
                 "status": UpstreamAccount.status,
                 "plan_type": UpstreamAccount.plan_type,
+                "priority": UpstreamAccount.priority,
+                "last_used_at": UpstreamAccount.last_used_at,
+                "last_error_at": UpstreamAccount.last_error_at,
+                "consecutive_failures": UpstreamAccount.consecutive_failures,
+                "cooldown_until": UpstreamAccount.cooldown_until,
                 "created_at": UpstreamAccount.created_at,
                 "updated_at": UpstreamAccount.updated_at,
                 "token_expires_at": UpstreamAccount.token_expires_at,

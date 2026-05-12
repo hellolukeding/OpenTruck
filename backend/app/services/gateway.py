@@ -4,15 +4,17 @@ import json
 import uuid
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
+from datetime import timedelta
 
 import httpx
 from fastapi import Response
 from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy import Select, desc, nullslast, select
+from sqlalchemy import Select, asc, desc, nullsfirst, nullslast, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import APIError, bad_request
 from app.core.settings import settings
+from app.models.common import utc_now
 from app.models.upstream_account import UpstreamAccount
 from app.services.openai_compat import (
     ChatCompletionsStreamState,
@@ -59,7 +61,7 @@ class GatewayService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def select_openai_oauth_account(self, tenant_id: uuid.UUID) -> UpstreamAccount:
+    def list_openai_oauth_accounts(self, tenant_id: uuid.UUID) -> list[UpstreamAccount]:
         statement: Select[tuple[UpstreamAccount]] = (
             select(UpstreamAccount)
             .where(
@@ -69,18 +71,20 @@ class GatewayService:
                 UpstreamAccount.status == "active",
             )
             .order_by(
+                asc(UpstreamAccount.priority),
+                nullsfirst(asc(UpstreamAccount.last_used_at)),
                 nullslast(desc(UpstreamAccount.last_refreshed_at)),
-                desc(UpstreamAccount.created_at),
+                asc(UpstreamAccount.created_at),
             )
         )
-        account = self.db.scalar(statement)
-        if account is None:
+        accounts = list(self.db.scalars(statement))
+        if not accounts:
             raise APIError(
                 status_code=503,
                 code="no_upstream_account_available",
                 message="No active OpenAI OAuth upstream account is available for this tenant",
             )
-        return account
+        return self._filter_usable_accounts(accounts)
 
     def forward_codex_responses(
         self,
@@ -90,17 +94,11 @@ class GatewayService:
         body: bytes,
         subpath: str = "",
     ) -> Response:
-        account = self.select_openai_oauth_account(tenant_id)
-        access_token = (account.credentials or {}).get("access_token")
-        if not access_token:
-            raise bad_request("missing_access_token", "Selected upstream account does not have an access token")
-
         upstream_url = self._build_upstream_url(subpath=subpath)
-        headers = self._build_request_headers(request_headers=request_headers, access_token=access_token)
-
-        upstream_response = self._post_upstream(
+        upstream_response = self._forward_with_failover(
+            tenant_id=tenant_id,
+            request_headers=request_headers,
             upstream_url=upstream_url,
-            headers=headers,
             body=body,
         )
 
@@ -126,17 +124,12 @@ class GatewayService:
         except ValueError as exc:
             raise bad_request("invalid_chat_completions_request", str(exc)) from exc
 
-        account = self.select_openai_oauth_account(tenant_id)
-        access_token = (account.credentials or {}).get("access_token")
-        if not access_token:
-            raise bad_request("missing_access_token", "Selected upstream account does not have an access token")
-
         upstream_url = self._build_upstream_url(subpath=subpath)
-        headers = self._build_request_headers(request_headers=request_headers, access_token=access_token)
         if payload.get("stream"):
-            upstream_response = self._stream_upstream(
+            upstream_response = self._stream_with_failover(
+                tenant_id=tenant_id,
+                request_headers=request_headers,
                 upstream_url=upstream_url,
-                headers=headers,
                 body=json.dumps(responses_payload).encode("utf-8"),
             )
             if upstream_response.status_code >= 400:
@@ -164,9 +157,10 @@ class GatewayService:
                 headers=response_headers,
             )
 
-        upstream_response = self._post_upstream(
+        upstream_response = self._forward_with_failover(
+            tenant_id=tenant_id,
+            request_headers=request_headers,
             upstream_url=upstream_url,
-            headers=headers,
             body=json.dumps(responses_payload).encode("utf-8"),
         )
 
@@ -229,6 +223,140 @@ class GatewayService:
                 headers[name] = value
         return headers
 
+    def _filter_usable_accounts(self, accounts: list[UpstreamAccount]) -> list[UpstreamAccount]:
+        now = utc_now()
+        usable_accounts: list[UpstreamAccount] = []
+        changed = False
+        for account in accounts:
+            if account.token_expires_at and account.token_expires_at <= now:
+                self._disable_account(account, code="token_expired")
+                changed = True
+                continue
+            if account.cooldown_until and account.cooldown_until > now:
+                continue
+            if not (account.credentials or {}).get("access_token"):
+                self._record_retryable_failure(account, code="missing_access_token")
+                changed = True
+                continue
+            usable_accounts.append(account)
+
+        if changed:
+            self.db.commit()
+
+        if not usable_accounts:
+            raise APIError(
+                status_code=503,
+                code="no_usable_upstream_account",
+                message="No usable OpenAI OAuth upstream account is currently available for this tenant",
+            )
+        return usable_accounts
+
+    def _forward_with_failover(
+        self,
+        *,
+        tenant_id: uuid.UUID,
+        request_headers: Iterable[tuple[str, str]],
+        upstream_url: str,
+        body: bytes,
+    ) -> httpx.Response:
+        last_error: APIError | None = None
+        for account in self.list_openai_oauth_accounts(tenant_id):
+            headers = self._build_request_headers(
+                request_headers=request_headers,
+                access_token=(account.credentials or {}).get("access_token", ""),
+            )
+            try:
+                upstream_response = self._post_upstream(upstream_url=upstream_url, headers=headers, body=body)
+            except APIError as exc:
+                self._record_retryable_failure(account, code=exc.code)
+                self.db.commit()
+                last_error = exc
+                continue
+
+            if self._is_auth_failure(upstream_response):
+                self._disable_account(account, code="upstream_auth_failed")
+                self.db.commit()
+                last_error = APIError(
+                    status_code=503,
+                    code="upstream_auth_failed",
+                    message="Selected upstream account is no longer authorized",
+                )
+                continue
+
+            if self._is_retryable_response(upstream_response):
+                self._record_retryable_failure(account, code=f"upstream_http_{upstream_response.status_code}")
+                self.db.commit()
+                last_error = APIError(
+                    status_code=502,
+                    code="upstream_request_failed",
+                    message="Failed to complete request with the selected upstream account",
+                )
+                continue
+
+            self._record_success(account)
+            self.db.commit()
+            return upstream_response
+
+        raise last_error or APIError(
+            status_code=503,
+            code="no_usable_upstream_account",
+            message="No usable OpenAI OAuth upstream account is currently available for this tenant",
+        )
+
+    def _stream_with_failover(
+        self,
+        *,
+        tenant_id: uuid.UUID,
+        request_headers: Iterable[tuple[str, str]],
+        upstream_url: str,
+        body: bytes,
+    ) -> httpx.Response:
+        last_error: APIError | None = None
+        for account in self.list_openai_oauth_accounts(tenant_id):
+            headers = self._build_request_headers(
+                request_headers=request_headers,
+                access_token=(account.credentials or {}).get("access_token", ""),
+            )
+            try:
+                upstream_response = self._stream_upstream(upstream_url=upstream_url, headers=headers, body=body)
+            except APIError as exc:
+                self._record_retryable_failure(account, code=exc.code)
+                self.db.commit()
+                last_error = exc
+                continue
+
+            if self._is_auth_failure(upstream_response):
+                self._disable_account(account, code="upstream_auth_failed")
+                self.db.commit()
+                upstream_response.close()
+                last_error = APIError(
+                    status_code=503,
+                    code="upstream_auth_failed",
+                    message="Selected upstream account is no longer authorized",
+                )
+                continue
+
+            if self._is_retryable_response(upstream_response):
+                self._record_retryable_failure(account, code=f"upstream_http_{upstream_response.status_code}")
+                self.db.commit()
+                upstream_response.close()
+                last_error = APIError(
+                    status_code=502,
+                    code="upstream_request_failed",
+                    message="Failed to complete request with the selected upstream account",
+                )
+                continue
+
+            self._record_success(account)
+            self.db.commit()
+            return upstream_response
+
+        raise last_error or APIError(
+            status_code=503,
+            code="no_usable_upstream_account",
+            message="No usable OpenAI OAuth upstream account is currently available for this tenant",
+        )
+
     def _post_upstream(self, *, upstream_url: str, headers: dict[str, str], body: bytes) -> httpx.Response:
         try:
             with httpx.Client(timeout=settings.gateway_upstream_timeout_seconds) as client:
@@ -259,6 +387,33 @@ class GatewayService:
                 code="upstream_request_failed",
                 message="Failed to reach upstream Codex service",
             ) from exc
+
+    def _record_success(self, account: UpstreamAccount) -> None:
+        account.last_used_at = utc_now()
+        account.last_error_at = None
+        account.last_error_code = None
+        account.consecutive_failures = 0
+        account.cooldown_until = None
+
+    def _record_retryable_failure(self, account: UpstreamAccount, *, code: str) -> None:
+        now = utc_now()
+        account.last_error_at = now
+        account.last_error_code = code
+        account.consecutive_failures = (account.consecutive_failures or 0) + 1
+        if account.consecutive_failures >= settings.gateway_upstream_failure_threshold:
+            account.cooldown_until = now + timedelta(seconds=settings.gateway_upstream_cooldown_seconds)
+
+    def _disable_account(self, account: UpstreamAccount, *, code: str) -> None:
+        account.status = "disabled"
+        account.last_error_at = utc_now()
+        account.last_error_code = code
+        account.cooldown_until = None
+
+    def _is_auth_failure(self, response: httpx.Response) -> bool:
+        return response.status_code in {401, 403}
+
+    def _is_retryable_response(self, response: httpx.Response) -> bool:
+        return response.status_code == 429 or response.status_code >= 500
 
     def _chat_completions_stream_generator(
         self,
