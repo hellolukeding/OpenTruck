@@ -35,6 +35,21 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `POST /admin/upstream-accounts/{id}/refresh`
 - OAuth sessions and upstream credentials are tenant-scoped so future gateway routing can pick accounts from a tenant-isolated pool
 
+## Gateway API
+
+- tenant-facing gateway authentication accepts either:
+  - `Authorization: Bearer <api-key>`
+  - `X-API-Key: <api-key>`
+- first-pass supported endpoints:
+  - `GET /v1/models`
+  - `POST /v1/responses`
+  - `POST /responses`
+  - `POST /backend-api/codex/responses`
+- current routing behavior:
+  - resolve tenant from the platform API key
+  - pick one active `openai/oauth` upstream account for that tenant
+  - forward the request to `chatgpt.com/backend-api/codex/responses`
+
 ## Frontend Notes
 
 - frontend uses `shadcn/ui`-style component primitives

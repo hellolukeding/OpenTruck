@@ -16,6 +16,7 @@ check:
 		backend/app/api/deps.py \
 		backend/app/api/utils.py \
 		backend/app/api/routes/health.py \
+		backend/app/api/routes/gateway.py \
 		backend/app/api/routes/models.py \
 		backend/app/api/routes/admin_tenants.py \
 		backend/app/api/routes/admin_nodes.py \
@@ -34,7 +35,9 @@ check:
 		backend/app/models/node_model.py \
 		backend/app/models/oauth_session.py \
 		backend/app/models/upstream_account.py \
+		backend/app/services/gateway.py \
 		backend/app/services/openai_oauth.py \
+		backend/app/services/security.py \
 		backend/app/schemas/tenant.py \
 		backend/app/schemas/node.py \
 		backend/app/schemas/api_key.py \

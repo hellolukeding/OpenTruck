@@ -46,6 +46,10 @@
 - 已新增 `OpenAI OAuth PKCE` 授权链接生成、授权码换 token、OAuth 账号落库与 refresh token 接口
 - 已用本地 Docker PostgreSQL 成功执行 `20260512_0002_oauth_upstream_accounts` 迁移
 - 已用 FastAPI `TestClient + mock token exchange` 验证 `auth-url -> create-account -> list -> refresh` 主链路
+- 已新增首版租户 API Key 鉴权依赖，支持 `Authorization: Bearer` 与 `X-API-Key`
+- 已新增首版网关执行层，可将 `/v1/responses`、`/responses` 与 `/backend-api/codex/responses` 转发到租户自己的 `OpenAI OAuth` 上游账号
+- 已将 `/v1/models` 接入租户 API Key 鉴权，并返回当前租户可见的基础模型信息
+- 已用 `TestClient + external httpx mock` 验证 `Bearer API Key -> tenant -> upstream account -> Codex responses` 真实转发链路
 
 ## 已知问题
 
@@ -53,11 +57,12 @@
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
-- 网关执行层尚未真正消费 `upstream_accounts`，目前只完成了 `sub2api` 式上游接入与管理面基础链路
+- 网关首版仍只支持 `responses`/`codex responses` 主链路，尚未覆盖 `chat/completions`、流式转发与更多协议适配
+- 上游账号调度仍是最简单的“租户内取一个 active OAuth 账号”，还没有接入更完整的优先级、限流、故障摘除与粘性策略
 
 ## 下一步
 
-1. 新增真正的网关执行层，从 `upstream_accounts` 中选择 `OpenAI OAuth` 账号并转发到 `chatgpt.com/backend-api/codex/responses`
-2. 为租户 API Key 增加鉴权中间件和租户隔离，让对外 API 可按租户选取上游账号池
+1. 为网关补 `chat/completions -> responses` 协议转换，继续向 `sub2api` 靠拢
+2. 为上游账号选择补优先级、故障摘除、token 过期处理与更细的调度策略
 3. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
 4. 将数据库连接与健康探测接入更完整的 FastAPI 生命周期管理

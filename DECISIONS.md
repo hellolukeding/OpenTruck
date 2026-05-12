@@ -35,3 +35,5 @@
 - `OpenAI OAuth / Codex` 上游接入模式参考 `sub2api`：先在后端完成 `OAuth PKCE` 和 token 托管，再由租户消费平台自己的 API Key，而不是让终端用户直接持有上游凭证
 - 因为 `OpenTruck` 是多租户产品，`OAuth session` 与 `upstream account` 都必须带 `tenant_id`，避免不同租户之间复用或误用同一组 Codex 凭证
 - 上游账号首版单独建 `upstream_accounts` 资源，不直接复用 `nodes`；`nodes` 代表基础转发节点，`upstream_accounts` 代表可被调度的真实上游身份
+- 对外网关首版先只做 `responses` / `codex responses` 主链路，并以租户自己的 API Key 作为统一入口；`chat/completions` 等其它协议待后续通过适配层继续补齐
+- 首版上游调度先采用“租户内选择一个 active 的 `openai/oauth` 账号”的最小策略，先打通真实请求路径，再逐步补优先级、失败摘除和粘性会话
