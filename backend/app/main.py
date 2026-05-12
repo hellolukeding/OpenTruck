@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi import HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.api.routes.admin_api_keys import router as admin_api_keys_router
@@ -32,3 +33,37 @@ async def http_exception_handler(_: Request, exc: HTTPException) -> JSONResponse
             }
         }
     return JSONResponse(status_code=exc.status_code, content=payload)
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
+    first_error = exc.errors()[0] if exc.errors() else None
+    if first_error is None:
+        message = "Request validation failed"
+    else:
+        location = ".".join(str(item) for item in first_error.get("loc", []) if item != "body")
+        reason = first_error.get("msg", "Invalid value")
+        message = f"{location}: {reason}" if location else reason
+
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": {
+                "code": "validation_error",
+                "message": message,
+            }
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(_: Request, __: Exception) -> JSONResponse:
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": {
+                "code": "internal_error",
+                "message": "Internal server error",
+            }
+        },
+    )

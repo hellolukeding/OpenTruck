@@ -4,15 +4,17 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.schemas.common import ResourceStatus, ShortName
 
 
 class TenantCreate(BaseModel):
-    name: str
-    status: str = "active"
-    quota_balance: Decimal = Decimal("0")
-    rate_limit_rpm: int = 60
-    rate_limit_tpm: int = 120000
+    name: ShortName
+    status: ResourceStatus = "active"
+    quota_balance: Decimal = Field(default=Decimal("0"), ge=0)
+    rate_limit_rpm: int = Field(default=60, ge=1, le=1_000_000)
+    rate_limit_tpm: int = Field(default=120000, ge=1, le=1_000_000_000)
 
 
 class TenantRead(BaseModel):
@@ -20,7 +22,7 @@ class TenantRead(BaseModel):
 
     id: uuid.UUID
     name: str
-    status: str
+    status: ResourceStatus
     quota_balance: Decimal
     rate_limit_rpm: int
     rate_limit_tpm: int
@@ -29,8 +31,8 @@ class TenantRead(BaseModel):
 
 
 class TenantUpdate(BaseModel):
-    name: str | None = None
-    status: str | None = None
-    quota_balance: Decimal | None = None
-    rate_limit_rpm: int | None = None
-    rate_limit_tpm: int | None = None
+    name: ShortName | None = None
+    status: ResourceStatus | None = None
+    quota_balance: Decimal | None = Field(default=None, ge=0)
+    rate_limit_rpm: int | None = Field(default=None, ge=1, le=1_000_000)
+    rate_limit_tpm: int | None = Field(default=None, ge=1, le=1_000_000_000)

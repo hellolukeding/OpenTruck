@@ -8,6 +8,7 @@ from app.api.deps import get_db
 from app.api.utils import apply_updates, build_search_filter, commit_or_409, paginate, resolve_sort
 from app.core.errors import not_found
 from app.models.node import Node
+from app.schemas.common import NodeHealthStatus, RegionName, ResourceStatus, SortOrder
 from app.schemas.error import ErrorResponse
 from app.schemas.pagination import PaginatedResponse
 from app.schemas.node import NodeCreate, NodeRead, NodeUpdate
@@ -18,14 +19,14 @@ router = APIRouter(prefix="/nodes", tags=["admin-nodes"])
 
 @router.get("", response_model=PaginatedResponse[NodeRead])
 def list_nodes(
-    status: str | None = Query(default=None),
-    health_status: str | None = Query(default=None),
-    region: str | None = Query(default=None),
+    status: ResourceStatus | None = Query(default=None),
+    health_status: NodeHealthStatus | None = Query(default=None),
+    region: RegionName | None = Query(default=None),
     search: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     sort_by: str = Query(default="created_at"),
-    sort_order: str = Query(default="desc"),
+    sort_order: SortOrder = Query(default="desc"),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[NodeRead]:
     statement = select(Node)

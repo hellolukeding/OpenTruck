@@ -28,3 +28,5 @@
 - 前端包管理与本地运行链路统一使用 `pnpm`
 - admin 列表接口的查询约定参考 `sub2api`，统一采用 `page`、`page_size`、`sort_by`、`sort_order`，并按资源补充 `status`、`search` 等筛选参数
 - admin 列表接口的返回结构统一为 `{ items, pagination }`，前端数据层暂时保持对旧数组返回的兼容读取
+- 资源状态字段的首版枚举约定参考 `sub2api` 的 `active/disabled` 风格；节点健康状态首版限定为 `unknown/ok/degraded/down/error`
+- FastAPI 请求校验错误与未处理异常统一映射到 `{ "error": { "code", "message" } }` 结构，避免默认 HTML 或原始校验数组直接泄漏给前端

@@ -10,10 +10,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.sql.selectable import Subquery
 
-from app.core.errors import APIError, bad_request, conflict
+from app.core.errors import APIError, bad_request, conflict, internal_error
 from app.schemas.pagination import PaginatedResponse, PaginationMeta
 
 T = TypeVar("T")
+
+UNIQUE_VIOLATION = "23505"
+FOREIGN_KEY_VIOLATION = "23503"
+NOT_NULL_VIOLATION = "23502"
+CHECK_VIOLATION = "23514"
 
 
 def commit_or_409(
@@ -26,7 +31,16 @@ def commit_or_409(
         db.commit()
     except IntegrityError as exc:
         db.rollback()
-        raise conflict(resource_name, field_name) from exc
+        sqlstate = getattr(exc.orig, "sqlstate", None) or getattr(exc.orig, "pgcode", None)
+        if sqlstate == UNIQUE_VIOLATION:
+            raise conflict(resource_name, field_name) from exc
+        if sqlstate == FOREIGN_KEY_VIOLATION:
+            raise bad_request("invalid_reference", f"{resource_name} references a missing related resource") from exc
+        if sqlstate == NOT_NULL_VIOLATION:
+            raise bad_request("missing_required_field", f"{resource_name} is missing a required field") from exc
+        if sqlstate == CHECK_VIOLATION:
+            raise bad_request("constraint_violation", f"{resource_name} violates a database constraint") from exc
+        raise internal_error() from exc
 
     if refresh is not None:
         db.refresh(refresh)
@@ -56,12 +70,11 @@ def resolve_sort(
     *,
     default_sort_by: str = "created_at",
 ) -> ColumnElement[object]:
-    column = allowed.get(sort_by, allowed.get(default_sort_by))
+    column = allowed.get(sort_by)
+    if sort_by == "":
+        column = allowed.get(default_sort_by)
     if column is None:
         raise bad_request("invalid_sort_by", f"Unsupported sort field: {sort_by}")
-
-    if sort_order not in {"asc", "desc"}:
-        raise bad_request("invalid_sort_order", "sort_order must be asc or desc")
 
     return column.asc() if sort_order == "asc" else column.desc()
 

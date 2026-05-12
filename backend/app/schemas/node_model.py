@@ -4,17 +4,19 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+from app.schemas.common import ModelName, ResourceStatus
 
 
 class NodeModelCreate(BaseModel):
     node_id: uuid.UUID
-    external_model: str
-    public_model: str
-    input_price: Decimal = Decimal("0")
-    output_price: Decimal = Decimal("0")
-    priority: int = 100
-    status: str = "active"
+    external_model: ModelName
+    public_model: ModelName
+    input_price: Decimal = Field(default=Decimal("0"), ge=0)
+    output_price: Decimal = Field(default=Decimal("0"), ge=0)
+    priority: int = Field(default=100, ge=0, le=10_000)
+    status: ResourceStatus = "active"
 
 
 class NodeModelRead(BaseModel):
@@ -27,15 +29,15 @@ class NodeModelRead(BaseModel):
     input_price: Decimal
     output_price: Decimal
     priority: int
-    status: str
+    status: ResourceStatus
     created_at: datetime
     updated_at: datetime
 
 
 class NodeModelUpdate(BaseModel):
-    external_model: str | None = None
-    public_model: str | None = None
-    input_price: Decimal | None = None
-    output_price: Decimal | None = None
-    priority: int | None = None
-    status: str | None = None
+    external_model: ModelName | None = None
+    public_model: ModelName | None = None
+    input_price: Decimal | None = Field(default=None, ge=0)
+    output_price: Decimal | None = Field(default=None, ge=0)
+    priority: int | None = Field(default=None, ge=0, le=10_000)
+    status: ResourceStatus | None = None

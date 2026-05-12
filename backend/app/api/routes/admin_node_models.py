@@ -9,6 +9,7 @@ from app.api.utils import apply_updates, build_search_filter, commit_or_409, pag
 from app.core.errors import not_found
 from app.models.node import Node
 from app.models.node_model import NodeModel
+from app.schemas.common import ModelName, ResourceStatus, SortOrder
 from app.schemas.error import ErrorResponse
 from app.schemas.pagination import PaginatedResponse
 from app.schemas.node_model import NodeModelCreate, NodeModelRead, NodeModelUpdate
@@ -20,13 +21,13 @@ router = APIRouter(prefix="/node-models", tags=["admin-node-models"])
 @router.get("", response_model=PaginatedResponse[NodeModelRead])
 def list_node_models(
     node_id: str | None = Query(default=None),
-    status: str | None = Query(default=None),
-    public_model: str | None = Query(default=None),
+    status: ResourceStatus | None = Query(default=None),
+    public_model: ModelName | None = Query(default=None),
     search: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     sort_by: str = Query(default="created_at"),
-    sort_order: str = Query(default="desc"),
+    sort_order: SortOrder = Query(default="desc"),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[NodeModelRead]:
     statement = select(NodeModel)

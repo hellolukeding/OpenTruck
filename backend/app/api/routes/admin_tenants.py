@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db
 from app.api.utils import apply_updates, build_search_filter, commit_or_409, paginate, resolve_sort
 from app.core.errors import not_found
+from app.schemas.common import ResourceStatus, SortOrder
 from app.models.tenant import Tenant
 from app.schemas.error import ErrorResponse
 from app.schemas.pagination import PaginatedResponse
@@ -18,12 +19,12 @@ router = APIRouter(prefix="/tenants", tags=["admin-tenants"])
 
 @router.get("", response_model=PaginatedResponse[TenantRead])
 def list_tenants(
-    status: str | None = Query(default=None),
+    status: ResourceStatus | None = Query(default=None),
     search: str | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     sort_by: str = Query(default="created_at"),
-    sort_order: str = Query(default="desc"),
+    sort_order: SortOrder = Query(default="desc"),
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[TenantRead]:
     statement = select(Tenant)

@@ -30,3 +30,11 @@ def bad_request(code: str, message: str) -> APIError:
         code=code,
         message=message,
     )
+
+
+def internal_error(message: str = "Internal server error") -> APIError:
+    return APIError(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        code="internal_error",
+        message=message,
+    )

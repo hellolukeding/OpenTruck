@@ -5,12 +5,14 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.common import ApiKeySecret, ResourceStatus, ShortName
+
 
 class ApiKeyCreate(BaseModel):
     tenant_id: uuid.UUID
-    name: str
-    raw_key: str
-    status: str = "active"
+    name: ShortName
+    raw_key: ApiKeySecret
+    status: ResourceStatus = "active"
     scope: dict = Field(default_factory=dict)
 
 
@@ -21,7 +23,7 @@ class ApiKeyRead(BaseModel):
     tenant_id: uuid.UUID
     name: str
     key_hash: str
-    status: str
+    status: ResourceStatus
     scope: dict
     last_used_at: datetime | None
     created_at: datetime
@@ -29,7 +31,7 @@ class ApiKeyRead(BaseModel):
 
 
 class ApiKeyUpdate(BaseModel):
-    name: str | None = None
-    raw_key: str | None = None
-    status: str | None = None
+    name: ShortName | None = None
+    raw_key: ApiKeySecret | None = None
+    status: ResourceStatus | None = None
     scope: dict | None = None
