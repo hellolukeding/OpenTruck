@@ -31,6 +31,7 @@ check:
 		backend/app/models/common.py \
 		backend/app/models/tenant.py \
 		backend/app/models/api_key.py \
+		backend/app/models/gateway_usage_ledger.py \
 		backend/app/models/node.py \
 		backend/app/models/node_model.py \
 		backend/app/models/oauth_session.py \
@@ -51,4 +52,5 @@ check:
 		backend/alembic/env.py \
 		backend/alembic/versions/20260511_0001_initial_schema.py \
 		backend/alembic/versions/20260512_0002_oauth_upstream_accounts.py \
-		backend/alembic/versions/20260512_0003_upstream_account_scheduling.py
+		backend/alembic/versions/20260512_0003_upstream_account_scheduling.py \
+		backend/alembic/versions/20260512_0004_gateway_usage_ledger.py

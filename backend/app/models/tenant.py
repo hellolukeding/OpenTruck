@@ -19,5 +19,6 @@ class Tenant(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     rate_limit_tpm: Mapped[int] = mapped_column(Integer, default=120000, nullable=False)
 
     api_keys = relationship("ApiKey", back_populates="tenant", cascade="all, delete-orphan")
+    gateway_usage_entries = relationship("GatewayUsageLedger", back_populates="tenant", cascade="all, delete-orphan")
     oauth_sessions = relationship("OAuthSession", back_populates="tenant", cascade="all, delete-orphan")
     upstream_accounts = relationship("UpstreamAccount", back_populates="tenant", cascade="all, delete-orphan")

@@ -28,9 +28,10 @@ async def codex_responses_proxy(
     body = await request.body()
     service = GatewayService(db)
     return service.forward_codex_responses(
-        tenant_id=identity.tenant_id,
+        identity=identity,
         request_headers=request.headers.items(),
         body=body,
+        request_path=request.url.path,
         subpath=subpath,
     )
 
@@ -52,7 +53,8 @@ async def chat_completions_proxy(
 
     service = GatewayService(db)
     return service.forward_chat_completions(
-        tenant_id=identity.tenant_id,
+        identity=identity,
         request_headers=request.headers.items(),
         payload=payload,
+        request_path=request.url.path,
     )

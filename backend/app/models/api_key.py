@@ -26,3 +26,4 @@ class ApiKey(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     tenant = relationship("Tenant", back_populates="api_keys")
+    gateway_usage_entries = relationship("GatewayUsageLedger", back_populates="api_key", cascade="all, delete-orphan")

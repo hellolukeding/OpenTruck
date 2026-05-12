@@ -6,7 +6,9 @@ import uuid
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
 from datetime import timedelta
+from decimal import Decimal, ROUND_HALF_UP
 from threading import Lock
+from typing import Any
 
 import httpx
 from fastapi import Response
@@ -17,6 +19,8 @@ from sqlalchemy.orm import Session
 from app.core.errors import APIError, bad_request
 from app.core.settings import settings
 from app.models.common import utc_now
+from app.models.gateway_usage_ledger import GatewayUsageLedger
+from app.models.tenant import Tenant
 from app.models.upstream_account import UpstreamAccount
 from app.services.openai_compat import (
     ChatCompletionsStreamState,
@@ -59,6 +63,15 @@ class TenantGatewayIdentity:
     api_key_id: uuid.UUID
 
 
+@dataclass(slots=True)
+class UsageAccounting:
+    input_tokens: int
+    output_tokens: int
+    total_tokens: int
+    model: str | None = None
+    response_id: str | None = None
+
+
 class GatewayService:
     _account_slot_lock = Lock()
     _account_active_requests: dict[str, int] = {}
@@ -94,19 +107,32 @@ class GatewayService:
     def forward_codex_responses(
         self,
         *,
-        tenant_id: uuid.UUID,
+        identity: TenantGatewayIdentity,
         request_headers: Iterable[tuple[str, str]],
         body: bytes,
+        request_path: str,
         subpath: str = "",
     ) -> Response:
         request_headers = list(request_headers)
+        self._ensure_tenant_quota_available(identity.tenant_id)
         upstream_url = self._build_upstream_url(subpath=subpath)
         upstream_response = self._forward_with_failover(
-            tenant_id=tenant_id,
+            tenant_id=identity.tenant_id,
             request_headers=request_headers,
             upstream_url=upstream_url,
             body=body,
         )
+        usage = self._extract_usage_from_json_response(upstream_response)
+        if upstream_response.status_code < 400:
+            self._apply_usage_accounting(
+                identity=identity,
+                request_kind="responses",
+                request_path=request_path,
+                conversation_id=self._resolve_conversation_id(request_headers),
+                upstream_status_code=upstream_response.status_code,
+                account_id=self._extract_response_account_id(upstream_response),
+                usage=usage,
+            )
 
         response_headers = self._build_response_headers(upstream_response.headers)
         content_type = upstream_response.headers.get("content-type", "application/json")
@@ -120,12 +146,14 @@ class GatewayService:
     def forward_chat_completions(
         self,
         *,
-        tenant_id: uuid.UUID,
+        identity: TenantGatewayIdentity,
         request_headers: Iterable[tuple[str, str]],
         payload: dict,
+        request_path: str,
         subpath: str = "",
     ) -> Response:
         request_headers = list(request_headers)
+        self._ensure_tenant_quota_available(identity.tenant_id)
         try:
             responses_payload = chat_completions_to_responses(payload)
         except ValueError as exc:
@@ -134,7 +162,7 @@ class GatewayService:
         upstream_url = self._build_upstream_url(subpath=subpath)
         if payload.get("stream"):
             upstream_response = self._stream_with_failover(
-                tenant_id=tenant_id,
+                tenant_id=identity.tenant_id,
                 request_headers=request_headers,
                 upstream_url=upstream_url,
                 body=json.dumps(responses_payload).encode("utf-8"),
@@ -162,13 +190,19 @@ class GatewayService:
             response_headers["content-type"] = "text/event-stream"
             response_headers["cache-control"] = "no-cache"
             return StreamingResponse(
-                self._chat_completions_stream_generator(upstream_response=upstream_response, state=state),
+                self._chat_completions_stream_generator(
+                    upstream_response=upstream_response,
+                    state=state,
+                    identity=identity,
+                    request_path=request_path,
+                    conversation_id=self._resolve_conversation_id(request_headers),
+                ),
                 media_type="text/event-stream",
                 headers=response_headers,
             )
 
         upstream_response = self._forward_with_failover(
-            tenant_id=tenant_id,
+            tenant_id=identity.tenant_id,
             request_headers=request_headers,
             upstream_url=upstream_url,
             body=json.dumps(responses_payload).encode("utf-8"),
@@ -196,6 +230,15 @@ class GatewayService:
         chat_response = responses_to_chat_completions(
             upstream_payload,
             fallback_model=payload.get("model") or "openai/responses",
+        )
+        self._apply_usage_accounting(
+            identity=identity,
+            request_kind="chat_completions",
+            request_path=request_path,
+            conversation_id=self._resolve_conversation_id(request_headers),
+            upstream_status_code=upstream_response.status_code,
+            account_id=self._extract_response_account_id(upstream_response),
+            usage=self._extract_usage_from_payload(upstream_payload),
         )
         response_headers = self._build_response_headers(upstream_response.headers)
         return JSONResponse(
@@ -232,6 +275,104 @@ class GatewayService:
             if name.lower() in ALLOWED_RESPONSE_HEADERS:
                 headers[name] = value
         return headers
+
+    def _ensure_tenant_quota_available(self, tenant_id: uuid.UUID) -> None:
+        tenant = self.db.get(Tenant, tenant_id)
+        if tenant is None or tenant.status != "active":
+            raise APIError(status_code=403, code="tenant_disabled", message="Tenant is disabled")
+        if tenant.quota_balance <= Decimal("0"):
+            raise APIError(
+                status_code=402,
+                code="insufficient_quota",
+                message="Tenant quota balance is exhausted",
+            )
+
+    def _extract_usage_from_json_response(self, response: httpx.Response) -> UsageAccounting | None:
+        content_type = response.headers.get("content-type", "")
+        if "json" not in content_type.lower():
+            return None
+        try:
+            payload = response.json()
+        except ValueError:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        return self._extract_usage_from_payload(payload)
+
+    def _extract_usage_from_payload(self, payload: dict[str, Any]) -> UsageAccounting | None:
+        usage = payload.get("usage")
+        if not isinstance(usage, dict):
+            return None
+        input_tokens = int(usage.get("input_tokens") or 0)
+        output_tokens = int(usage.get("output_tokens") or 0)
+        total_tokens = int(usage.get("total_tokens") or (input_tokens + output_tokens))
+        return UsageAccounting(
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            total_tokens=total_tokens,
+            model=payload.get("model") if isinstance(payload.get("model"), str) else None,
+            response_id=payload.get("id") if isinstance(payload.get("id"), str) else None,
+        )
+
+    def _resolve_conversation_id(self, request_headers: Iterable[tuple[str, str]]) -> str | None:
+        header_map = {name.lower(): value for name, value in request_headers}
+        value = header_map.get("conversation_id")
+        if value and value.strip():
+            return value.strip()
+        return None
+
+    def _quota_delta_for_usage(self, total_tokens: int) -> Decimal:
+        if total_tokens <= 0:
+            return Decimal("0")
+        return (
+            Decimal(total_tokens)
+            * Decimal(str(settings.gateway_quota_cost_per_1k_tokens))
+            / Decimal("1000")
+        ).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
+
+    def _apply_usage_accounting(
+        self,
+        *,
+        identity: TenantGatewayIdentity,
+        request_kind: str,
+        request_path: str,
+        conversation_id: str | None,
+        upstream_status_code: int,
+        account_id: uuid.UUID | None,
+        usage: UsageAccounting | None,
+    ) -> None:
+        tenant = self.db.get(Tenant, identity.tenant_id)
+        if tenant is None:
+            return
+        quota_delta = self._quota_delta_for_usage(usage.total_tokens if usage else 0)
+        tenant.quota_balance -= quota_delta
+        ledger = GatewayUsageLedger(
+            tenant_id=identity.tenant_id,
+            api_key_id=identity.api_key_id,
+            upstream_account_id=account_id,
+            request_kind=request_kind,
+            endpoint=request_path,
+            status="succeeded",
+            model=usage.model if usage else None,
+            response_id=usage.response_id if usage else None,
+            conversation_id=conversation_id,
+            upstream_status_code=upstream_status_code,
+            input_tokens=usage.input_tokens if usage else 0,
+            output_tokens=usage.output_tokens if usage else 0,
+            total_tokens=usage.total_tokens if usage else 0,
+            quota_delta=quota_delta,
+        )
+        self.db.add(ledger)
+        self.db.commit()
+
+    def _extract_response_account_id(self, response: httpx.Response) -> uuid.UUID | None:
+        raw = getattr(response, "_opentruck_account_id", None)
+        if not raw:
+            return None
+        try:
+            return uuid.UUID(str(raw))
+        except ValueError:
+            return None
 
     def _filter_usable_accounts(self, accounts: list[UpstreamAccount]) -> list[UpstreamAccount]:
         now = utc_now()
@@ -314,6 +455,7 @@ class GatewayService:
             self._record_success(account)
             self.db.commit()
             try:
+                upstream_response._opentruck_account_id = str(account.id)  # type: ignore[attr-defined]
                 return upstream_response
             finally:
                 self._release_account_slot(account)
@@ -530,6 +672,9 @@ class GatewayService:
         *,
         upstream_response: httpx.Response,
         state: ChatCompletionsStreamState,
+        identity: TenantGatewayIdentity,
+        request_path: str,
+        conversation_id: str | None,
     ) -> Generator[bytes, None, None]:
         pending_event: str | None = None
         pending_data: list[str] = []
@@ -566,6 +711,26 @@ class GatewayService:
                     yield format_chat_chunk_sse(chunk)
             yield done_sse_chunk()
         finally:
+            usage = (
+                UsageAccounting(
+                    input_tokens=int(state.usage.get("prompt_tokens") or 0),
+                    output_tokens=int(state.usage.get("completion_tokens") or 0),
+                    total_tokens=int(state.usage.get("total_tokens") or 0),
+                    model=state.model or None,
+                    response_id=state.id,
+                )
+                if state.usage
+                else None
+            )
+            self._apply_usage_accounting(
+                identity=identity,
+                request_kind="chat_completions_stream",
+                request_path=request_path,
+                conversation_id=conversation_id,
+                upstream_status_code=upstream_response.status_code,
+                account_id=self._extract_response_account_id(upstream_response),
+                usage=usage,
+            )
             upstream_response.close()
             if client is not None:
                 client.close()
