@@ -21,6 +21,8 @@ check:
 		backend/app/api/routes/admin_nodes.py \
 		backend/app/api/routes/admin_api_keys.py \
 		backend/app/api/routes/admin_node_models.py \
+		backend/app/api/routes/admin_openai_oauth.py \
+		backend/app/api/routes/admin_upstream_accounts.py \
 		backend/app/core/errors.py \
 		backend/app/core/settings.py \
 		backend/app/db/base.py \
@@ -30,12 +32,18 @@ check:
 		backend/app/models/api_key.py \
 		backend/app/models/node.py \
 		backend/app/models/node_model.py \
+		backend/app/models/oauth_session.py \
+		backend/app/models/upstream_account.py \
+		backend/app/services/openai_oauth.py \
 		backend/app/schemas/tenant.py \
 		backend/app/schemas/node.py \
 		backend/app/schemas/api_key.py \
 		backend/app/schemas/node_model.py \
 		backend/app/schemas/common.py \
+		backend/app/schemas/openai_oauth.py \
 		backend/app/schemas/pagination.py \
 		backend/app/schemas/error.py \
+		backend/app/schemas/upstream_account.py \
 		backend/alembic/env.py \
-		backend/alembic/versions/20260511_0001_initial_schema.py
+		backend/alembic/versions/20260511_0001_initial_schema.py \
+		backend/alembic/versions/20260512_0002_oauth_upstream_accounts.py

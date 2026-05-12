@@ -32,3 +32,6 @@
 - FastAPI 请求校验错误与未处理异常统一映射到 `{ "error": { "code", "message" } }` 结构，避免默认 HTML 或原始校验数组直接泄漏给前端
 - 前端资源页不再只依赖总览聚合接口，分页列表改为按资源直接读取对应 admin 接口；总览接口继续保留给首页卡片使用
 - 前端写操作先采用行内对话框模式承接编辑与删除，避免打断现有页面结构，同时让管理面尽快具备真实操作闭环
+- `OpenAI OAuth / Codex` 上游接入模式参考 `sub2api`：先在后端完成 `OAuth PKCE` 和 token 托管，再由租户消费平台自己的 API Key，而不是让终端用户直接持有上游凭证
+- 因为 `OpenTruck` 是多租户产品，`OAuth session` 与 `upstream account` 都必须带 `tenant_id`，避免不同租户之间复用或误用同一组 Codex 凭证
+- 上游账号首版单独建 `upstream_accounts` 资源，不直接复用 `nodes`；`nodes` 代表基础转发节点，`upstream_accounts` 代表可被调度的真实上游身份

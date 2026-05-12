@@ -23,6 +23,18 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
 - `frontend/` reads admin data from `BACKEND_BASE_URL`
 - default fallback is `http://127.0.0.1:8000`
 
+## OpenAI OAuth Control Plane
+
+- backend now includes a first-pass multi-tenant OpenAI OAuth account flow inspired by `sub2api`
+- new admin endpoints:
+  - `POST /admin/openai/oauth/auth-url`
+  - `POST /admin/openai/oauth/exchange-code`
+  - `POST /admin/openai/oauth/create-account`
+  - `POST /admin/openai/oauth/refresh-token`
+  - `GET/POST/PATCH/DELETE /admin/upstream-accounts`
+  - `POST /admin/upstream-accounts/{id}/refresh`
+- OAuth sessions and upstream credentials are tenant-scoped so future gateway routing can pick accounts from a tenant-isolated pool
+
 ## Frontend Notes
 
 - frontend uses `shadcn/ui`-style component primitives

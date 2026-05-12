@@ -41,6 +41,11 @@
 - 已为四类资源页补齐基础筛选条、分页控件、编辑对话框与删除确认对话框
 - 已将前端状态词从 `paused` 对齐为后端实际使用的 `disabled`
 - 已在干净的 `next start` 实例上用浏览器验证 `/en/tenants` 编辑弹窗可打开，`/en/models` 创建区与行操作可正常渲染
+- 已参考 `sub2api` 落地首版 `OpenAI OAuth / Codex` 上游账号接入链路
+- 已新增多租户 `oauth_sessions` 与 `upstream_accounts` 两张表
+- 已新增 `OpenAI OAuth PKCE` 授权链接生成、授权码换 token、OAuth 账号落库与 refresh token 接口
+- 已用本地 Docker PostgreSQL 成功执行 `20260512_0002_oauth_upstream_accounts` 迁移
+- 已用 FastAPI `TestClient + mock token exchange` 验证 `auth-url -> create-account -> list -> refresh` 主链路
 
 ## 已知问题
 
@@ -48,10 +53,11 @@
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
+- 网关执行层尚未真正消费 `upstream_accounts`，目前只完成了 `sub2api` 式上游接入与管理面基础链路
 
 ## 下一步
 
-1. 为前端资源页补排序切换、更多筛选维度与详情操作
-2. 为首页与资源页补更准确的聚合统计接口，避免摘要只基于当前页数据
-3. 为列表接口补充更细的资源级筛选与排序白名单文档
+1. 新增真正的网关执行层，从 `upstream_accounts` 中选择 `OpenAI OAuth` 账号并转发到 `chatgpt.com/backend-api/codex/responses`
+2. 为租户 API Key 增加鉴权中间件和租户隔离，让对外 API 可按租户选取上游账号池
+3. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
 4. 将数据库连接与健康探测接入更完整的 FastAPI 生命周期管理

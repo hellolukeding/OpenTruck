@@ -6,7 +6,9 @@ from fastapi.responses import JSONResponse
 from app.api.routes.admin_api_keys import router as admin_api_keys_router
 from app.api.routes.admin_node_models import router as admin_node_models_router
 from app.api.routes.admin_nodes import router as admin_nodes_router
+from app.api.routes.admin_openai_oauth import router as admin_openai_oauth_router
 from app.api.routes.admin_tenants import router as admin_tenants_router
+from app.api.routes.admin_upstream_accounts import router as admin_upstream_accounts_router
 from app.api.routes.health import router as health_router
 from app.api.routes.models import router as models_router
 
@@ -18,6 +20,8 @@ app.include_router(admin_tenants_router, prefix="/admin")
 app.include_router(admin_nodes_router, prefix="/admin")
 app.include_router(admin_api_keys_router, prefix="/admin")
 app.include_router(admin_node_models_router, prefix="/admin")
+app.include_router(admin_openai_oauth_router, prefix="/admin")
+app.include_router(admin_upstream_accounts_router, prefix="/admin")
 
 
 @app.exception_handler(HTTPException)

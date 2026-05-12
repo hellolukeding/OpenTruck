@@ -7,7 +7,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.core.settings import settings
 from app.db.base import Base
-from app.models import api_key, node, node_model, tenant
+from app.models import api_key, node, node_model, oauth_session, tenant, upstream_account
 
 config = context.config
 
