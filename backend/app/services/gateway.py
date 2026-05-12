@@ -116,6 +116,42 @@ class GatewayService:
         request_headers = list(request_headers)
         self._ensure_tenant_quota_available(identity.tenant_id)
         upstream_url = self._build_upstream_url(subpath=subpath)
+        if self._request_body_is_streaming(body):
+            upstream_response = self._stream_with_failover(
+                tenant_id=identity.tenant_id,
+                request_headers=request_headers,
+                upstream_url=upstream_url,
+                body=body,
+            )
+            if upstream_response.status_code >= 400:
+                body_bytes = upstream_response.read()
+                response_headers = self._build_response_headers(upstream_response.headers)
+                content_type = upstream_response.headers.get("content-type", "application/json")
+                account_id = getattr(upstream_response, "_opentruck_account_id", None)
+                upstream_response.close()
+                if account_id is not None:
+                    self._release_account_slot_by_id(account_id)
+                return Response(
+                    content=body_bytes,
+                    status_code=upstream_response.status_code,
+                    media_type=content_type.split(";")[0],
+                    headers=response_headers,
+                )
+
+            response_headers = self._build_response_headers(upstream_response.headers)
+            response_headers["content-type"] = "text/event-stream"
+            response_headers["cache-control"] = "no-cache"
+            return StreamingResponse(
+                self._responses_stream_generator(
+                    upstream_response=upstream_response,
+                    identity=identity,
+                    request_path=request_path,
+                    conversation_id=self._resolve_conversation_id(request_headers),
+                ),
+                media_type="text/event-stream",
+                headers=response_headers,
+            )
+
         upstream_response = self._forward_with_failover(
             tenant_id=identity.tenant_id,
             request_headers=request_headers,
@@ -276,6 +312,13 @@ class GatewayService:
                 headers[name] = value
         return headers
 
+    def _request_body_is_streaming(self, body: bytes) -> bool:
+        try:
+            payload = json.loads(body)
+        except (TypeError, ValueError):
+            return False
+        return isinstance(payload, dict) and bool(payload.get("stream"))
+
     def _ensure_tenant_quota_available(self, tenant_id: uuid.UUID) -> None:
         tenant = self.db.get(Tenant, tenant_id)
         if tenant is None or tenant.status != "active":
@@ -313,6 +356,14 @@ class GatewayService:
             model=payload.get("model") if isinstance(payload.get("model"), str) else None,
             response_id=payload.get("id") if isinstance(payload.get("id"), str) else None,
         )
+
+    def _extract_usage_from_stream_event(self, event_type: str, payload: dict[str, Any]) -> UsageAccounting | None:
+        if event_type not in {"response.completed", "response.done", "response.incomplete", "response.failed"}:
+            return None
+        response = payload.get("response")
+        if not isinstance(response, dict):
+            return None
+        return self._extract_usage_from_payload(response)
 
     def _resolve_conversation_id(self, request_headers: Iterable[tuple[str, str]]) -> str | None:
         header_map = {name.lower(): value for name, value in request_headers}
@@ -736,6 +787,79 @@ class GatewayService:
                 client.close()
             if account_id is not None:
                 self._release_account_slot_by_id(account_id)
+
+    def _responses_stream_generator(
+        self,
+        *,
+        upstream_response: httpx.Response,
+        identity: TenantGatewayIdentity,
+        request_path: str,
+        conversation_id: str | None,
+    ) -> Generator[bytes, None, None]:
+        pending_event: str | None = None
+        pending_data: list[str] = []
+        usage: UsageAccounting | None = None
+        client = getattr(upstream_response, "_client", None)
+        account_id = getattr(upstream_response, "_opentruck_account_id", None)
+        try:
+            for line in upstream_response.iter_lines():
+                if line is None:
+                    continue
+                if line.startswith("event:"):
+                    pending_event = line.partition(":")[2].strip()
+                elif line.startswith("data:"):
+                    pending_data.append(line.partition(":")[2].lstrip())
+                elif line == "":
+                    usage = self._merge_stream_usage(
+                        current=usage,
+                        event_type=pending_event,
+                        pending_data=pending_data,
+                    )
+                    pending_event = None
+                    pending_data = []
+                yield f"{line}\n".encode("utf-8")
+
+            if pending_event or pending_data:
+                usage = self._merge_stream_usage(
+                    current=usage,
+                    event_type=pending_event,
+                    pending_data=pending_data,
+                )
+        finally:
+            self._apply_usage_accounting(
+                identity=identity,
+                request_kind="responses_stream",
+                request_path=request_path,
+                conversation_id=conversation_id,
+                upstream_status_code=upstream_response.status_code,
+                account_id=self._extract_response_account_id(upstream_response),
+                usage=usage,
+            )
+            upstream_response.close()
+            if client is not None:
+                client.close()
+            if account_id is not None:
+                self._release_account_slot_by_id(account_id)
+
+    def _merge_stream_usage(
+        self,
+        *,
+        current: UsageAccounting | None,
+        event_type: str | None,
+        pending_data: list[str],
+    ) -> UsageAccounting | None:
+        if not pending_data:
+            return current
+        raw_data = "\n".join(pending_data).strip()
+        if not raw_data or raw_data == "[DONE]":
+            return current
+        try:
+            payload = json.loads(raw_data)
+        except json.JSONDecodeError:
+            return current
+        if not isinstance(payload, dict):
+            return current
+        return self._extract_usage_from_stream_event(event_type or "", payload) or current
 
     def _flush_sse_event(
         self,

@@ -36,6 +36,7 @@
 - 因为 `OpenTruck` 是多租户产品，`OAuth session` 与 `upstream account` 都必须带 `tenant_id`，避免不同租户之间复用或误用同一组 Codex 凭证
 - 上游账号首版单独建 `upstream_accounts` 资源，不直接复用 `nodes`；`nodes` 代表基础转发节点，`upstream_accounts` 代表可被调度的真实上游身份
 - 对外网关首版先只做 `responses` / `codex responses` 主链路，并以租户自己的 API Key 作为统一入口；`chat/completions` 等其它协议待后续通过适配层继续补齐
+- `responses` 主链路需要同时覆盖非流式与 SSE 流式透传；流式场景优先保留上游事件原样输出，usage 则在 `response.completed/done` 一类事件落账，避免为了记账破坏原始协议
 - 上游账号调度继续沿 `sub2api` 的方向演进：当前版本已补 `priority`、`last_used_at`、`consecutive_failures`、`cooldown_until`，并会在转发前跳过过期账号、对 `429/5xx/网络错误` 做冷却摘除、对 `401/403` 做禁用处理；同时已基于 `conversation_id/session_id` 引入首版会话粘性，并加入首版进程内并发槽位控制，优先保证同一对话稳定命中同一上游账号、同一账号不会被无限并发打穿，后续再升级到更完整的分布式并发与负载均衡
 - 租户配额首版直接挂在网关成功响应上：当前按 `usage.total_tokens` 和 `GATEWAY_QUOTA_COST_PER_1K_TOKENS` 计算扣减额度，并写入 `gateway_usage_ledger`；余额为 `0` 或以下时在网关入口直接拦截，后续再升级到按模型/账号定价、失败请求记账和更完整的账务策略
 - `chat/completions` 的兼容策略采用 `Chat Completions -> Responses -> Chat Completions` 的翻译模式，与 `sub2api` 保持同方向；当前已支持首版 SSE 流式转换，但仍按“小步覆盖事件类型”的策略逐步补齐

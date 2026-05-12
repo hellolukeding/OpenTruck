@@ -50,6 +50,8 @@
 - 已新增首版网关执行层，可将 `/v1/responses`、`/responses` 与 `/backend-api/codex/responses` 转发到租户自己的 `OpenAI OAuth` 上游账号
 - 已将 `/v1/models` 接入租户 API Key 鉴权，并返回当前租户可见的基础模型信息
 - 已用 `TestClient + external httpx mock` 验证 `Bearer API Key -> tenant -> upstream account -> Codex responses` 真实转发链路
+- 已为 `/v1/responses` 与 `/responses` 接入首版 SSE 流式透传，可保留上游 Responses 事件原样下发
+- 已为 `responses` 流式链路补 usage 记账和租户配额扣减，完成 `response.completed` 后会写入 `gateway_usage_ledger`
 - 已新增首版 `chat/completions -> responses` 协议兼容层，并接入租户 OAuth 网关
 - 已支持 `/v1/chat/completions` 与 `/chat/completions` 的非流式文本回复和 tool calls 回复
 - 已用 `TestClient + external httpx mock` 验证 Chat Completions 请求转换、上游转发和响应逆向转换
@@ -76,6 +78,7 @@
 - 已为 `/v1/responses` 与 `/v1/chat/completions` 接入首版租户级配额联动：成功请求后按 usage 扣减 `quota_balance`
 - 已支持在租户 `quota_balance <= 0` 时于网关入口直接返回 `402 insufficient_quota`，避免继续打上游消耗账号池
 - 已通过真实 gateway 冒烟验证 `responses` 与 `chat/completions` 两条链路的“成功扣减余额 + 写 usage ledger + 余额耗尽拦截”行为
+- 已通过真实 gateway 冒烟验证 `responses stream` 链路的“SSE 透传 + usage 记账 + 余额扣减”行为
 - 已新增前端 `upstream_accounts` 资源页，支持分页读取、调度字段展示与租户映射
 - 已新增前端 OAuth 接入台，支持生成 OpenAI OAuth 授权链接与手动完成账号落库
 - 已为 `upstream_accounts` 资源页补齐编辑、refresh、删除操作入口
@@ -99,13 +102,14 @@
 - 其余前端资源页仍缺更完整的排序切换、更多筛选维度与详情面板；当前这类增强已优先补到 `upstream_accounts`
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
 - `chat/completions` 流式兼容层已覆盖更多 done 事件与回填逻辑，但后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
+- `responses` 流式主链路已经可透传并做 usage 记账，但后续仍需要补更完整的流式失败记账、断流恢复和更细的事件观测
 - 上游账号调度已补到首版优先级、故障摘除、会话粘性、进程内并发占位与基础租户配额扣减，但仍缺跨进程/分布式并发协调、按模型或账号的精细计费、失败请求记账策略与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
 
 ## 下一步
 
-1. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
+1. 为流式兼容层与 `responses stream` 主链路补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体、错误事件与断流处理
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略、失败请求记账与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
