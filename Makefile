@@ -34,6 +34,7 @@ check:
 		backend/app/schemas/node.py \
 		backend/app/schemas/api_key.py \
 		backend/app/schemas/node_model.py \
+		backend/app/schemas/pagination.py \
 		backend/app/schemas/error.py \
 		backend/alembic/env.py \
 		backend/alembic/versions/20260511_0001_initial_schema.py

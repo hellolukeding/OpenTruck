@@ -2,25 +2,59 @@ from __future__ import annotations
 
 import hashlib
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.api.utils import apply_updates, commit_or_409
+from app.api.utils import apply_updates, build_search_filter, commit_or_409, paginate, resolve_sort
 from app.core.errors import not_found
 from app.models.api_key import ApiKey
 from app.models.tenant import Tenant
 from app.schemas.api_key import ApiKeyCreate, ApiKeyRead, ApiKeyUpdate
 from app.schemas.error import ErrorResponse
+from app.schemas.pagination import PaginatedResponse
 
 
 router = APIRouter(prefix="/api-keys", tags=["admin-api-keys"])
 
 
-@router.get("", response_model=list[ApiKeyRead])
-def list_api_keys(db: Session = Depends(get_db)) -> list[ApiKey]:
-    return list(db.scalars(select(ApiKey).order_by(ApiKey.created_at.desc())).all())
+@router.get("", response_model=PaginatedResponse[ApiKeyRead])
+def list_api_keys(
+    tenant_id: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+    search: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    sort_by: str = Query(default="created_at"),
+    sort_order: str = Query(default="desc"),
+    db: Session = Depends(get_db),
+) -> PaginatedResponse[ApiKeyRead]:
+    statement = select(ApiKey)
+
+    if tenant_id:
+        statement = statement.where(ApiKey.tenant_id == tenant_id)
+    if status:
+        statement = statement.where(ApiKey.status == status)
+
+    search_filter = build_search_filter(search, ApiKey.name, ApiKey.key_hash)
+    if search_filter is not None:
+        statement = statement.where(search_filter)
+
+    statement = statement.order_by(
+        resolve_sort(
+            sort_by,
+            sort_order,
+            {
+                "name": ApiKey.name,
+                "status": ApiKey.status,
+                "last_used_at": ApiKey.last_used_at,
+                "created_at": ApiKey.created_at,
+                "updated_at": ApiKey.updated_at,
+            },
+        ),
+    )
+    return paginate(db, statement, page=page, page_size=page_size)
 
 
 @router.post("", response_model=ApiKeyRead, status_code=status.HTTP_201_CREATED)

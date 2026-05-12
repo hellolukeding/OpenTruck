@@ -26,3 +26,5 @@
 - 前端默认提供 `en` 与 `zh-CN` 两种语言
 - 前端视觉方向切为接近 OpenAI 的黑白中性色，而不是暖色运营风
 - 前端包管理与本地运行链路统一使用 `pnpm`
+- admin 列表接口的查询约定参考 `sub2api`，统一采用 `page`、`page_size`、`sort_by`、`sort_order`，并按资源补充 `status`、`search` 等筛选参数
+- admin 列表接口的返回结构统一为 `{ items, pagination }`，前端数据层暂时保持对旧数组返回的兼容读取

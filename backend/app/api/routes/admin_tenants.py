@@ -1,23 +1,54 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.api.utils import apply_updates, commit_or_409
+from app.api.utils import apply_updates, build_search_filter, commit_or_409, paginate, resolve_sort
 from app.core.errors import not_found
 from app.models.tenant import Tenant
 from app.schemas.error import ErrorResponse
+from app.schemas.pagination import PaginatedResponse
 from app.schemas.tenant import TenantCreate, TenantRead, TenantUpdate
 
 
 router = APIRouter(prefix="/tenants", tags=["admin-tenants"])
 
 
-@router.get("", response_model=list[TenantRead])
-def list_tenants(db: Session = Depends(get_db)) -> list[Tenant]:
-    return list(db.scalars(select(Tenant).order_by(Tenant.created_at.desc())).all())
+@router.get("", response_model=PaginatedResponse[TenantRead])
+def list_tenants(
+    status: str | None = Query(default=None),
+    search: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    sort_by: str = Query(default="created_at"),
+    sort_order: str = Query(default="desc"),
+    db: Session = Depends(get_db),
+) -> PaginatedResponse[TenantRead]:
+    statement = select(Tenant)
+
+    if status:
+        statement = statement.where(Tenant.status == status)
+
+    search_filter = build_search_filter(search, Tenant.name)
+    if search_filter is not None:
+        statement = statement.where(search_filter)
+
+    statement = statement.order_by(
+        resolve_sort(
+            sort_by,
+            sort_order,
+            {
+                "name": Tenant.name,
+                "status": Tenant.status,
+                "quota_balance": Tenant.quota_balance,
+                "created_at": Tenant.created_at,
+                "updated_at": Tenant.updated_at,
+            },
+        ),
+    )
+    return paginate(db, statement, page=page, page_size=page_size)
 
 
 @router.post("", response_model=TenantRead, status_code=status.HTTP_201_CREATED)

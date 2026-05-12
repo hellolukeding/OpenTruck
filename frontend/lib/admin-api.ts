@@ -62,6 +62,16 @@ export type AdminOverview = {
 const BACKEND_BASE_URL =
   process.env.BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
 
+type PaginatedResponse<T> = {
+  items: T[];
+  pagination: {
+    total: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+  };
+};
+
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(`${BACKEND_BASE_URL}${path}`, {
     cache: "no-store",
@@ -74,20 +84,27 @@ async function fetchJson<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+function unwrapList<T>(payload: T[] | PaginatedResponse<T>): T[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  return payload.items;
+}
+
 export async function getAdminOverview(): Promise<AdminOverview> {
   try {
-    const [tenants, nodes, apiKeys, nodeModels] = await Promise.all([
-      fetchJson<Tenant[]>("/admin/tenants"),
-      fetchJson<Node[]>("/admin/nodes"),
-      fetchJson<ApiKey[]>("/admin/api-keys"),
-      fetchJson<NodeModel[]>("/admin/node-models"),
+    const [tenantsPayload, nodesPayload, apiKeysPayload, nodeModelsPayload] = await Promise.all([
+      fetchJson<Tenant[] | PaginatedResponse<Tenant>>("/admin/tenants"),
+      fetchJson<Node[] | PaginatedResponse<Node>>("/admin/nodes"),
+      fetchJson<ApiKey[] | PaginatedResponse<ApiKey>>("/admin/api-keys"),
+      fetchJson<NodeModel[] | PaginatedResponse<NodeModel>>("/admin/node-models"),
     ]);
 
     return {
-      tenants,
-      nodes,
-      apiKeys,
-      nodeModels,
+      tenants: unwrapList(tenantsPayload),
+      nodes: unwrapList(nodesPayload),
+      apiKeys: unwrapList(apiKeysPayload),
+      nodeModels: unwrapList(nodeModelsPayload),
       backendReachable: true,
       backendUrl: BACKEND_BASE_URL,
     };

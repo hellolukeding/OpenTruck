@@ -22,3 +22,11 @@ def conflict(resource: str, field: str) -> APIError:
         code=f"{resource.lower().replace(' ', '_')}_conflict",
         message=f"{resource} with this {field} already exists",
     )
+
+
+def bad_request(code: str, message: str) -> APIError:
+    return APIError(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        code=code,
+        message=message,
+    )
