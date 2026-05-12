@@ -55,6 +55,10 @@
 - 已用 `TestClient + external httpx mock` 验证 Chat Completions 请求转换、上游转发和响应逆向转换
 - 已支持 `chat/completions` 的首版 SSE 流式转换，可将 Responses SSE 事件翻译为 Chat Completions SSE
 - 已用 `TestClient + mock upstream stream response` 验证 `response.created / output_text.delta / completed` 到 `chat.completion.chunk` 的流式转换
+- 已为 `chat/completions` 流式兼容层补充更多 Responses 事件覆盖：`response.output_item.done`、`response.function_call_arguments.done`、`response.reasoning_summary_text.done`
+- 已修正流式工具参数映射逻辑，未匹配到 `output_index` 时不再错误写入默认工具槽位
+- 已支持在缺少 delta 事件时，从 `message/function_call/reasoning` 的 done 事件回填 Chat Completions chunk
+- 已用 mocked upstream SSE 验证 `reasoning done -> function_call done -> completed` 的整条 `/v1/chat/completions` 流式网关链路
 - 已为 `upstream_accounts` 增加调度字段：`priority`、`last_used_at`、`last_error_at`、`last_error_code`、`consecutive_failures`、`cooldown_until`
 - 已将租户内上游选择策略升级为“优先级 + 最久未使用”排序，并在转发前跳过冷却中的账号
 - 已接入上游 token 过期自动禁用、`429/5xx/网络错误` 冷却摘除，以及 `401/403` 禁用处理
@@ -79,7 +83,7 @@
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板；`upstream_accounts` 目前也还没有单独的详情视图
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
-- `chat/completions` 流式兼容层目前只覆盖首批常见 Responses 事件，后续还需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
+- `chat/completions` 流式兼容层已覆盖更多 done 事件与回填逻辑，但后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
 - 上游账号调度已补到首版优先级与故障摘除，但仍缺粘性会话、并发占位、租户级配额联动与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果

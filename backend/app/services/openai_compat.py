@@ -135,10 +135,13 @@ class ChatCompletionsStreamState:
     created: int = field(default_factory=lambda: int(time.time()))
     model: str = ""
     sent_role: bool = False
+    saw_text: bool = False
+    saw_reasoning: bool = False
     saw_tool_call: bool = False
     finalized: bool = False
     next_tool_call_index: int = 0
     output_index_to_tool_index: dict[int, int] = field(default_factory=dict)
+    output_indices_with_tool_args: set[int] = field(default_factory=set)
     include_usage: bool = False
     usage: dict[str, Any] | None = None
 
@@ -164,6 +167,7 @@ def responses_event_to_chat_chunks(
         delta = event_payload.get("delta")
         if not isinstance(delta, str) or not delta:
             return []
+        state.saw_text = True
         if not state.sent_role:
             state.sent_role = True
             return [
@@ -176,6 +180,7 @@ def responses_event_to_chat_chunks(
         delta = event_payload.get("delta")
         if not isinstance(delta, str) or not delta:
             return []
+        state.saw_reasoning = True
         if not state.sent_role:
             state.sent_role = True
             return [
@@ -186,36 +191,26 @@ def responses_event_to_chat_chunks(
 
     if event_type == "response.output_item.added":
         item = event_payload.get("item") or {}
-        if item.get("type") != "function_call":
-            return []
-        state.saw_tool_call = True
-        tool_index = state.next_tool_call_index
-        state.output_index_to_tool_index[int(event_payload.get("output_index") or 0)] = tool_index
-        state.next_tool_call_index += 1
-        return [
-            _make_chat_delta_chunk(
+        item_type = item.get("type")
+        if item_type == "function_call":
+            return _handle_function_call_item(
+                item=item,
+                output_index=int(event_payload.get("output_index") or 0),
                 state=state,
-                delta={
-                    "tool_calls": [
-                        {
-                            "index": tool_index,
-                            "id": item.get("call_id"),
-                            "type": "function",
-                            "function": {
-                                "name": item.get("name", ""),
-                            },
-                        }
-                    ]
-                },
             )
-        ]
+        if item_type == "message":
+            return _handle_message_output_item(item=item, state=state)
+        return []
 
     if event_type == "response.function_call_arguments.delta":
         delta = event_payload.get("delta")
         if not isinstance(delta, str) or not delta:
             return []
         output_index = int(event_payload.get("output_index") or 0)
-        tool_index = state.output_index_to_tool_index.get(output_index, 0)
+        tool_index = state.output_index_to_tool_index.get(output_index)
+        if tool_index is None:
+            return []
+        state.output_indices_with_tool_args.add(output_index)
         return [
             _make_chat_delta_chunk(
                 state=state,
@@ -231,6 +226,59 @@ def responses_event_to_chat_chunks(
                 },
             )
         ]
+
+    if event_type == "response.function_call_arguments.done":
+        output_index = int(event_payload.get("output_index") or 0)
+        arguments = event_payload.get("arguments")
+        if not isinstance(arguments, str) or not arguments:
+            return []
+        if output_index in state.output_indices_with_tool_args:
+            return []
+        tool_index = state.output_index_to_tool_index.get(output_index)
+        if tool_index is None:
+            return []
+        state.output_indices_with_tool_args.add(output_index)
+        return [
+            _make_chat_delta_chunk(
+                state=state,
+                delta={
+                    "tool_calls": [
+                        {
+                            "index": tool_index,
+                            "function": {
+                                "arguments": arguments,
+                            },
+                        }
+                    ]
+                },
+            )
+        ]
+
+    if event_type == "response.reasoning_summary_text.done":
+        text = event_payload.get("text")
+        if not isinstance(text, str) or not text or state.saw_reasoning:
+            return []
+        state.saw_reasoning = True
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"reasoning_content": text}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"reasoning_content": text})]
+
+    if event_type == "response.output_item.done":
+        item = event_payload.get("item") or {}
+        if item.get("type") == "function_call":
+            return _handle_function_call_item(
+                item=item,
+                output_index=int(event_payload.get("output_index") or 0),
+                state=state,
+                include_arguments_when_missing=True,
+            )
+        if item.get("type") == "message" and not state.saw_text:
+            return _handle_message_output_item(item=item, state=state)
+        return []
 
     if event_type in {"response.completed", "response.done", "response.incomplete", "response.failed"}:
         response = event_payload.get("response") or {}
@@ -446,3 +494,81 @@ def _make_chat_delta_chunk(*, state: ChatCompletionsStreamState, delta: dict[str
             }
         ],
     }
+
+
+def _handle_function_call_item(
+    *,
+    item: dict[str, Any],
+    output_index: int,
+    state: ChatCompletionsStreamState,
+    include_arguments_when_missing: bool = False,
+) -> list[dict[str, Any]]:
+    tool_index = state.output_index_to_tool_index.get(output_index)
+    chunks: list[dict[str, Any]] = []
+
+    if tool_index is None:
+        state.saw_tool_call = True
+        tool_index = state.next_tool_call_index
+        state.output_index_to_tool_index[output_index] = tool_index
+        state.next_tool_call_index += 1
+        chunks.append(
+            _make_chat_delta_chunk(
+                state=state,
+                delta={
+                    "tool_calls": [
+                        {
+                            "index": tool_index,
+                            "id": item.get("call_id"),
+                            "type": "function",
+                            "function": {
+                                "name": item.get("name", ""),
+                            },
+                        }
+                    ]
+                },
+            )
+        )
+
+    arguments = item.get("arguments")
+    if include_arguments_when_missing and isinstance(arguments, str) and arguments and output_index not in state.output_indices_with_tool_args:
+        state.output_indices_with_tool_args.add(output_index)
+        chunks.append(
+            _make_chat_delta_chunk(
+                state=state,
+                delta={
+                    "tool_calls": [
+                        {
+                            "index": tool_index,
+                            "function": {
+                                "arguments": arguments,
+                            },
+                        }
+                    ]
+                },
+            )
+        )
+
+    return chunks
+
+
+def _handle_message_output_item(*, item: dict[str, Any], state: ChatCompletionsStreamState) -> list[dict[str, Any]]:
+    content_parts = item.get("content")
+    if not isinstance(content_parts, list):
+        return []
+
+    text = "".join(
+        part.get("text", "")
+        for part in content_parts
+        if isinstance(part, dict) and part.get("type") == "output_text" and isinstance(part.get("text"), str)
+    )
+    if not text:
+        return []
+
+    state.saw_text = True
+    if not state.sent_role:
+        state.sent_role = True
+        return [
+            _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+            _make_chat_delta_chunk(state=state, delta={"content": text}),
+        ]
+    return [_make_chat_delta_chunk(state=state, delta={"content": text})]
