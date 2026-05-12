@@ -52,9 +52,13 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - resolve tenant from the platform API key
   - prefer lower-priority and least-recently-used `openai/oauth` upstream accounts within that tenant
   - keep requests sticky to the same upstream account when `conversation_id` or `session_id` is present
+  - apply a first-pass per-account parallel request limit before choosing an upstream
   - automatically disable expired upstream tokens before routing
   - place retryable upstream failures into cooldown and fail over to the next usable account when possible
   - forward the request to `chatgpt.com/backend-api/codex/responses`
+- per-account parallel limits:
+  - default limit comes from `GATEWAY_UPSTREAM_DEFAULT_MAX_PARALLEL_REQUESTS`
+  - override per account with `upstream_account.extra.max_parallel_requests`
 - current Chat Completions behavior:
   - non-streaming requests are translated to Responses API shape and translated back on the way out
   - streaming requests are translated to Responses SSE and converted back to Chat Completions SSE

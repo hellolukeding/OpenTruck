@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     gateway_upstream_timeout_seconds: float = 120.0
     gateway_upstream_failure_threshold: int = 3
     gateway_upstream_cooldown_seconds: int = 90
+    gateway_upstream_default_max_parallel_requests: int = 4
     openai_codex_base_url: str = "https://chatgpt.com/backend-api/codex/responses"
 
     postgres_host: str = "localhost"

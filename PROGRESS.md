@@ -65,9 +65,13 @@
 - 已在非流式与流式转发入口接入首版 failover，可在首个账号不可用时尝试下一个可用租户账号
 - 已为网关接入首版会话粘性调度：带 `conversation_id/session_id` 的请求会稳定命中同一租户上游账号
 - 已采用按优先级分组的稳定 hash 排序做粘性选择，并在账号失效时自然回退到下一个可用账号
+- 已为上游账号接入首版进程内并发槽位控制，支持按账号限制并发请求数
+- 已支持通过 `upstream_account.extra.max_parallel_requests` 覆盖单账号并发上限，默认回退到全局配置
+- 已在账号并发已满时自动切换到下一个可用账号，而不是继续挤占同一上游
 - 已用真实 Alembic 迁移执行 `20260512_0003_upstream_account_scheduling`
 - 已用 `TestClient + external httpx mock` 验证“过期账号自动禁用 -> 限流账号进入冷却 -> 下一健康账号接管请求”的主链路
 - 已用真实 gateway 请求验证同一 `conversation_id` 会持续命中同一上游账号
+- 已用真实 gateway 请求验证账号 A 并发占满时，请求会自动 failover 到账号 B
 - 已新增前端 `upstream_accounts` 资源页，支持分页读取、调度字段展示与租户映射
 - 已新增前端 OAuth 接入台，支持生成 OpenAI OAuth 授权链接与手动完成账号落库
 - 已为 `upstream_accounts` 资源页补齐编辑、refresh、删除操作入口
@@ -87,13 +91,13 @@
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板；`upstream_accounts` 目前也还没有单独的详情视图
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
 - `chat/completions` 流式兼容层已覆盖更多 done 事件与回填逻辑，但后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
-- 上游账号调度已补到首版优先级、故障摘除与会话粘性，但仍缺并发占位、租户级配额联动与更细的负载均衡策略
+- 上游账号调度已补到首版优先级、故障摘除、会话粘性与进程内并发占位，但仍缺跨进程/分布式并发协调、租户级配额联动与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
 
 ## 下一步
 
 1. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
-2. 继续把上游账号调度往 `sub2api` 方向推进，补并发占位、租户级配额联动与更细的故障恢复策略
+2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、租户级配额联动与更细的故障恢复策略
 3. 为 `upstream_accounts` 页面补更多筛选维度、排序切换与详情视图
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证

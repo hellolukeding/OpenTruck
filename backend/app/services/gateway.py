@@ -6,6 +6,7 @@ import uuid
 from collections.abc import Generator, Iterable
 from dataclasses import dataclass
 from datetime import timedelta
+from threading import Lock
 
 import httpx
 from fastapi import Response
@@ -59,6 +60,9 @@ class TenantGatewayIdentity:
 
 
 class GatewayService:
+    _account_slot_lock = Lock()
+    _account_active_requests: dict[str, int] = {}
+
     def __init__(self, db: Session) -> None:
         self.db = db
 
@@ -139,7 +143,10 @@ class GatewayService:
                 body_bytes = upstream_response.read()
                 response_headers = self._build_response_headers(upstream_response.headers)
                 content_type = upstream_response.headers.get("content-type", "application/json")
+                account_id = getattr(upstream_response, "_opentruck_account_id", None)
                 upstream_response.close()
+                if account_id is not None:
+                    self._release_account_slot_by_id(account_id)
                 return Response(
                     content=body_bytes,
                     status_code=upstream_response.status_code,
@@ -264,7 +271,11 @@ class GatewayService:
     ) -> httpx.Response:
         last_error: APIError | None = None
         sticky_key = self._resolve_sticky_key(request_headers)
+        saw_concurrency_exhausted = False
         for account in self._order_accounts_for_request(self.list_openai_oauth_accounts(tenant_id), sticky_key=sticky_key):
+            if not self._try_acquire_account_slot(account):
+                saw_concurrency_exhausted = True
+                continue
             headers = self._build_request_headers(
                 request_headers=request_headers,
                 access_token=(account.credentials or {}).get("access_token", ""),
@@ -272,12 +283,14 @@ class GatewayService:
             try:
                 upstream_response = self._post_upstream(upstream_url=upstream_url, headers=headers, body=body)
             except APIError as exc:
+                self._release_account_slot(account)
                 self._record_retryable_failure(account, code=exc.code)
                 self.db.commit()
                 last_error = exc
                 continue
 
             if self._is_auth_failure(upstream_response):
+                self._release_account_slot(account)
                 self._disable_account(account, code="upstream_auth_failed")
                 self.db.commit()
                 last_error = APIError(
@@ -288,6 +301,7 @@ class GatewayService:
                 continue
 
             if self._is_retryable_response(upstream_response):
+                self._release_account_slot(account)
                 self._record_retryable_failure(account, code=f"upstream_http_{upstream_response.status_code}")
                 self.db.commit()
                 last_error = APIError(
@@ -299,8 +313,17 @@ class GatewayService:
 
             self._record_success(account)
             self.db.commit()
-            return upstream_response
+            try:
+                return upstream_response
+            finally:
+                self._release_account_slot(account)
 
+        if saw_concurrency_exhausted and last_error is None:
+            raise APIError(
+                status_code=503,
+                code="upstream_concurrency_exhausted",
+                message="All usable upstream accounts are currently at their parallel request limit",
+            )
         raise last_error or APIError(
             status_code=503,
             code="no_usable_upstream_account",
@@ -317,7 +340,11 @@ class GatewayService:
     ) -> httpx.Response:
         last_error: APIError | None = None
         sticky_key = self._resolve_sticky_key(request_headers)
+        saw_concurrency_exhausted = False
         for account in self._order_accounts_for_request(self.list_openai_oauth_accounts(tenant_id), sticky_key=sticky_key):
+            if not self._try_acquire_account_slot(account):
+                saw_concurrency_exhausted = True
+                continue
             headers = self._build_request_headers(
                 request_headers=request_headers,
                 access_token=(account.credentials or {}).get("access_token", ""),
@@ -325,12 +352,14 @@ class GatewayService:
             try:
                 upstream_response = self._stream_upstream(upstream_url=upstream_url, headers=headers, body=body)
             except APIError as exc:
+                self._release_account_slot(account)
                 self._record_retryable_failure(account, code=exc.code)
                 self.db.commit()
                 last_error = exc
                 continue
 
             if self._is_auth_failure(upstream_response):
+                self._release_account_slot(account)
                 self._disable_account(account, code="upstream_auth_failed")
                 self.db.commit()
                 upstream_response.close()
@@ -342,6 +371,7 @@ class GatewayService:
                 continue
 
             if self._is_retryable_response(upstream_response):
+                self._release_account_slot(account)
                 self._record_retryable_failure(account, code=f"upstream_http_{upstream_response.status_code}")
                 self.db.commit()
                 upstream_response.close()
@@ -354,8 +384,15 @@ class GatewayService:
 
             self._record_success(account)
             self.db.commit()
+            upstream_response._opentruck_account_id = str(account.id)  # type: ignore[attr-defined]
             return upstream_response
 
+        if saw_concurrency_exhausted and last_error is None:
+            raise APIError(
+                status_code=503,
+                code="upstream_concurrency_exhausted",
+                message="All usable upstream accounts are currently at their parallel request limit",
+            )
         raise last_error or APIError(
             status_code=503,
             code="no_usable_upstream_account",
@@ -462,6 +499,32 @@ class GatewayService:
         raw = f"{sticky_key}:{account.id}".encode("utf-8")
         return int.from_bytes(hashlib.sha256(raw).digest()[:8], byteorder="big", signed=False)
 
+    def _account_slot_limit(self, account: UpstreamAccount) -> int:
+        value = (account.extra or {}).get("max_parallel_requests")
+        if isinstance(value, int) and value > 0:
+            return value
+        return settings.gateway_upstream_default_max_parallel_requests
+
+    def _try_acquire_account_slot(self, account: UpstreamAccount) -> bool:
+        account_id = str(account.id)
+        with self._account_slot_lock:
+            current = self._account_active_requests.get(account_id, 0)
+            if current >= self._account_slot_limit(account):
+                return False
+            self._account_active_requests[account_id] = current + 1
+            return True
+
+    def _release_account_slot(self, account: UpstreamAccount) -> None:
+        self._release_account_slot_by_id(str(account.id))
+
+    def _release_account_slot_by_id(self, account_id: str) -> None:
+        with self._account_slot_lock:
+            current = self._account_active_requests.get(account_id, 0)
+            if current <= 1:
+                self._account_active_requests.pop(account_id, None)
+            else:
+                self._account_active_requests[account_id] = current - 1
+
     def _chat_completions_stream_generator(
         self,
         *,
@@ -471,6 +534,7 @@ class GatewayService:
         pending_event: str | None = None
         pending_data: list[str] = []
         client = getattr(upstream_response, "_client", None)
+        account_id = getattr(upstream_response, "_opentruck_account_id", None)
         try:
             for line in upstream_response.iter_lines():
                 if line is None:
@@ -505,6 +569,8 @@ class GatewayService:
             upstream_response.close()
             if client is not None:
                 client.close()
+            if account_id is not None:
+                self._release_account_slot_by_id(account_id)
 
     def _flush_sse_event(
         self,
