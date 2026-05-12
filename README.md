@@ -51,6 +51,7 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
 - current routing behavior:
   - resolve tenant from the platform API key
   - prefer lower-priority and least-recently-used `openai/oauth` upstream accounts within that tenant
+  - keep requests sticky to the same upstream account when `conversation_id` or `session_id` is present
   - automatically disable expired upstream tokens before routing
   - place retryable upstream failures into cooldown and fail over to the next usable account when possible
   - forward the request to `chatgpt.com/backend-api/codex/responses`

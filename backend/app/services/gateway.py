@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from collections.abc import Generator, Iterable
@@ -94,6 +95,7 @@ class GatewayService:
         body: bytes,
         subpath: str = "",
     ) -> Response:
+        request_headers = list(request_headers)
         upstream_url = self._build_upstream_url(subpath=subpath)
         upstream_response = self._forward_with_failover(
             tenant_id=tenant_id,
@@ -119,6 +121,7 @@ class GatewayService:
         payload: dict,
         subpath: str = "",
     ) -> Response:
+        request_headers = list(request_headers)
         try:
             responses_payload = chat_completions_to_responses(payload)
         except ValueError as exc:
@@ -260,7 +263,8 @@ class GatewayService:
         body: bytes,
     ) -> httpx.Response:
         last_error: APIError | None = None
-        for account in self.list_openai_oauth_accounts(tenant_id):
+        sticky_key = self._resolve_sticky_key(request_headers)
+        for account in self._order_accounts_for_request(self.list_openai_oauth_accounts(tenant_id), sticky_key=sticky_key):
             headers = self._build_request_headers(
                 request_headers=request_headers,
                 access_token=(account.credentials or {}).get("access_token", ""),
@@ -312,7 +316,8 @@ class GatewayService:
         body: bytes,
     ) -> httpx.Response:
         last_error: APIError | None = None
-        for account in self.list_openai_oauth_accounts(tenant_id):
+        sticky_key = self._resolve_sticky_key(request_headers)
+        for account in self._order_accounts_for_request(self.list_openai_oauth_accounts(tenant_id), sticky_key=sticky_key):
             headers = self._build_request_headers(
                 request_headers=request_headers,
                 access_token=(account.credentials or {}).get("access_token", ""),
@@ -414,6 +419,48 @@ class GatewayService:
 
     def _is_retryable_response(self, response: httpx.Response) -> bool:
         return response.status_code == 429 or response.status_code >= 500
+
+    def _resolve_sticky_key(self, request_headers: Iterable[tuple[str, str]]) -> str | None:
+        header_map = {name.lower(): value for name, value in request_headers}
+        for key in ("conversation_id", "session_id"):
+            value = header_map.get(key)
+            if value and value.strip():
+                return f"{key}:{value.strip()}"
+        return None
+
+    def _order_accounts_for_request(
+        self,
+        accounts: list[UpstreamAccount],
+        *,
+        sticky_key: str | None,
+    ) -> list[UpstreamAccount]:
+        if not sticky_key or len(accounts) <= 1:
+            return accounts
+
+        grouped: dict[int, list[UpstreamAccount]] = {}
+        for account in accounts:
+            grouped.setdefault(account.priority, []).append(account)
+
+        ordered: list[UpstreamAccount] = []
+        for priority in sorted(grouped):
+            group = grouped[priority]
+            if len(group) == 1:
+                ordered.extend(group)
+                continue
+            ordered.extend(
+                sorted(
+                    group,
+                    key=lambda account: (
+                        -self._sticky_account_score(sticky_key=sticky_key, account=account),
+                        account.created_at,
+                    ),
+                )
+            )
+        return ordered
+
+    def _sticky_account_score(self, *, sticky_key: str, account: UpstreamAccount) -> int:
+        raw = f"{sticky_key}:{account.id}".encode("utf-8")
+        return int.from_bytes(hashlib.sha256(raw).digest()[:8], byteorder="big", signed=False)
 
     def _chat_completions_stream_generator(
         self,
