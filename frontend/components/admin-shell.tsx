@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KeyRound, LayoutGrid, RadioTower, Route, Users } from "lucide-react";
+import { KeyRound, LayoutGrid, RadioTower, Route, Users, Waypoints } from "lucide-react";
 
 import type { Locale, DashboardDictionary } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,7 @@ const navigationIcons = {
   nodes: RadioTower,
   apiKeys: KeyRound,
   models: Route,
+  upstreamAccounts: Waypoints,
 };
 
 export function AdminShell({
@@ -39,6 +40,7 @@ export function AdminShell({
     { key: "nodes", href: `/${locale}/nodes` },
     { key: "apiKeys", href: `/${locale}/api-keys` },
     { key: "models", href: `/${locale}/models` },
+    { key: "upstreamAccounts", href: `/${locale}/upstream-accounts` },
   ] as const;
 
   return (

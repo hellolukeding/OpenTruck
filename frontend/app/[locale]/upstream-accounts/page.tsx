@@ -1,0 +1,215 @@
+import { notFound } from "next/navigation";
+
+import { AdminShell } from "@/components/admin-shell";
+import { CreateUpstreamAccountForm } from "@/components/create-upstream-account-form";
+import { PaginationControls } from "@/components/pagination-controls";
+import { ResourceFilters } from "@/components/resource-filters";
+import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
+import { UpstreamAccountRowActions } from "@/components/upstream-account-row-actions";
+import { getAdminOverview, getTenantsPage, getUpstreamAccountsPage } from "@/lib/admin-api";
+import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
+
+function formatDate(value: string | null, locale: "en" | "zh-CN", fallback: string) {
+  if (!value) return fallback;
+
+  return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+export default async function UpstreamAccountsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ page?: string; search?: string; status?: string }>;
+}) {
+  const { locale } = await params;
+  const query = await searchParams;
+
+  if (!isSupportedLocale(locale)) {
+    notFound();
+  }
+
+  const typedLocale = locale as Locale;
+  const dictionary = getDictionary(typedLocale);
+  const overview = await getAdminOverview();
+  const tenantOptions = await getTenantsPage({ page: 1, pageSize: 100, sortBy: "name", sortOrder: "asc" });
+  const page = Number(query.page ?? "1");
+  const status = query.status?.trim() || undefined;
+  const search = query.search?.trim() || undefined;
+  const upstreamPage = await getUpstreamAccountsPage({
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: 10,
+    status,
+    search,
+    sortBy: "priority",
+    sortOrder: "asc",
+  });
+  const tenantMap = new Map(tenantOptions.items.map((tenant) => [tenant.id, tenant.name]));
+
+  const copy =
+    typedLocale === "zh-CN"
+      ? {
+          eyebrow: "上游账号池",
+          title: "把真实 Codex 身份当作可调度资源来运营。",
+          description:
+            "这里展示租户名下的 OpenAI OAuth 上游账号，以及优先级、冷却状态、最近使用时间和最近错误，方便你按 sub2api 的方式管理账号池。",
+          empty: "当前还没有接入任何上游账号。",
+          noteTitle: "调度说明",
+          noteBody:
+            "网关现在会优先选择更低的 priority，并避开冷却中或已过期的账号。这里的字段就是调度层正在使用的真实状态。",
+          summary: {
+            count: "账号数量",
+            countNote: "租户账号池中的总记录数",
+            active: "活跃账号",
+            activeNote: "当前仍可参与路由的记录",
+            cooling: "冷却中",
+            coolingNote: "暂时被摘除等待恢复的账号",
+          },
+          labels: {
+            tenant: "租户",
+            status: "状态",
+            priority: "优先级",
+            lastUsed: "最近使用",
+            cooldown: "冷却至",
+            lastError: "最近错误",
+            email: "邮箱",
+            never: "从未",
+            clear: "无",
+          },
+        }
+      : {
+          eyebrow: "Upstream pool",
+          title: "Operate real Codex identities as schedulable inventory.",
+          description:
+            "This page exposes the OpenAI OAuth upstream accounts behind each tenant, including priority, cooldown state, recency, and last error so the pool behaves like sub2api rather than a blind proxy.",
+          empty: "No upstream accounts connected yet.",
+          noteTitle: "Scheduler note",
+          noteBody:
+            "The gateway now prefers lower priority accounts and skips identities that are cooling down or already expired. The table reflects the same live scheduler metadata the backend is using.",
+          summary: {
+            count: "Accounts",
+            countNote: "Records inside the tenant upstream pool",
+            active: "Active accounts",
+            activeNote: "Currently eligible for routing",
+            cooling: "Cooling down",
+            coolingNote: "Temporarily removed after recent failures",
+          },
+          labels: {
+            tenant: "Tenant",
+            status: "Status",
+            priority: "Priority",
+            lastUsed: "Last used",
+            cooldown: "Cooldown until",
+            lastError: "Last error",
+            email: "Email",
+            never: "Never",
+            clear: "Clear",
+          },
+        };
+
+  return (
+    <AdminShell
+      locale={typedLocale}
+      currentPath={`/${typedLocale}/upstream-accounts`}
+      dictionary={dictionary}
+      backendReachable={overview.backendReachable}
+      backendUrl={overview.backendUrl}
+    >
+      <CreateUpstreamAccountForm locale={typedLocale} tenants={tenantOptions.items} />
+      <ResourceFilters
+        locale={typedLocale}
+        path={`/${typedLocale}/upstream-accounts`}
+        search={search}
+        status={status}
+        statusOptions={[
+          { value: "active", label: dictionary.status.active },
+          { value: "disabled", label: dictionary.status.disabled },
+        ]}
+      />
+      <ResourceTableCard
+        eyebrow={copy.eyebrow}
+        title={copy.title}
+        description={copy.description}
+        emptyLabel={copy.empty}
+        noteTitle={copy.noteTitle}
+        noteBody={copy.noteBody}
+        summary={[
+          {
+            label: copy.summary.count,
+            value: upstreamPage.pagination.total,
+            note: copy.summary.countNote,
+          },
+          {
+            label: copy.summary.active,
+            value: upstreamPage.items.filter((account) => account.status === "active").length,
+            note: copy.summary.activeNote,
+          },
+          {
+            label: copy.summary.cooling,
+            value: upstreamPage.items.filter((account) => account.cooldown_until !== null).length,
+            note: copy.summary.coolingNote,
+          },
+        ]}
+        items={upstreamPage.items}
+        columns={[
+          {
+            key: "name",
+            label: dictionary.labels.name,
+            render: (account) => <span className="font-medium text-black">{account.name}</span>,
+          },
+          {
+            key: "tenant",
+            label: copy.labels.tenant,
+            render: (account) => tenantMap.get(account.tenant_id) ?? account.tenant_id,
+          },
+          {
+            key: "email",
+            label: copy.labels.email,
+            render: (account) => account.email ?? copy.labels.clear,
+          },
+          {
+            key: "status",
+            label: copy.labels.status,
+            render: (account) => <ResourceStatusBadge status={account.status} />,
+          },
+          {
+            key: "priority",
+            label: copy.labels.priority,
+            render: (account) => account.priority,
+          },
+          {
+            key: "last_used_at",
+            label: copy.labels.lastUsed,
+            render: (account) => formatDate(account.last_used_at, typedLocale, copy.labels.never),
+          },
+          {
+            key: "cooldown_until",
+            label: copy.labels.cooldown,
+            render: (account) => formatDate(account.cooldown_until, typedLocale, copy.labels.clear),
+          },
+          {
+            key: "last_error_code",
+            label: copy.labels.lastError,
+            render: (account) => account.last_error_code ?? copy.labels.clear,
+          },
+          {
+            key: "actions",
+            label: "",
+            render: (account) => <UpstreamAccountRowActions locale={typedLocale} account={account} />,
+          },
+        ]}
+      />
+      <PaginationControls
+        locale={typedLocale}
+        path={`/${typedLocale}/upstream-accounts`}
+        pagination={upstreamPage.pagination}
+        query={{ search, status }}
+      />
+    </AdminShell>
+  );
+}

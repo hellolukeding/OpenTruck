@@ -21,6 +21,7 @@ export type DashboardDictionary = {
     nodes: string;
     apiKeys: string;
     models: string;
+    upstreamAccounts: string;
   };
   shell: {
     brandTitle: string;
@@ -222,6 +223,7 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       nodes: "Nodes",
       apiKeys: "API Keys",
       models: "Models",
+      upstreamAccounts: "Upstream Accounts",
     },
     shell: {
       brandTitle: "Relay desk",
@@ -437,6 +439,7 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       nodes: "节点",
       apiKeys: "API 密钥",
       models: "模型",
+      upstreamAccounts: "上游账号",
     },
     shell: {
       brandTitle: "调度席",

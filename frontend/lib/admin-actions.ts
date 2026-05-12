@@ -8,9 +8,10 @@ const BACKEND_BASE_URL =
 export type AdminActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  details?: Record<string, string>;
 };
 
-type ResourceKey = "tenants" | "nodes" | "api-keys" | "models";
+type ResourceKey = "tenants" | "nodes" | "api-keys" | "models" | "upstream-accounts";
 
 type ErrorPayload = {
   error?: {
@@ -66,11 +67,29 @@ function revalidateAdminViews(resource: ResourceKey) {
 
     if (resource === "tenants") {
       revalidatePath(`/${locale}/api-keys`);
+      revalidatePath(`/${locale}/upstream-accounts`);
     }
 
     if (resource === "nodes") {
       revalidatePath(`/${locale}/models`);
     }
+
+    if (resource === "upstream-accounts") {
+      revalidatePath(`/${locale}/upstream-accounts`);
+    }
+  }
+}
+
+async function postAdminAndParse<T>(path: string, payload: unknown): Promise<{ response: Response; data: T | null }> {
+  const response = await postAdmin(path, payload);
+  if (!response.ok) {
+    return { response, data: null };
+  }
+
+  try {
+    return { response, data: (await response.json()) as T };
+  } catch {
+    return { response, data: null };
   }
 }
 
@@ -345,4 +364,116 @@ export async function deleteNodeModelAction(
 
   revalidateAdminViews("models");
   return { status: "success", message: "Model route deleted successfully." };
+}
+
+type OpenAIOAuthAuthUrlResponse = {
+  session_id: string;
+  auth_url: string;
+  state: string;
+  expires_at: string;
+};
+
+export async function generateOpenAIOAuthUrlAction(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const redirectUri = String(formData.get("redirect_uri") ?? "").trim();
+  const proxyUrl = String(formData.get("proxy_url") ?? "").trim();
+  const payload = {
+    tenant_id: String(formData.get("tenant_id") ?? "").trim(),
+    redirect_uri: redirectUri || null,
+    proxy_url: proxyUrl || null,
+    platform: "openai",
+  };
+
+  const { response, data } = await postAdminAndParse<OpenAIOAuthAuthUrlResponse>("/admin/openai/oauth/auth-url", payload);
+  if (!response.ok || !data) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateAdminViews("upstream-accounts");
+  return {
+    status: "success",
+    message: "OAuth authorization link created successfully.",
+    details: {
+      session_id: data.session_id,
+      auth_url: data.auth_url,
+      state: data.state,
+      expires_at: data.expires_at,
+    },
+  };
+}
+
+export async function createUpstreamAccountFromOAuthAction(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const payload = {
+    tenant_id: String(formData.get("tenant_id") ?? "").trim(),
+    session_id: String(formData.get("session_id") ?? "").trim(),
+    code: String(formData.get("code") ?? "").trim(),
+    state: String(formData.get("state") ?? "").trim(),
+    name: String(formData.get("name") ?? "").trim() || null,
+    status: String(formData.get("status") ?? "active"),
+  };
+
+  const response = await postAdmin("/admin/openai/oauth/create-account", payload);
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateAdminViews("upstream-accounts");
+  return { status: "success", message: "Upstream account connected successfully." };
+}
+
+export async function updateUpstreamAccountAction(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const accountId = String(formData.get("account_id") ?? "").trim();
+  const tokenExpiresAt = String(formData.get("token_expires_at") ?? "").trim();
+  const cooldownUntil = String(formData.get("cooldown_until") ?? "").trim();
+  const payload = {
+    name: String(formData.get("name") ?? "").trim(),
+    status: String(formData.get("status") ?? "active"),
+    priority: Number(formData.get("priority") ?? 100),
+    token_expires_at: tokenExpiresAt || null,
+    cooldown_until: cooldownUntil || null,
+  };
+
+  const response = await patchAdmin(`/admin/upstream-accounts/${accountId}`, payload);
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateAdminViews("upstream-accounts");
+  return { status: "success", message: "Upstream account updated successfully." };
+}
+
+export async function deleteUpstreamAccountAction(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const accountId = String(formData.get("account_id") ?? "").trim();
+  const response = await deleteAdmin(`/admin/upstream-accounts/${accountId}`);
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateAdminViews("upstream-accounts");
+  return { status: "success", message: "Upstream account deleted successfully." };
+}
+
+export async function refreshUpstreamAccountAction(
+  _prevState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const accountId = String(formData.get("account_id") ?? "").trim();
+  const response = await postAdmin(`/admin/upstream-accounts/${accountId}/refresh`, {});
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateAdminViews("upstream-accounts");
+  return { status: "success", message: "Upstream account refreshed successfully." };
 }

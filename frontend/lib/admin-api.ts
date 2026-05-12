@@ -50,6 +50,33 @@ export type NodeModel = {
   updated_at: string;
 };
 
+export type UpstreamAccount = {
+  id: string;
+  tenant_id: string;
+  name: string;
+  platform: string;
+  account_type: string;
+  status: string;
+  provider_account_id: string | null;
+  provider_user_id: string | null;
+  organization_id: string | null;
+  email: string | null;
+  plan_type: string | null;
+  client_id: string | null;
+  priority: number;
+  token_expires_at: string | null;
+  last_refreshed_at: string | null;
+  last_used_at: string | null;
+  last_error_at: string | null;
+  last_error_code: string | null;
+  consecutive_failures: number;
+  cooldown_until: string | null;
+  extra: Record<string, unknown>;
+  has_refresh_token: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type PaginationMeta = {
   total: number;
   page: number;
@@ -67,6 +94,7 @@ export type AdminOverview = {
   nodes: Node[];
   apiKeys: ApiKey[];
   nodeModels: NodeModel[];
+  upstreamAccounts: UpstreamAccount[];
   backendReachable: boolean;
   backendUrl: string;
 };
@@ -83,6 +111,8 @@ export type ResourceQuery = {
   tenantId?: string;
   nodeId?: string;
   publicModel?: string;
+  accountType?: string;
+  platform?: string;
 };
 
 const BACKEND_BASE_URL =
@@ -121,6 +151,8 @@ function buildResourceUrl(path: string, query: ResourceQuery = {}): string {
   if (query.tenantId) searchParams.set("tenant_id", query.tenantId);
   if (query.nodeId) searchParams.set("node_id", query.nodeId);
   if (query.publicModel) searchParams.set("public_model", query.publicModel);
+  if (query.accountType) searchParams.set("account_type", query.accountType);
+  if (query.platform) searchParams.set("platform", query.platform);
 
   const queryString = searchParams.toString();
   return queryString ? `${path}?${queryString}` : path;
@@ -150,11 +182,12 @@ async function fetchPaginated<T>(
 
 export async function getAdminOverview(): Promise<AdminOverview> {
   try {
-    const [tenantsPayload, nodesPayload, apiKeysPayload, nodeModelsPayload] = await Promise.all([
+    const [tenantsPayload, nodesPayload, apiKeysPayload, nodeModelsPayload, upstreamAccountsPayload] = await Promise.all([
       fetchJson<Tenant[] | PaginatedResponse<Tenant>>("/admin/tenants"),
       fetchJson<Node[] | PaginatedResponse<Node>>("/admin/nodes"),
       fetchJson<ApiKey[] | PaginatedResponse<ApiKey>>("/admin/api-keys"),
       fetchJson<NodeModel[] | PaginatedResponse<NodeModel>>("/admin/node-models"),
+      fetchJson<UpstreamAccount[] | PaginatedResponse<UpstreamAccount>>("/admin/upstream-accounts"),
     ]);
 
     return {
@@ -162,6 +195,7 @@ export async function getAdminOverview(): Promise<AdminOverview> {
       nodes: unwrapList(nodesPayload),
       apiKeys: unwrapList(apiKeysPayload),
       nodeModels: unwrapList(nodeModelsPayload),
+      upstreamAccounts: unwrapList(upstreamAccountsPayload),
       backendReachable: true,
       backendUrl: BACKEND_BASE_URL,
     };
@@ -171,6 +205,7 @@ export async function getAdminOverview(): Promise<AdminOverview> {
       nodes: [],
       apiKeys: [],
       nodeModels: [],
+      upstreamAccounts: [],
       backendReachable: false,
       backendUrl: BACKEND_BASE_URL,
     };
@@ -191,4 +226,8 @@ export async function getApiKeysPage(query: ResourceQuery = {}) {
 
 export async function getNodeModelsPage(query: ResourceQuery = {}) {
   return fetchPaginated<NodeModel>("/admin/node-models", query);
+}
+
+export async function getUpstreamAccountsPage(query: ResourceQuery = {}) {
+  return fetchPaginated<UpstreamAccount>("/admin/upstream-accounts", query);
 }

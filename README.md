@@ -69,8 +69,13 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `/{locale}/nodes`
   - `/{locale}/api-keys`
   - `/{locale}/models`
+  - `/{locale}/upstream-accounts`
 - visual direction is monochrome and OpenAI-like rather than decorative SaaS styling
 - resource pages now include create forms backed by real FastAPI admin POST endpoints
+- `upstream-accounts` now includes a two-step OAuth intake surface:
+  - generate an OpenAI OAuth authorization link
+  - manually complete account creation with `session_id`, `state`, and callback `code`
+- upstream account rows expose scheduler fields such as `priority`, cooldown, last-used time, and refresh / edit / delete actions
 
 ## Frontend Auth
 
