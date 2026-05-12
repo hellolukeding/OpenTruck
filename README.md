@@ -15,8 +15,17 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
 ## Local Development
 
 - run `frontend/` directly with Next.js
-- run `backend/` directly with FastAPI
+- run `backend/` directly with FastAPI and `Poetry`
 - run PostgreSQL and Redis with Docker Compose
+
+## Backend Commands
+
+```bash
+cd backend
+poetry install
+poetry run alembic upgrade head
+poetry run uvicorn app.main:app --reload --port 8000
+```
 
 ## Frontend Backend Target
 

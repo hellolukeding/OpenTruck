@@ -9,6 +9,8 @@
 - 已落地 `make check`
 - 已修正后端入口导入路径
 - 已接入 `SQLAlchemy + Alembic` 基础结构
+- 已将后端依赖管理切到 `Poetry`，并固定使用 `backend/.venv`
+- 已生成 `backend/poetry.lock`，并验证 `poetry install` 与 `poetry run uvicorn --version` 可正常工作
 - 已添加首个手写迁移 `20260511_0001_initial_schema`
 - 已建立 `Tenant`、`ApiKey`、`Node`、`NodeModel` 四个模型
 - 已在 Docker 中真实执行 Alembic 迁移并验证落表

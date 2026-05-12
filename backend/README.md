@@ -24,8 +24,8 @@ cp backend/.env.example backend/.env
 ### 3. Run backend
 
 ```bash
-cd backend && uv sync
-cd backend && python3 -m uvicorn app.main:app --reload --port 8000
+cd backend && poetry install
+cd backend && poetry run uvicorn app.main:app --reload --port 8000
 ```
 
 ## Local Services
@@ -37,6 +37,6 @@ cd backend && python3 -m uvicorn app.main:app --reload --port 8000
 ## Planned Database Commands
 
 ```bash
-cd backend && alembic upgrade head
-cd backend && alembic revision -m "describe change"
+cd backend && poetry run alembic upgrade head
+cd backend && poetry run alembic revision -m "describe change"
 ```

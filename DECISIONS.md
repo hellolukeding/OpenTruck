@@ -12,6 +12,7 @@
 - 仓库根目录保留 `Makefile`，并用 `make check` 作为基础一致性检查入口
 - ORM 定为 `SQLAlchemy 2`
 - 数据库迁移工具定为 `Alembic`
+- 后端依赖与虚拟环境管理切到 `Poetry`，并使用 `backend/poetry.toml` 固定本地 `.venv` 在项目目录内
 - 首批核心表先围绕网关最小闭环落地:
   - `tenants`
   - `api_keys`
