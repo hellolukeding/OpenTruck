@@ -39,6 +39,7 @@
 - `responses` 主链路需要同时覆盖非流式与 SSE 流式透传；流式场景优先保留上游事件原样输出，usage 则在 `response.completed/done` 一类事件落账，避免为了记账破坏原始协议
 - 上游账号调度继续沿 `sub2api` 的方向演进：当前版本已补 `priority`、`last_used_at`、`consecutive_failures`、`cooldown_until`，并会在转发前跳过过期账号、对 `429/5xx/网络错误` 做冷却摘除、对 `401/403` 做禁用处理；同时已基于 `conversation_id/session_id` 引入首版会话粘性，并加入首版进程内并发槽位控制，优先保证同一对话稳定命中同一上游账号、同一账号不会被无限并发打穿，后续再升级到更完整的分布式并发与负载均衡
 - 租户配额首版直接挂在网关成功响应上：当前按 `usage.total_tokens` 和 `GATEWAY_QUOTA_COST_PER_1K_TOKENS` 计算扣减额度，并写入 `gateway_usage_ledger`；余额为 `0` 或以下时在网关入口直接拦截，后续再升级到按模型/账号定价、失败请求记账和更完整的账务策略
+- 失败请求也需要进入 `gateway_usage_ledger`，但默认不扣减 `quota_balance`；首版先覆盖 `insufficient_quota`、failover 后仍失败的上游请求，以及直接返回失败响应的场景，后续再细分更多流式终态和账务规则
 - `chat/completions` 的兼容策略采用 `Chat Completions -> Responses -> Chat Completions` 的翻译模式，与 `sub2api` 保持同方向；当前已支持首版 SSE 流式转换，但仍按“小步覆盖事件类型”的策略逐步补齐
 - 前端登录注册优先采用 `Auth.js`，先用 OAuth 统一承接“登录 + 首次注册”，避免在主线早期再单独造密码体系
 - 控制台访问先通过 Next.js `middleware` 保护 `/{locale}` 路由，未登录用户统一跳转到 `/auth/signin`

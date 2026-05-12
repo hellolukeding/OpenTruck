@@ -114,20 +114,53 @@ class GatewayService:
         subpath: str = "",
     ) -> Response:
         request_headers = list(request_headers)
-        self._ensure_tenant_quota_available(identity.tenant_id)
+        conversation_id = self._resolve_conversation_id(request_headers)
+        try:
+            self._ensure_tenant_quota_available(identity.tenant_id)
+        except APIError as exc:
+            if exc.detail.get("code") == "insufficient_quota":
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="responses_stream" if self._request_body_is_streaming(body) else "responses",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    error_code="insufficient_quota",
+                )
+            raise
         upstream_url = self._build_upstream_url(subpath=subpath)
         if self._request_body_is_streaming(body):
-            upstream_response = self._stream_with_failover(
-                tenant_id=identity.tenant_id,
-                request_headers=request_headers,
-                upstream_url=upstream_url,
-                body=body,
-            )
+            try:
+                upstream_response = self._stream_with_failover(
+                    tenant_id=identity.tenant_id,
+                    request_headers=request_headers,
+                    upstream_url=upstream_url,
+                    body=body,
+                )
+            except APIError as exc:
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="responses_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=exc.status_code,
+                    error_code=exc.detail.get("code", "upstream_request_failed"),
+                )
+                raise
             if upstream_response.status_code >= 400:
                 body_bytes = upstream_response.read()
                 response_headers = self._build_response_headers(upstream_response.headers)
                 content_type = upstream_response.headers.get("content-type", "application/json")
                 account_id = getattr(upstream_response, "_opentruck_account_id", None)
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="responses_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=upstream_response.status_code,
+                    account_id=self._extract_response_account_id(upstream_response),
+                    error_code=f"upstream_http_{upstream_response.status_code}",
+                    usage=self._extract_usage_from_json_response(upstream_response),
+                )
                 upstream_response.close()
                 if account_id is not None:
                     self._release_account_slot_by_id(account_id)
@@ -152,21 +185,43 @@ class GatewayService:
                 headers=response_headers,
             )
 
-        upstream_response = self._forward_with_failover(
-            tenant_id=identity.tenant_id,
-            request_headers=request_headers,
-            upstream_url=upstream_url,
-            body=body,
-        )
+        try:
+            upstream_response = self._forward_with_failover(
+                tenant_id=identity.tenant_id,
+                request_headers=request_headers,
+                upstream_url=upstream_url,
+                body=body,
+            )
+        except APIError as exc:
+            self._apply_failed_accounting(
+                identity=identity,
+                request_kind="responses",
+                request_path=request_path,
+                conversation_id=conversation_id,
+                upstream_status_code=exc.status_code,
+                error_code=exc.detail.get("code", "upstream_request_failed"),
+            )
+            raise
         usage = self._extract_usage_from_json_response(upstream_response)
         if upstream_response.status_code < 400:
             self._apply_usage_accounting(
                 identity=identity,
                 request_kind="responses",
                 request_path=request_path,
-                conversation_id=self._resolve_conversation_id(request_headers),
+                conversation_id=conversation_id,
                 upstream_status_code=upstream_response.status_code,
                 account_id=self._extract_response_account_id(upstream_response),
+                usage=usage,
+            )
+        else:
+            self._apply_failed_accounting(
+                identity=identity,
+                request_kind="responses",
+                request_path=request_path,
+                conversation_id=conversation_id,
+                upstream_status_code=upstream_response.status_code,
+                account_id=self._extract_response_account_id(upstream_response),
+                error_code=f"upstream_http_{upstream_response.status_code}",
                 usage=usage,
             )
 
@@ -189,7 +244,19 @@ class GatewayService:
         subpath: str = "",
     ) -> Response:
         request_headers = list(request_headers)
-        self._ensure_tenant_quota_available(identity.tenant_id)
+        conversation_id = self._resolve_conversation_id(request_headers)
+        try:
+            self._ensure_tenant_quota_available(identity.tenant_id)
+        except APIError as exc:
+            if exc.detail.get("code") == "insufficient_quota":
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="chat_completions_stream" if payload.get("stream") else "chat_completions",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    error_code="insufficient_quota",
+                )
+            raise
         try:
             responses_payload = chat_completions_to_responses(payload)
         except ValueError as exc:
@@ -197,17 +264,38 @@ class GatewayService:
 
         upstream_url = self._build_upstream_url(subpath=subpath)
         if payload.get("stream"):
-            upstream_response = self._stream_with_failover(
-                tenant_id=identity.tenant_id,
-                request_headers=request_headers,
-                upstream_url=upstream_url,
-                body=json.dumps(responses_payload).encode("utf-8"),
-            )
+            try:
+                upstream_response = self._stream_with_failover(
+                    tenant_id=identity.tenant_id,
+                    request_headers=request_headers,
+                    upstream_url=upstream_url,
+                    body=json.dumps(responses_payload).encode("utf-8"),
+                )
+            except APIError as exc:
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="chat_completions_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=exc.status_code,
+                    error_code=exc.detail.get("code", "upstream_request_failed"),
+                )
+                raise
             if upstream_response.status_code >= 400:
                 body_bytes = upstream_response.read()
                 response_headers = self._build_response_headers(upstream_response.headers)
                 content_type = upstream_response.headers.get("content-type", "application/json")
                 account_id = getattr(upstream_response, "_opentruck_account_id", None)
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="chat_completions_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=upstream_response.status_code,
+                    account_id=self._extract_response_account_id(upstream_response),
+                    error_code=f"upstream_http_{upstream_response.status_code}",
+                    usage=self._extract_usage_from_json_response(upstream_response),
+                )
                 upstream_response.close()
                 if account_id is not None:
                     self._release_account_slot_by_id(account_id)
@@ -231,20 +319,41 @@ class GatewayService:
                     state=state,
                     identity=identity,
                     request_path=request_path,
-                    conversation_id=self._resolve_conversation_id(request_headers),
+                    conversation_id=conversation_id,
                 ),
                 media_type="text/event-stream",
                 headers=response_headers,
             )
 
-        upstream_response = self._forward_with_failover(
-            tenant_id=identity.tenant_id,
-            request_headers=request_headers,
-            upstream_url=upstream_url,
-            body=json.dumps(responses_payload).encode("utf-8"),
-        )
+        try:
+            upstream_response = self._forward_with_failover(
+                tenant_id=identity.tenant_id,
+                request_headers=request_headers,
+                upstream_url=upstream_url,
+                body=json.dumps(responses_payload).encode("utf-8"),
+            )
+        except APIError as exc:
+            self._apply_failed_accounting(
+                identity=identity,
+                request_kind="chat_completions",
+                request_path=request_path,
+                conversation_id=conversation_id,
+                upstream_status_code=exc.status_code,
+                error_code=exc.detail.get("code", "upstream_request_failed"),
+            )
+            raise
 
         if upstream_response.status_code >= 400:
+            self._apply_failed_accounting(
+                identity=identity,
+                request_kind="chat_completions",
+                request_path=request_path,
+                conversation_id=conversation_id,
+                upstream_status_code=upstream_response.status_code,
+                account_id=self._extract_response_account_id(upstream_response),
+                error_code=f"upstream_http_{upstream_response.status_code}",
+                usage=self._extract_usage_from_json_response(upstream_response),
+            )
             response_headers = self._build_response_headers(upstream_response.headers)
             content_type = upstream_response.headers.get("content-type", "application/json")
             return Response(
@@ -271,7 +380,7 @@ class GatewayService:
             identity=identity,
             request_kind="chat_completions",
             request_path=request_path,
-            conversation_id=self._resolve_conversation_id(request_headers),
+            conversation_id=conversation_id,
             upstream_status_code=upstream_response.status_code,
             account_id=self._extract_response_account_id(upstream_response),
             usage=self._extract_usage_from_payload(upstream_payload),
@@ -412,6 +521,42 @@ class GatewayService:
             output_tokens=usage.output_tokens if usage else 0,
             total_tokens=usage.total_tokens if usage else 0,
             quota_delta=quota_delta,
+        )
+        self.db.add(ledger)
+        self.db.commit()
+
+    def _apply_failed_accounting(
+        self,
+        *,
+        identity: TenantGatewayIdentity,
+        request_kind: str,
+        request_path: str,
+        conversation_id: str | None,
+        error_code: str,
+        upstream_status_code: int | None = None,
+        account_id: uuid.UUID | None = None,
+        usage: UsageAccounting | None = None,
+        status: str = "failed",
+    ) -> None:
+        tenant = self.db.get(Tenant, identity.tenant_id)
+        if tenant is None:
+            return
+        ledger = GatewayUsageLedger(
+            tenant_id=identity.tenant_id,
+            api_key_id=identity.api_key_id,
+            upstream_account_id=account_id,
+            request_kind=request_kind,
+            endpoint=request_path,
+            status=status,
+            model=usage.model if usage else None,
+            response_id=usage.response_id if usage else None,
+            conversation_id=conversation_id,
+            upstream_status_code=upstream_status_code,
+            error_code=error_code,
+            input_tokens=usage.input_tokens if usage else 0,
+            output_tokens=usage.output_tokens if usage else 0,
+            total_tokens=usage.total_tokens if usage else 0,
+            quota_delta=Decimal("0"),
         )
         self.db.add(ledger)
         self.db.commit()
