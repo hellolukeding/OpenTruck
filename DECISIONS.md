@@ -37,4 +37,4 @@
 - 上游账号首版单独建 `upstream_accounts` 资源，不直接复用 `nodes`；`nodes` 代表基础转发节点，`upstream_accounts` 代表可被调度的真实上游身份
 - 对外网关首版先只做 `responses` / `codex responses` 主链路，并以租户自己的 API Key 作为统一入口；`chat/completions` 等其它协议待后续通过适配层继续补齐
 - 首版上游调度先采用“租户内选择一个 active 的 `openai/oauth` 账号”的最小策略，先打通真实请求路径，再逐步补优先级、失败摘除和粘性会话
-- `chat/completions` 的第一阶段兼容策略采用 `Chat Completions -> Responses -> Chat Completions` 的翻译模式，与 `sub2api` 保持同方向；先支持非流式请求，流式 SSE 转换后补
+- `chat/completions` 的兼容策略采用 `Chat Completions -> Responses -> Chat Completions` 的翻译模式，与 `sub2api` 保持同方向；当前已支持首版 SSE 流式转换，但仍按“小步覆盖事件类型”的策略逐步补齐

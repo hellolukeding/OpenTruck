@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import json
 import time
 import uuid
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -125,6 +127,176 @@ def responses_to_chat_completions(payload: dict[str, Any], *, fallback_model: st
         response["usage"] = usage_payload
 
     return response
+
+
+@dataclass
+class ChatCompletionsStreamState:
+    id: str = field(default_factory=lambda: f"chatcmpl_{uuid.uuid4().hex}")
+    created: int = field(default_factory=lambda: int(time.time()))
+    model: str = ""
+    sent_role: bool = False
+    saw_tool_call: bool = False
+    finalized: bool = False
+    next_tool_call_index: int = 0
+    output_index_to_tool_index: dict[int, int] = field(default_factory=dict)
+    include_usage: bool = False
+    usage: dict[str, Any] | None = None
+
+
+def responses_event_to_chat_chunks(
+    event_type: str,
+    event_payload: dict[str, Any],
+    *,
+    state: ChatCompletionsStreamState,
+) -> list[dict[str, Any]]:
+    if event_type == "response.created":
+        response = event_payload.get("response") or {}
+        if response.get("id"):
+            state.id = response["id"]
+        if response.get("model"):
+            state.model = response["model"]
+        if state.sent_role:
+            return []
+        state.sent_role = True
+        return [_make_chat_delta_chunk(state=state, delta={"role": "assistant"})]
+
+    if event_type == "response.output_text.delta":
+        delta = event_payload.get("delta")
+        if not isinstance(delta, str) or not delta:
+            return []
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"content": delta}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"content": delta})]
+
+    if event_type == "response.reasoning_summary_text.delta":
+        delta = event_payload.get("delta")
+        if not isinstance(delta, str) or not delta:
+            return []
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"reasoning_content": delta}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"reasoning_content": delta})]
+
+    if event_type == "response.output_item.added":
+        item = event_payload.get("item") or {}
+        if item.get("type") != "function_call":
+            return []
+        state.saw_tool_call = True
+        tool_index = state.next_tool_call_index
+        state.output_index_to_tool_index[int(event_payload.get("output_index") or 0)] = tool_index
+        state.next_tool_call_index += 1
+        return [
+            _make_chat_delta_chunk(
+                state=state,
+                delta={
+                    "tool_calls": [
+                        {
+                            "index": tool_index,
+                            "id": item.get("call_id"),
+                            "type": "function",
+                            "function": {
+                                "name": item.get("name", ""),
+                            },
+                        }
+                    ]
+                },
+            )
+        ]
+
+    if event_type == "response.function_call_arguments.delta":
+        delta = event_payload.get("delta")
+        if not isinstance(delta, str) or not delta:
+            return []
+        output_index = int(event_payload.get("output_index") or 0)
+        tool_index = state.output_index_to_tool_index.get(output_index, 0)
+        return [
+            _make_chat_delta_chunk(
+                state=state,
+                delta={
+                    "tool_calls": [
+                        {
+                            "index": tool_index,
+                            "function": {
+                                "arguments": delta,
+                            },
+                        }
+                    ]
+                },
+            )
+        ]
+
+    if event_type in {"response.completed", "response.done", "response.incomplete", "response.failed"}:
+        response = event_payload.get("response") or {}
+        if response.get("model"):
+            state.model = response["model"]
+        usage = response.get("usage")
+        if isinstance(usage, dict):
+            state.usage = {
+                "prompt_tokens": int(usage.get("input_tokens") or 0),
+                "completion_tokens": int(usage.get("output_tokens") or 0),
+                "total_tokens": int(usage.get("input_tokens") or 0) + int(usage.get("output_tokens") or 0),
+            }
+            details = usage.get("input_tokens_details")
+            if isinstance(details, dict) and details.get("cached_tokens"):
+                state.usage["prompt_tokens_details"] = {"cached_tokens": details["cached_tokens"]}
+        return finalize_chat_stream(state=state, response=response)
+
+    return []
+
+
+def finalize_chat_stream(*, state: ChatCompletionsStreamState, response: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    if state.finalized:
+        return []
+    state.finalized = True
+
+    finish_reason = "tool_calls" if state.saw_tool_call else "stop"
+    response = response or {}
+    incomplete_details = response.get("incomplete_details") or {}
+    if response.get("status") == "incomplete" and incomplete_details.get("reason") == "max_output_tokens":
+        finish_reason = "length"
+
+    chunks: list[dict[str, Any]] = [
+        {
+            "id": state.id,
+            "object": "chat.completion.chunk",
+            "created": state.created,
+            "model": state.model or response.get("model") or "openai/responses",
+            "choices": [
+                {
+                    "index": 0,
+                    "delta": {},
+                    "finish_reason": finish_reason,
+                }
+            ],
+        }
+    ]
+    if state.include_usage and state.usage:
+        chunks.append(
+            {
+                "id": state.id,
+                "object": "chat.completion.chunk",
+                "created": state.created,
+                "model": state.model or response.get("model") or "openai/responses",
+                "choices": [],
+                "usage": state.usage,
+            }
+        )
+    return chunks
+
+
+def format_chat_chunk_sse(chunk: dict[str, Any]) -> bytes:
+    return f"data: {json.dumps(chunk, separators=(',', ':'))}\n\n".encode("utf-8")
+
+
+def done_sse_chunk() -> bytes:
+    return b"data: [DONE]\n\n"
 
 
 def _convert_messages(messages: list[Any]) -> list[dict[str, Any]]:
@@ -258,3 +430,19 @@ def _stringify_content(content: Any) -> str:
                 parts.append(item["text"])
         return "".join(parts)
     return str(content)
+
+
+def _make_chat_delta_chunk(*, state: ChatCompletionsStreamState, delta: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": state.id,
+        "object": "chat.completion.chunk",
+        "created": state.created,
+        "model": state.model or "openai/responses",
+        "choices": [
+            {
+                "index": 0,
+                "delta": delta,
+                "finish_reason": None,
+            }
+        ],
+    }

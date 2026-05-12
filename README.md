@@ -53,7 +53,8 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - forward the request to `chatgpt.com/backend-api/codex/responses`
 - current Chat Completions behavior:
   - non-streaming requests are translated to Responses API shape and translated back on the way out
-  - `stream=true` is not implemented yet and currently returns `501`
+  - streaming requests are translated to Responses SSE and converted back to Chat Completions SSE
+  - current stream support focuses on the main Codex text/tool event flow and will be expanded incrementally
 
 ## Frontend Notes
 

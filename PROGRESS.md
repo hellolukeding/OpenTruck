@@ -53,7 +53,8 @@
 - 已新增首版 `chat/completions -> responses` 协议兼容层，并接入租户 OAuth 网关
 - 已支持 `/v1/chat/completions` 与 `/chat/completions` 的非流式文本回复和 tool calls 回复
 - 已用 `TestClient + external httpx mock` 验证 Chat Completions 请求转换、上游转发和响应逆向转换
-- 已明确将 `stream=true` 的 Chat Completions 请求以 `501` 拒绝，避免假支持
+- 已支持 `chat/completions` 的首版 SSE 流式转换，可将 Responses SSE 事件翻译为 Chat Completions SSE
+- 已用 `TestClient + mock upstream stream response` 验证 `response.created / output_text.delta / completed` 到 `chat.completion.chunk` 的流式转换
 
 ## 已知问题
 
@@ -61,12 +62,12 @@
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
-- `chat/completions` 首版仍只支持非流式主链路，尚未补 SSE 流式转换
+- `chat/completions` 流式兼容层目前只覆盖首批常见 Responses 事件，后续还需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
 - 上游账号调度仍是最简单的“租户内取一个 active OAuth 账号”，还没有接入更完整的优先级、限流、故障摘除与粘性策略
 
 ## 下一步
 
-1. 为 `chat/completions` 补 SSE 流式转换，继续向 `sub2api` 靠拢
+1. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
 2. 为上游账号选择补优先级、故障摘除、token 过期处理与更细的调度策略
 3. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
 4. 将数据库连接与健康探测接入更完整的 FastAPI 生命周期管理
