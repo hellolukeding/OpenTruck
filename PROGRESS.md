@@ -77,6 +77,10 @@
 - 已为 `upstream_accounts` 资源页补齐编辑、refresh、删除操作入口
 - 已将 `upstream_accounts` 接入控制台主导航与多语言文案
 - 已通过 `pnpm --dir frontend build` 验证 `/{locale}/upstream-accounts` 新页面与相关组件构建通过
+- 已为 `upstream_accounts` 页面补充专用筛选面板，支持按租户、账号类型、平台、状态与搜索词过滤
+- 已为 `upstream_accounts` 页面补充排序切换，可按优先级、最近使用、冷却结束、最近错误、Token 过期与创建时间排序
+- 已为 `upstream_accounts` 行操作补充详情视图，可直接查看调度字段、OAuth 身份字段与额外元数据
+- 已通过 `pnpm --dir frontend build` 与 `make check` 重新验证 `upstream_accounts` 页面增强构建通过
 - 已在 `frontend/` 引入 `Auth.js`
 - 已新增 `/api/auth/[...nextauth]` 路由、`/auth/signin` 登录页与 `middleware` 保护控制台路由
 - 已将控制台 `/{locale}` 路由接到登录门禁，未登录访问会重定向到登录页并携带 `callbackUrl`
@@ -88,7 +92,7 @@
 
 - 数据库连接尚未接入更完整的 FastAPI 生命周期管理
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
-- 前端资源页仍缺排序切换、更多筛选维度与详情面板；`upstream_accounts` 目前也还没有单独的详情视图
+- 其余前端资源页仍缺更完整的排序切换、更多筛选维度与详情面板；当前这类增强已优先补到 `upstream_accounts`
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
 - `chat/completions` 流式兼容层已覆盖更多 done 事件与回填逻辑，但后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
 - 上游账号调度已补到首版优先级、故障摘除、会话粘性与进程内并发占位，但仍缺跨进程/分布式并发协调、租户级配额联动与更细的负载均衡策略
@@ -99,5 +103,5 @@
 
 1. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、租户级配额联动与更细的故障恢复策略
-3. 为 `upstream_accounts` 页面补更多筛选维度、排序切换与详情视图
+3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证

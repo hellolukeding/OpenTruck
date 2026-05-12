@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin-shell";
 import { CreateUpstreamAccountForm } from "@/components/create-upstream-account-form";
 import { PaginationControls } from "@/components/pagination-controls";
-import { ResourceFilters } from "@/components/resource-filters";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
+import { UpstreamAccountFilters } from "@/components/upstream-account-filters";
 import { UpstreamAccountRowActions } from "@/components/upstream-account-row-actions";
 import { getAdminOverview, getTenantsPage, getUpstreamAccountsPage } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -25,7 +25,16 @@ export default async function UpstreamAccountsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ page?: string; search?: string; status?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    search?: string;
+    status?: string;
+    tenant_id?: string;
+    account_type?: string;
+    platform?: string;
+    sort_by?: string;
+    sort_order?: string;
+  }>;
 }) {
   const { locale } = await params;
   const query = await searchParams;
@@ -41,13 +50,21 @@ export default async function UpstreamAccountsPage({
   const page = Number(query.page ?? "1");
   const status = query.status?.trim() || undefined;
   const search = query.search?.trim() || undefined;
+  const tenantId = query.tenant_id?.trim() || undefined;
+  const accountType = query.account_type?.trim() || undefined;
+  const platform = query.platform?.trim() || undefined;
+  const sortBy = query.sort_by?.trim() || "priority";
+  const sortOrder = query.sort_order === "desc" ? "desc" : "asc";
   const upstreamPage = await getUpstreamAccountsPage({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: 10,
     status,
     search,
-    sortBy: "priority",
-    sortOrder: "asc",
+    tenantId,
+    accountType,
+    platform,
+    sortBy,
+    sortOrder,
   });
   const tenantMap = new Map(tenantOptions.items.map((tenant) => [tenant.id, tenant.name]));
 
@@ -121,15 +138,17 @@ export default async function UpstreamAccountsPage({
       backendUrl={overview.backendUrl}
     >
       <CreateUpstreamAccountForm locale={typedLocale} tenants={tenantOptions.items} />
-      <ResourceFilters
+      <UpstreamAccountFilters
         locale={typedLocale}
         path={`/${typedLocale}/upstream-accounts`}
         search={search}
         status={status}
-        statusOptions={[
-          { value: "active", label: dictionary.status.active },
-          { value: "disabled", label: dictionary.status.disabled },
-        ]}
+        tenantId={tenantId}
+        accountType={accountType}
+        platform={platform}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        tenants={tenantOptions.items}
       />
       <ResourceTableCard
         eyebrow={copy.eyebrow}
@@ -208,7 +227,15 @@ export default async function UpstreamAccountsPage({
         locale={typedLocale}
         path={`/${typedLocale}/upstream-accounts`}
         pagination={upstreamPage.pagination}
-        query={{ search, status }}
+        query={{
+          search,
+          status,
+          tenant_id: tenantId,
+          account_type: accountType,
+          platform,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+        }}
       />
     </AdminShell>
   );

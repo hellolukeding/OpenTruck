@@ -32,6 +32,28 @@ function toDateTimeLocal(value: string | null): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function formatDateTime(value: string | null, locale: "en" | "zh-CN", fallback: string): string {
+  if (!value) return fallback;
+
+  return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function formatExtraValue(value: unknown, fallback: string): string {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+  return JSON.stringify(value);
+}
+
 export function UpstreamAccountRowActions({
   locale,
   account,
@@ -42,6 +64,7 @@ export function UpstreamAccountRowActions({
   const copy =
     locale === "zh-CN"
       ? {
+          details: "详情",
           edit: "编辑",
           refresh: "刷新",
           remove: "删除",
@@ -55,15 +78,39 @@ export function UpstreamAccountRowActions({
           refreshDescription: `尝试为 ${account.name} 拉取新的 access token。`,
           deleteTitle: "删除上游账号",
           deleteDescription: `删除后将把 ${account.name} 从租户账号池中移除。`,
+          detailsTitle: "上游账号详情",
+          detailsDescription: "查看调度、身份与 Token 生命周期字段，便于排查网关选路和账号池故障。",
           name: "名称",
+          tenantId: "租户 ID",
+          platform: "平台",
+          accountType: "账号类型",
           priority: "优先级",
           status: "状态",
+          email: "邮箱",
+          providerAccountId: "Provider Account ID",
+          providerUserId: "Provider User ID",
+          organizationId: "组织 ID",
+          planType: "套餐",
+          clientId: "Client ID",
           tokenExpiresAt: "Token 过期时间",
+          lastRefreshedAt: "最近刷新",
+          lastUsed: "最近使用",
+          lastErrorAt: "最近错误时间",
+          lastErrorCode: "最近错误码",
+          failures: "连续失败次数",
+          refreshToken: "Refresh Token",
+          maxParallelRequests: "并发上限",
+          rawExtra: "额外元数据",
           cooldownUntil: "冷却结束时间",
           active: "活跃",
           disabled: "禁用",
+          available: "可用",
+          unavailable: "不可用",
+          none: "无",
+          close: "关闭",
         }
       : {
+          details: "Details",
           edit: "Edit",
           refresh: "Refresh",
           remove: "Delete",
@@ -77,15 +124,67 @@ export function UpstreamAccountRowActions({
           refreshDescription: `Attempt to fetch a fresh access token for ${account.name}.`,
           deleteTitle: "Delete upstream account",
           deleteDescription: `This removes ${account.name} from the tenant pool.`,
+          detailsTitle: "Upstream account details",
+          detailsDescription: "Inspect scheduler, identity, and token lifecycle fields to debug routing and pool health.",
           name: "Name",
+          tenantId: "Tenant ID",
+          platform: "Platform",
+          accountType: "Account type",
           priority: "Priority",
           status: "Status",
+          email: "Email",
+          providerAccountId: "Provider Account ID",
+          providerUserId: "Provider User ID",
+          organizationId: "Organization ID",
+          planType: "Plan",
+          clientId: "Client ID",
           tokenExpiresAt: "Token expiry",
+          lastRefreshedAt: "Last refreshed",
+          lastUsed: "Last used",
+          lastErrorAt: "Last error time",
+          lastErrorCode: "Last error code",
+          failures: "Consecutive failures",
+          refreshToken: "Refresh token",
+          maxParallelRequests: "Max parallel requests",
+          rawExtra: "Extra metadata",
           cooldownUntil: "Cooldown until",
           active: "Active",
           disabled: "Disabled",
+          available: "Available",
+          unavailable: "Unavailable",
+          none: "None",
+          close: "Close",
         };
 
+  const detailItems = [
+    { label: copy.name, value: account.name },
+    { label: copy.tenantId, value: account.tenant_id },
+    { label: copy.platform, value: account.platform },
+    { label: copy.accountType, value: account.account_type },
+    { label: copy.status, value: account.status },
+    { label: copy.priority, value: String(account.priority) },
+    { label: copy.email, value: account.email ?? copy.none },
+    { label: copy.providerAccountId, value: account.provider_account_id ?? copy.none },
+    { label: copy.providerUserId, value: account.provider_user_id ?? copy.none },
+    { label: copy.organizationId, value: account.organization_id ?? copy.none },
+    { label: copy.planType, value: account.plan_type ?? copy.none },
+    { label: copy.clientId, value: account.client_id ?? copy.none },
+    { label: copy.tokenExpiresAt, value: formatDateTime(account.token_expires_at, locale, copy.none) },
+    { label: copy.lastRefreshedAt, value: formatDateTime(account.last_refreshed_at, locale, copy.none) },
+    { label: copy.lastUsed, value: formatDateTime(account.last_used_at, locale, copy.none) },
+    { label: copy.cooldownUntil, value: formatDateTime(account.cooldown_until, locale, copy.none) },
+    { label: copy.lastErrorAt, value: formatDateTime(account.last_error_at, locale, copy.none) },
+    { label: copy.lastErrorCode, value: account.last_error_code ?? copy.none },
+    { label: copy.failures, value: String(account.consecutive_failures) },
+    { label: copy.refreshToken, value: account.has_refresh_token ? copy.available : copy.unavailable },
+    {
+      label: copy.maxParallelRequests,
+      value: formatExtraValue(account.extra["max_parallel_requests"], copy.none),
+    },
+    { label: copy.rawExtra, value: formatExtraValue(account.extra, copy.none) },
+  ];
+
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [refreshOpen, setRefreshOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -114,6 +213,38 @@ export function UpstreamAccountRowActions({
 
   return (
     <div className="flex items-center justify-end gap-xs">
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogTrigger asChild>
+          <Button variant="ghost" size="sm" type="button">
+            {copy.details}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{copy.detailsTitle}</DialogTitle>
+            <DialogDescription>{copy.detailsDescription}</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 md:grid-cols-2">
+            {detailItems.map((item) => (
+              <div
+                key={item.label}
+                className="grid gap-1 rounded-xl border border-outline-variant bg-surface-container-low p-md"
+              >
+                <span className="font-code-sm text-code-sm uppercase tracking-wide text-on-surface-variant">
+                  {item.label}
+                </span>
+                <span className="break-all font-body-md text-body-md text-primary">{item.value}</span>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setDetailsOpen(false)}>
+              {copy.close}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
           <Button variant="ghost" size="sm" type="button">
