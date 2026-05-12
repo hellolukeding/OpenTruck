@@ -68,3 +68,21 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `/{locale}/models`
 - visual direction is monochrome and OpenAI-like rather than decorative SaaS styling
 - resource pages now include create forms backed by real FastAPI admin POST endpoints
+
+## Frontend Auth
+
+- frontend now uses `Auth.js` for OAuth-based sign-in
+- protected console routes:
+  - `/en`
+  - `/zh-CN`
+  - and their nested resource pages
+- auth endpoints:
+  - `GET/POST /api/auth/[...nextauth]`
+  - `GET /auth/signin`
+- supported provider env vars:
+  - `AUTH_SECRET`
+  - `AUTH_GITHUB_ID`
+  - `AUTH_GITHUB_SECRET`
+  - `AUTH_GOOGLE_ID`
+  - `AUTH_GOOGLE_SECRET`
+- if no provider env vars are configured, the sign-in page still renders and explains what is missing

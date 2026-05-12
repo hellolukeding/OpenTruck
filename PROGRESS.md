@@ -55,6 +55,12 @@
 - 已用 `TestClient + external httpx mock` 验证 Chat Completions 请求转换、上游转发和响应逆向转换
 - 已支持 `chat/completions` 的首版 SSE 流式转换，可将 Responses SSE 事件翻译为 Chat Completions SSE
 - 已用 `TestClient + mock upstream stream response` 验证 `response.created / output_text.delta / completed` 到 `chat.completion.chunk` 的流式转换
+- 已在 `frontend/` 引入 `Auth.js`
+- 已新增 `/api/auth/[...nextauth]` 路由、`/auth/signin` 登录页与 `middleware` 保护控制台路由
+- 已将控制台 `/{locale}` 路由接到登录门禁，未登录访问会重定向到登录页并携带 `callbackUrl`
+- 已将前端 `UserMenu` 接到真实 session，移除原本的本地假登录逻辑
+- 已用浏览器验证 `http://localhost:3005/en` 会重定向到 `/auth/signin?callbackUrl=%2Fen`
+- 已用浏览器验证未配置 provider 时登录页会正常渲染并提示所需环境变量
 
 ## 已知问题
 
@@ -64,10 +70,12 @@
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
 - `chat/completions` 流式兼容层目前只覆盖首批常见 Responses 事件，后续还需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
 - 上游账号调度仍是最简单的“租户内取一个 active OAuth 账号”，还没有接入更完整的优先级、限流、故障摘除与粘性策略
+- OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
+- `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
 
 ## 下一步
 
-1. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
-2. 为上游账号选择补优先级、故障摘除、token 过期处理与更细的调度策略
-3. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
-4. 将数据库连接与健康探测接入更完整的 FastAPI 生命周期管理
+1. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
+2. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
+3. 为流式兼容层补更完整的 Responses 事件覆盖，尤其是更多 tool/reasoning 变体与错误事件
+4. 为上游账号选择补优先级、故障摘除、token 过期处理与更细的调度策略
