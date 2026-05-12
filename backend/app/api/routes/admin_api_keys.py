@@ -8,13 +8,15 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.api.utils import apply_updates, build_search_filter, commit_or_409, paginate, resolve_sort
-from app.core.errors import not_found
+from app.core.errors import APIError, not_found
 from app.models.api_key import ApiKey
 from app.models.tenant import Tenant
 from app.schemas.common import ResourceStatus, SortOrder
 from app.schemas.api_key import ApiKeyCreate, ApiKeyRead, ApiKeyUpdate
 from app.schemas.error import ErrorResponse
+from app.schemas.jwt import GatewayJwtIssueRequest, GatewayJwtIssueResponse
 from app.schemas.pagination import PaginatedResponse
+from app.services.security import create_gateway_jwt
 
 
 router = APIRouter(prefix="/api-keys", tags=["admin-api-keys"])
@@ -112,3 +114,34 @@ def delete_api_key(api_key_id: str, db: Session = Depends(get_db)) -> Response:
     db.delete(api_key)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/{api_key_id}/issue-jwt",
+    response_model=GatewayJwtIssueResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+def issue_gateway_jwt(
+    api_key_id: str,
+    payload: GatewayJwtIssueRequest,
+    db: Session = Depends(get_db),
+) -> GatewayJwtIssueResponse:
+    api_key = db.get(ApiKey, api_key_id)
+    if api_key is None:
+        raise not_found("API key")
+    if api_key.status != "active":
+        raise APIError(status_code=403, code="api_key_disabled", message="API key is disabled")
+    if api_key.tenant is None or api_key.tenant.status != "active":
+        raise APIError(status_code=403, code="tenant_disabled", message="Tenant is disabled")
+
+    token, expires_at = create_gateway_jwt(
+        tenant_id=api_key.tenant_id,
+        api_key_id=api_key.id,
+        expires_in_minutes=payload.expires_in_minutes,
+    )
+    return GatewayJwtIssueResponse(
+        access_token=token,
+        expires_at=expires_at,
+        tenant_id=api_key.tenant_id,
+        api_key_id=api_key.id,
+    )

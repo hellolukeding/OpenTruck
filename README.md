@@ -50,6 +50,9 @@ poetry run uvicorn app.main:app --reload --port 8000
 - tenant-facing gateway authentication accepts either:
   - `Authorization: Bearer <api-key>`
   - `X-API-Key: <api-key>`
+  - `Authorization: Bearer <jwt>`
+- admin JWT helper:
+  - `POST /admin/api-keys/{id}/issue-jwt`
 - first-pass supported endpoints:
   - `GET /v1/models`
   - `POST /v1/responses`

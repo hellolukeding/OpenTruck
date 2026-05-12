@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     gateway_upstream_cooldown_seconds: int = 90
     gateway_upstream_default_max_parallel_requests: int = 4
     gateway_quota_cost_per_1k_tokens: float = 1.0
+    jwt_secret: str = "opentruck-dev-secret-change-me-32chars"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 120
+    jwt_issuer: str = "opentruck"
+    jwt_audience: str = "opentruck-gateway"
     openai_codex_base_url: str = "https://chatgpt.com/backend-api/codex/responses"
 
     postgres_host: str = "localhost"

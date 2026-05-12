@@ -49,6 +49,9 @@
 - 已用本地 Docker PostgreSQL 成功执行 `20260512_0002_oauth_upstream_accounts` 迁移
 - 已用 FastAPI `TestClient + mock token exchange` 验证 `auth-url -> create-account -> list -> refresh` 主链路
 - 已新增首版租户 API Key 鉴权依赖，支持 `Authorization: Bearer` 与 `X-API-Key`
+- 已为网关补充 JWT Bearer 鉴权，支持基于 `tenant_id + api_key_id` 的签名 token 校验
+- 已新增 `POST /admin/api-keys/{id}/issue-jwt`，可从现有 API Key 签发首版网关 JWT
+- 已通过真实后端冒烟验证 `issue-jwt -> Authorization: Bearer <jwt> -> GET /v1/models` 链路可用，并会正常回写 `api_key.last_used_at`
 - 已新增首版网关执行层，可将 `/v1/responses`、`/responses` 与 `/backend-api/codex/responses` 转发到租户自己的 `OpenAI OAuth` 上游账号
 - 已将 `/v1/models` 接入租户 API Key 鉴权，并返回当前租户可见的基础模型信息
 - 已用 `TestClient + external httpx mock` 验证 `Bearer API Key -> tenant -> upstream account -> Codex responses` 真实转发链路
@@ -110,6 +113,7 @@
 - 上游账号调度已补到首版优先级、故障摘除、会话粘性、进程内并发占位与基础租户配额/失败记账，但仍缺跨进程/分布式并发协调、按模型或账号的精细计费与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
+- JWT 首版已可用于网关，但当前还没有单独的 JWT 撤销/黑名单机制，失效主要依赖过期时间和底层 API Key / tenant 状态校验
 
 ## 下一步
 

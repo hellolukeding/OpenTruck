@@ -45,6 +45,7 @@ check:
 		backend/app/schemas/api_key.py \
 		backend/app/schemas/node_model.py \
 		backend/app/schemas/common.py \
+		backend/app/schemas/jwt.py \
 		backend/app/schemas/openai_oauth.py \
 		backend/app/schemas/pagination.py \
 		backend/app/schemas/error.py \

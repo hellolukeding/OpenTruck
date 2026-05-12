@@ -19,6 +19,8 @@
   - `nodes`
   - `node_models`
 - `api_keys` 在数据库中只存 `raw_key` 的 `SHA-256` 哈希，不存明文
+- 网关鉴权在保留 API Key 的同时补充 JWT Bearer 支持；JWT 首版由后端按 `tenant_id + api_key_id` 签发，便于客户端在不直接暴露原始 API Key 的情况下接入
+- JWT 首版采用后端本地 `HS256` 签名，claim 至少包含 `tenant_id`、`api_key_id`、`iss`、`aud`、`token_type=gateway_access`；校验通过后仍会回查 API Key 和 tenant 状态，避免签发后脱离底层资源状态
 - 首批管理面接口先提供创建与列表，优先打通完整主链路，再补更新删除
 - 管理面错误响应统一为 `{ "error": { "code": "...", "message": "..." } }`
 - 前端管理台先采用服务端取数模式直接读取 FastAPI admin 接口
