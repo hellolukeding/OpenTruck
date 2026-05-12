@@ -50,6 +50,10 @@
 - 已新增首版网关执行层，可将 `/v1/responses`、`/responses` 与 `/backend-api/codex/responses` 转发到租户自己的 `OpenAI OAuth` 上游账号
 - 已将 `/v1/models` 接入租户 API Key 鉴权，并返回当前租户可见的基础模型信息
 - 已用 `TestClient + external httpx mock` 验证 `Bearer API Key -> tenant -> upstream account -> Codex responses` 真实转发链路
+- 已新增首版 `chat/completions -> responses` 协议兼容层，并接入租户 OAuth 网关
+- 已支持 `/v1/chat/completions` 与 `/chat/completions` 的非流式文本回复和 tool calls 回复
+- 已用 `TestClient + external httpx mock` 验证 Chat Completions 请求转换、上游转发和响应逆向转换
+- 已明确将 `stream=true` 的 Chat Completions 请求以 `501` 拒绝，避免假支持
 
 ## 已知问题
 
@@ -57,12 +61,12 @@
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
 - 前端资源页仍缺排序切换、更多筛选维度与详情面板
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
-- 网关首版仍只支持 `responses`/`codex responses` 主链路，尚未覆盖 `chat/completions`、流式转发与更多协议适配
+- `chat/completions` 首版仍只支持非流式主链路，尚未补 SSE 流式转换
 - 上游账号调度仍是最简单的“租户内取一个 active OAuth 账号”，还没有接入更完整的优先级、限流、故障摘除与粘性策略
 
 ## 下一步
 
-1. 为网关补 `chat/completions -> responses` 协议转换，继续向 `sub2api` 靠拢
+1. 为 `chat/completions` 补 SSE 流式转换，继续向 `sub2api` 靠拢
 2. 为上游账号选择补优先级、故障摘除、token 过期处理与更细的调度策略
 3. 为前端资源页补 `upstream_accounts` 管理页，并接入 OAuth 创建和 refresh 操作
 4. 将数据库连接与健康探测接入更完整的 FastAPI 生命周期管理

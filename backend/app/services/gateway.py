@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import json
 import uuid
 from collections.abc import Iterable
 from dataclasses import dataclass
 
 import httpx
 from fastapi import Response
+from fastapi.responses import JSONResponse
 from sqlalchemy import Select, desc, nullslast, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import APIError, bad_request
 from app.core.settings import settings
 from app.models.upstream_account import UpstreamAccount
+from app.services.openai_compat import chat_completions_to_responses, responses_to_chat_completions
 
 
 CHATGPT_CODEX_RESPONSES_PATH = "/backend-api/codex/responses"
@@ -87,19 +90,11 @@ class GatewayService:
         upstream_url = self._build_upstream_url(subpath=subpath)
         headers = self._build_request_headers(request_headers=request_headers, access_token=access_token)
 
-        try:
-            with httpx.Client(timeout=settings.gateway_upstream_timeout_seconds) as client:
-                upstream_response = client.post(
-                    upstream_url,
-                    content=body,
-                    headers=headers,
-                )
-        except httpx.HTTPError as exc:
-            raise APIError(
-                status_code=502,
-                code="upstream_request_failed",
-                message="Failed to reach upstream Codex service",
-            ) from exc
+        upstream_response = self._post_upstream(
+            upstream_url=upstream_url,
+            headers=headers,
+            body=body,
+        )
 
         response_headers = self._build_response_headers(upstream_response.headers)
         content_type = upstream_response.headers.get("content-type", "application/json")
@@ -107,6 +102,69 @@ class GatewayService:
             content=upstream_response.content,
             status_code=upstream_response.status_code,
             media_type=content_type.split(";")[0],
+            headers=response_headers,
+        )
+
+    def forward_chat_completions(
+        self,
+        *,
+        tenant_id: uuid.UUID,
+        request_headers: Iterable[tuple[str, str]],
+        payload: dict,
+        subpath: str = "",
+    ) -> Response:
+        if payload.get("stream"):
+            raise APIError(
+                status_code=501,
+                code="chat_completions_stream_not_supported",
+                message="Streaming chat completions are not supported yet",
+            )
+
+        try:
+            responses_payload = chat_completions_to_responses(payload)
+        except ValueError as exc:
+            raise bad_request("invalid_chat_completions_request", str(exc)) from exc
+
+        account = self.select_openai_oauth_account(tenant_id)
+        access_token = (account.credentials or {}).get("access_token")
+        if not access_token:
+            raise bad_request("missing_access_token", "Selected upstream account does not have an access token")
+
+        upstream_url = self._build_upstream_url(subpath=subpath)
+        headers = self._build_request_headers(request_headers=request_headers, access_token=access_token)
+        upstream_response = self._post_upstream(
+            upstream_url=upstream_url,
+            headers=headers,
+            body=json.dumps(responses_payload).encode("utf-8"),
+        )
+
+        if upstream_response.status_code >= 400:
+            response_headers = self._build_response_headers(upstream_response.headers)
+            content_type = upstream_response.headers.get("content-type", "application/json")
+            return Response(
+                content=upstream_response.content,
+                status_code=upstream_response.status_code,
+                media_type=content_type.split(";")[0],
+                headers=response_headers,
+            )
+
+        try:
+            upstream_payload = upstream_response.json()
+        except ValueError as exc:
+            raise APIError(
+                status_code=502,
+                code="invalid_upstream_response",
+                message="Upstream did not return valid JSON for chat completions conversion",
+            ) from exc
+
+        chat_response = responses_to_chat_completions(
+            upstream_payload,
+            fallback_model=payload.get("model") or "openai/responses",
+        )
+        response_headers = self._build_response_headers(upstream_response.headers)
+        return JSONResponse(
+            content=chat_response,
+            status_code=upstream_response.status_code,
             headers=response_headers,
         )
 
@@ -138,3 +196,18 @@ class GatewayService:
             if name.lower() in ALLOWED_RESPONSE_HEADERS:
                 headers[name] = value
         return headers
+
+    def _post_upstream(self, *, upstream_url: str, headers: dict[str, str], body: bytes) -> httpx.Response:
+        try:
+            with httpx.Client(timeout=settings.gateway_upstream_timeout_seconds) as client:
+                return client.post(
+                    upstream_url,
+                    content=body,
+                    headers=headers,
+                )
+        except httpx.HTTPError as exc:
+            raise APIError(
+                status_code=502,
+                code="upstream_request_failed",
+                message="Failed to reach upstream Codex service",
+            ) from exc

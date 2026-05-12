@@ -45,10 +45,15 @@ See [docs/OPENTRUCK_MVP_BLUEPRINT.md](/Users/lukeding/Desktop/playground/2026/pr
   - `POST /v1/responses`
   - `POST /responses`
   - `POST /backend-api/codex/responses`
+  - `POST /v1/chat/completions`
+  - `POST /chat/completions`
 - current routing behavior:
   - resolve tenant from the platform API key
   - pick one active `openai/oauth` upstream account for that tenant
   - forward the request to `chatgpt.com/backend-api/codex/responses`
+- current Chat Completions behavior:
+  - non-streaming requests are translated to Responses API shape and translated back on the way out
+  - `stream=true` is not implemented yet and currently returns `501`
 
 ## Frontend Notes
 

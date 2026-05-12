@@ -36,6 +36,7 @@ check:
 		backend/app/models/oauth_session.py \
 		backend/app/models/upstream_account.py \
 		backend/app/services/gateway.py \
+		backend/app/services/openai_compat.py \
 		backend/app/services/openai_oauth.py \
 		backend/app/services/security.py \
 		backend/app/schemas/tenant.py \
