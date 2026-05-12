@@ -15,7 +15,7 @@ export function FormStatus({ status, message }: FormStatusProps) {
   return (
     <div
       className={cn(
-        "border px-4 py-3 text-sm",
+        "border px-4 py-3 text-sm rounded-lg",
         status === "success"
           ? "border-outline-variant bg-surface-container text-primary"
           : "border-error bg-error-container text-on-error-container",

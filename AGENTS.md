@@ -1,10 +1,10 @@
 <claude-mem-context>
 # Memory Context
 
-# [OpenTruck] recent context, 2026-05-11 6:55pm GMT+8
+# [OpenTruck] recent context, 2026-05-12 1:58pm GMT+8
 
 No previous sessions found.
-</claude-mem-context>``
+</claude-mem-context>```
 
 ## 每次会话开始时（上班打卡）
 
@@ -22,3 +22,7 @@ No previous sessions found.
 ## 项目目标
 
 本项目需要重点参考sub2api的设计和代码，本项目的目标是构建一款社区共建的多租户的开源ai中转站
+
+## 代码规范
+
+- 前端每个代码文件不得超过300行，超过300行的需要创建新文件，保证代码的可读性

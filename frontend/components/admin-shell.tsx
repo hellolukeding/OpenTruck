@@ -2,9 +2,11 @@ import Link from "next/link";
 import { KeyRound, LayoutGrid, RadioTower, Route, Users } from "lucide-react";
 
 import type { Locale, DashboardDictionary } from "@/lib/i18n";
-import { SUPPORTED_LOCALES } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 
 type AdminShellProps = {
   locale: Locale;
@@ -77,27 +79,14 @@ export function AdminShell({
                 search
               </span>
               <input
-                className="bg-surface border border-outline-variant text-label-md font-label-md rounded-none px-sm py-xs pl-7 focus:outline-none focus:border-primary focus:ring-0 w-48 transition-colors placeholder:text-on-surface-variant"
+                className="bg-surface border border-outline-variant text-label-md font-label-md rounded-lg px-sm py-xs pl-7 focus:outline-none focus:border-primary focus:ring-0 w-48 transition-colors placeholder:text-on-surface-variant"
                 placeholder="Search..."
                 type="text"
               />
             </div>
-            <div className="flex items-center gap-xs">
-              {SUPPORTED_LOCALES.map((item) => (
-                <Link
-                  key={item}
-                  href={currentPath.replace(`/${locale}`, `/${item}`)}
-                  className={cn(
-                    "text-code-sm font-code-sm px-1 py-0.5 border transition-colors",
-                    locale === item
-                      ? "border-primary text-primary bg-surface-container"
-                      : "border-transparent text-on-surface-variant hover:text-primary hover:border-outline-variant",
-                  )}
-                >
-                  {item === "en" ? "EN" : "中"}
-                </Link>
-              ))}
-            </div>
+            <ThemeToggle />
+            <UserMenu />
+            <LocaleSwitcher locale={locale} currentPath={currentPath} />
           </div>
         </div>
       </header>
