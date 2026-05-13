@@ -137,6 +137,7 @@ class ChatCompletionsStreamState:
     sent_role: bool = False
     saw_text: bool = False
     saw_reasoning: bool = False
+    saw_refusal: bool = False
     saw_tool_call: bool = False
     finalized: bool = False
     next_tool_call_index: int = 0
@@ -176,6 +177,19 @@ def responses_event_to_chat_chunks(
             ]
         return [_make_chat_delta_chunk(state=state, delta={"content": delta})]
 
+    if event_type == "response.output_text.done":
+        text = event_payload.get("text")
+        if not isinstance(text, str) or not text or state.saw_text:
+            return []
+        state.saw_text = True
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"content": text}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"content": text})]
+
     if event_type == "response.reasoning_summary_text.delta":
         delta = event_payload.get("delta")
         if not isinstance(delta, str) or not delta:
@@ -188,6 +202,32 @@ def responses_event_to_chat_chunks(
                 _make_chat_delta_chunk(state=state, delta={"reasoning_content": delta}),
             ]
         return [_make_chat_delta_chunk(state=state, delta={"reasoning_content": delta})]
+
+    if event_type == "response.refusal.delta":
+        delta = event_payload.get("delta")
+        if not isinstance(delta, str) or not delta:
+            return []
+        state.saw_refusal = True
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"refusal": delta}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"refusal": delta})]
+
+    if event_type == "response.refusal.done":
+        text = event_payload.get("text")
+        if not isinstance(text, str) or not text or state.saw_refusal:
+            return []
+        state.saw_refusal = True
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"refusal": text}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"refusal": text})]
 
     if event_type == "response.output_item.added":
         item = event_payload.get("item") or {}
@@ -309,6 +349,8 @@ def finalize_chat_stream(*, state: ChatCompletionsStreamState, response: dict[st
     incomplete_details = response.get("incomplete_details") or {}
     if response.get("status") == "incomplete" and incomplete_details.get("reason") == "max_output_tokens":
         finish_reason = "length"
+    elif response.get("status") == "incomplete" and incomplete_details.get("reason") == "content_filter":
+        finish_reason = "content_filter"
 
     chunks: list[dict[str, Any]] = [
         {

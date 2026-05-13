@@ -63,9 +63,12 @@
 - 已支持 `chat/completions` 的首版 SSE 流式转换，可将 Responses SSE 事件翻译为 Chat Completions SSE
 - 已用 `TestClient + mock upstream stream response` 验证 `response.created / output_text.delta / completed` 到 `chat.completion.chunk` 的流式转换
 - 已为 `chat/completions` 流式兼容层补充更多 Responses 事件覆盖：`response.output_item.done`、`response.function_call_arguments.done`、`response.reasoning_summary_text.done`
+- 已继续扩展 `chat/completions` 流式兼容层，新增 `response.output_text.done` 与 `response.refusal.delta/done` 支持
 - 已修正流式工具参数映射逻辑，未匹配到 `output_index` 时不再错误写入默认工具槽位
 - 已支持在缺少 delta 事件时，从 `message/function_call/reasoning` 的 done 事件回填 Chat Completions chunk
+- 已将 `response.incomplete` 的 `content_filter` 原因映射为 `finish_reason=content_filter`
 - 已用 mocked upstream SSE 验证 `reasoning done -> function_call done -> completed` 的整条 `/v1/chat/completions` 流式网关链路
+- 已用本地冒烟验证 `output_text.done` 可回填文本，`refusal.done + content_filter` 可回填 refusal 并给出正确 `finish_reason`
 - 已为 `upstream_accounts` 增加调度字段：`priority`、`last_used_at`、`last_error_at`、`last_error_code`、`consecutive_failures`、`cooldown_until`
 - 已将租户内上游选择策略升级为“优先级 + 最久未使用”排序，并在转发前跳过冷却中的账号
 - 已接入上游 token 过期自动禁用、`429/5xx/网络错误` 冷却摘除，以及 `401/403` 禁用处理
