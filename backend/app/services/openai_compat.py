@@ -50,6 +50,7 @@ def chat_completions_to_responses(payload: dict[str, Any]) -> dict[str, Any]:
 
 def responses_to_chat_completions(payload: dict[str, Any], *, fallback_model: str) -> dict[str, Any]:
     content_text = ""
+    refusal_text = ""
     tool_calls: list[dict[str, Any]] = []
     reasoning_text = ""
 
@@ -63,6 +64,8 @@ def responses_to_chat_completions(payload: dict[str, Any], *, fallback_model: st
                     continue
                 if part.get("type") == "output_text" and isinstance(part.get("text"), str):
                     content_text += part["text"]
+                elif part.get("type") == "refusal" and isinstance(part.get("text"), str):
+                    refusal_text += part["text"]
         elif item_type == "function_call":
             tool_calls.append(
                 {
@@ -88,6 +91,8 @@ def responses_to_chat_completions(payload: dict[str, Any], *, fallback_model: st
         message["content"] = content_text
     else:
         message["content"] = None
+    if refusal_text:
+        message["refusal"] = refusal_text
     if reasoning_text:
         message["reasoning_content"] = reasoning_text
 
@@ -95,6 +100,8 @@ def responses_to_chat_completions(payload: dict[str, Any], *, fallback_model: st
     incomplete_details = payload.get("incomplete_details") or {}
     if payload.get("status") == "incomplete" and incomplete_details.get("reason") == "max_output_tokens":
         finish_reason = "length"
+    elif payload.get("status") == "incomplete" and incomplete_details.get("reason") == "content_filter":
+        finish_reason = "content_filter"
 
     response: dict[str, Any] = {
         "id": payload.get("id") or f"chatcmpl_{uuid.uuid4().hex}",
@@ -329,7 +336,7 @@ def responses_event_to_chat_chunks(
                 state=state,
                 include_arguments_when_missing=True,
             )
-        if item.get("type") == "message" and not (state.saw_text or state.saw_refusal):
+        if item.get("type") == "message" and not (state.saw_text and state.saw_refusal):
             return _handle_message_output_item(item=item, state=state)
         if item.get("type") == "reasoning" and not state.saw_reasoning:
             return _handle_reasoning_output_item(item=item, state=state)
@@ -649,10 +656,10 @@ def _handle_message_output_item(*, item: dict[str, Any], state: ChatCompletionsS
         state.sent_role = True
         chunks.append(_make_chat_delta_chunk(state=state, delta={"role": "assistant"}))
 
-    if text:
+    if text and not state.saw_text:
         state.saw_text = True
         chunks.append(_make_chat_delta_chunk(state=state, delta={"content": text}))
-    if refusal:
+    if refusal and not state.saw_refusal:
         state.saw_refusal = True
         chunks.append(_make_chat_delta_chunk(state=state, delta={"refusal": refusal}))
     return chunks

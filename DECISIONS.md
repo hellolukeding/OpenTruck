@@ -51,6 +51,7 @@
 - 对 `responses` 原生 SSE 兜底，优先维持 Responses 协议风格：可补 `response.failed` 事件，但不额外注入 Chat 风格的 `[DONE]`；同时对 `response.failed` 的记账错误码尽量细化到上游错误类型，便于后续运营排查
 - 对 `response.failed` 的错误提取，优先读取 `response.error.*`，再回退到顶层 `error.*`，避免不同上游或不同转发层的错误字段位置差异导致终态信息丢失
 - 对流式 usage 采集，不只依赖 terminal event；若上游在 `response.in_progress` 就提前上报 usage，也要进入当前流式状态与后续失败/不完整账目，避免断流时低估真实消耗
+- 对 `message output_item` 的回填采用“只补缺失字段、不重复已输出字段”的策略：如果 text 已由 delta 输出，后续 `output_item.done` 只补 refusal 等遗漏信息；非流式 `responses -> chat/completions` 也按同样语义保留 refusal 和 `content_filter`
 - 前端登录注册优先采用 `Auth.js`，先用 OAuth 统一承接“登录 + 首次注册”，避免在主线早期再单独造密码体系
 - 控制台访问先通过 Next.js `middleware` 保护 `/{locale}` 路由，未登录用户统一跳转到 `/auth/signin`
 - OAuth provider 首版先接 `GitHub` 与 `Google`，并通过环境变量开关决定是否展示入口；未配置 provider 时保留登录页占位提示

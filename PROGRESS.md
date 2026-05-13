@@ -70,6 +70,8 @@
 - 已继续收紧 `responses stream` 终态语义：断流兜底保留 `response.failed` 失败事件，但不再额外注入 `[DONE]`；`response.failed` 的 ledger 错误码也会细化到 `safety_error` 级别
 - 已继续补齐 `response.failed` 错误提取兼容：现在会优先读取 `response.error.*`，再回退到顶层 `error.*`
 - 已继续补齐流式 usage 采集：`response.in_progress` 中提前出现的 usage 现在也会被 `responses` 与 `chat/completions` 两条流式链路纳入状态和失败账目
+- 已继续补齐 `message output_item` 混合场景：若前面已通过 delta 输出文本，后续 `output_item.done` 仍可补回遗漏的 refusal，而不会重复文本
+- 已将非流式 `responses -> chat/completions` 的 refusal 与 `content_filter` finish reason 对齐到流式行为
 - 已修正流式工具参数映射逻辑，未匹配到 `output_index` 时不再错误写入默认工具槽位
 - 已支持在缺少 delta 事件时，从 `message/function_call/reasoning` 的 done 事件回填 Chat Completions chunk
 - 已将 `response.incomplete` 的 `content_filter` 原因映射为 `finish_reason=content_filter`
@@ -81,6 +83,8 @@
 - 已用本地冒烟验证 `responses` 断流兜底不再输出 `[DONE]`，并验证 `response.failed + safety_error` 会落成 `upstream_terminal_safety_error`
 - 已用本地冒烟验证 `response.failed` 即使只在 `response.error` 下携带错误信息，也能正确回填 refusal、映射 `content_filter`，并写入细化错误码
 - 已用本地冒烟验证仅收到 `response.in_progress` 后断流时，两条流式链路都会把预先上报的 usage 写进 `upstream_missing_terminal_event` 账目
+- 已用本地冒烟验证“先输出 text delta，后在 message output_item 中补 refusal”时不会重复文本，且 refusal 能正确回填
+- 已用本地冒烟验证非流式 `responses` 含 refusal 且 `incomplete.reason=content_filter` 时，会正确生成 `message.refusal` 与 `finish_reason=content_filter`
 - 已为 `upstream_accounts` 增加调度字段：`priority`、`last_used_at`、`last_error_at`、`last_error_code`、`consecutive_failures`、`cooldown_until`
 - 已将租户内上游选择策略升级为“优先级 + 最久未使用”排序，并在转发前跳过冷却中的账号
 - 已接入上游 token 过期自动禁用、`429/5xx/网络错误` 冷却摘除，以及 `401/403` 禁用处理
@@ -123,7 +127,7 @@
 - admin 接口仍缺更细的资源级筛选校验与更完整的字段级错误元数据
 - 其余前端资源页仍缺更完整的排序切换、更多筛选维度与详情面板；当前这类增强已优先补到 `upstream_accounts`
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
-- `chat/completions` 流式兼容层已覆盖更多 done/failed/canceled 事件与回填逻辑，但后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
+- `chat/completions` 流式兼容层已覆盖更多 done/failed/canceled 事件与回填逻辑，并补了 message/refusal 混合场景；后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
 - `responses` 流式主链路已经可透传，并在缺少 terminal event、失败终态和 `in_progress` 预上报 usage 场景下做更明确记账；后续仍需要补更完整的断流恢复、更多 error 变体与更细的事件观测
 - 上游账号调度已补到首版优先级、故障摘除、会话粘性、进程内并发占位与基础租户配额/失败记账，但仍缺跨进程/分布式并发协调、按模型或账号的精细计费与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
