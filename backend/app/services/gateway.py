@@ -63,6 +63,9 @@ RESPONSES_TERMINAL_EVENTS = {
     "response.cancelled",
     "response.canceled",
 }
+RESPONSES_USAGE_EVENTS = RESPONSES_TERMINAL_EVENTS | {
+    "response.in_progress",
+}
 
 
 @dataclass(slots=True)
@@ -475,7 +478,7 @@ class GatewayService:
         )
 
     def _extract_usage_from_stream_event(self, event_type: str, payload: dict[str, Any]) -> UsageAccounting | None:
-        if event_type not in RESPONSES_TERMINAL_EVENTS:
+        if event_type not in RESPONSES_USAGE_EVENTS:
             return None
         response = payload.get("response")
         if not isinstance(response, dict):

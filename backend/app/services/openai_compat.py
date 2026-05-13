@@ -166,6 +166,15 @@ def responses_event_to_chat_chunks(
         state.sent_role = True
         return [_make_chat_delta_chunk(state=state, delta={"role": "assistant"})]
 
+    if event_type == "response.in_progress":
+        response = event_payload.get("response") or {}
+        if response.get("id"):
+            state.id = response["id"]
+        if response.get("model"):
+            state.model = response["model"]
+        _update_state_usage_from_response(state=state, response=response)
+        return []
+
     if event_type == "response.output_text.delta":
         delta = event_payload.get("delta")
         if not isinstance(delta, str) or not delta:
@@ -343,16 +352,7 @@ def responses_event_to_chat_chunks(
             state.terminal_error_type = error["type"]
         if isinstance(error, dict) and not isinstance(response.get("error"), dict):
             response = {**response, "error": error}
-        usage = response.get("usage")
-        if isinstance(usage, dict):
-            state.usage = {
-                "prompt_tokens": int(usage.get("input_tokens") or 0),
-                "completion_tokens": int(usage.get("output_tokens") or 0),
-                "total_tokens": int(usage.get("input_tokens") or 0) + int(usage.get("output_tokens") or 0),
-            }
-            details = usage.get("input_tokens_details")
-            if isinstance(details, dict) and details.get("cached_tokens"):
-                state.usage["prompt_tokens_details"] = {"cached_tokens": details["cached_tokens"]}
+        _update_state_usage_from_response(state=state, response=response)
         chunks = _handle_terminal_event_message(
             event_type=event_type,
             event_payload=event_payload,
@@ -727,3 +727,17 @@ def _extract_terminal_error(*, event_payload: dict[str, Any], response: dict[str
     if isinstance(top_level_error, dict):
         return top_level_error
     return {}
+
+
+def _update_state_usage_from_response(*, state: ChatCompletionsStreamState, response: dict[str, Any]) -> None:
+    usage = response.get("usage")
+    if not isinstance(usage, dict):
+        return
+    state.usage = {
+        "prompt_tokens": int(usage.get("input_tokens") or 0),
+        "completion_tokens": int(usage.get("output_tokens") or 0),
+        "total_tokens": int(usage.get("input_tokens") or 0) + int(usage.get("output_tokens") or 0),
+    }
+    details = usage.get("input_tokens_details")
+    if isinstance(details, dict) and details.get("cached_tokens"):
+        state.usage["prompt_tokens_details"] = {"cached_tokens": details["cached_tokens"]}
