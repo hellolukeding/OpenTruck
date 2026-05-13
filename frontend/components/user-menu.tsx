@@ -1,8 +1,9 @@
-import Link from "next/link";
-
 import { auth, signOut } from "@/auth";
+import { SignInDialogTrigger } from "@/components/sign-in-dialog-trigger";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getAuthUiConfig } from "@/lib/auth-providers";
+import { headers } from "next/headers";
 
 function getInitials(name: string): string {
   return name
@@ -15,6 +16,10 @@ function getInitials(name: string): string {
 
 export async function UserMenu() {
   const session = await auth();
+  const requestHeaders = await headers();
+  const authUiConfig = getAuthUiConfig(
+    requestHeaders.get("x-forwarded-host") || requestHeaders.get("host"),
+  );
   const user = session?.user;
 
   if (user) {
@@ -44,8 +49,10 @@ export async function UserMenu() {
   }
 
   return (
-    <Link href="/auth/signin" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-      Log in
-    </Link>
+    <SignInDialogTrigger callbackUrl="/en" authUiConfig={authUiConfig}>
+      <button className={buttonVariants({ variant: "ghost", size: "sm" })} type="button">
+        Log in
+      </button>
+    </SignInDialogTrigger>
   );
 }

@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 
-import { getAuthProviders } from "@/lib/auth-providers";
+import { getAuthProviders, LOCAL_AUTH_SECRET } from "@/lib/auth-providers";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   trustHost: true,
-  secret: process.env.AUTH_SECRET || "opentruck-local-auth-secret",
+  secret: process.env.AUTH_SECRET || LOCAL_AUTH_SECRET,
   providers: getAuthProviders(),
   pages: {
     signIn: "/auth/signin",

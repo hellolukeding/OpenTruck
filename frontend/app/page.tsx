@@ -1,7 +1,11 @@
+import { auth } from "@/auth";
+import { SignInDialogTrigger } from "@/components/sign-in-dialog-trigger";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import Link from "next/link";
+import { headers } from "next/headers";
+import { getAuthUiConfig } from "@/lib/auth-providers";
 import { isSupportedLocale, type Locale } from "@/lib/i18n";
 
 const models = [
@@ -143,6 +147,11 @@ export default async function LandingPage({
 }: {
   searchParams?: Promise<{ lang?: string }>;
 }) {
+  const session = await auth();
+  const requestHeaders = await headers();
+  const authUiConfig = getAuthUiConfig(
+    requestHeaders.get("x-forwarded-host") || requestHeaders.get("host"),
+  );
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const requestedLocale = resolvedSearchParams?.lang;
   const locale: Locale =
@@ -151,6 +160,7 @@ export default async function LandingPage({
       : "en";
   const copy = landingCopy[locale];
   const consoleHref = `/${locale}`;
+  const showSignInDialog = !session;
 
   return (
     <div className="bg-surface text-on-surface antialiased min-h-screen flex flex-col">
@@ -167,7 +177,18 @@ export default async function LandingPage({
               <a className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="#models">{copy.navModels}</a>
               <a className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="#pricing">{copy.navPricing}</a>
               <a className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href="#endpoints">{copy.navDocs}</a>
-              <Link className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href={consoleHref}>{copy.navConsole}</Link>
+              {showSignInDialog ? (
+                <SignInDialogTrigger callbackUrl={consoleHref} authUiConfig={authUiConfig}>
+                  <button
+                    className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"
+                    type="button"
+                  >
+                    {copy.navConsole}
+                  </button>
+                </SignInDialogTrigger>
+              ) : (
+                <Link className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors" href={consoleHref}>{copy.navConsole}</Link>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-md">
@@ -179,12 +200,23 @@ export default async function LandingPage({
                 "zh-CN": "/?lang=zh-CN",
               }}
             />
-            <Link
-              href={consoleHref}
-              className="ml-sm bg-primary text-on-primary text-label-md font-label-md px-md py-sm hover:bg-primary-container hover:text-on-primary-container transition-colors rounded-lg"
-            >
-              {copy.navConsole}
-            </Link>
+            {showSignInDialog ? (
+              <SignInDialogTrigger callbackUrl={consoleHref} authUiConfig={authUiConfig}>
+                <button
+                  type="button"
+                  className="ml-sm bg-primary text-on-primary text-label-md font-label-md px-md py-sm hover:bg-primary-container hover:text-on-primary-container transition-colors rounded-lg"
+                >
+                  {copy.navConsole}
+                </button>
+              </SignInDialogTrigger>
+            ) : (
+              <Link
+                href={consoleHref}
+                className="ml-sm bg-primary text-on-primary text-label-md font-label-md px-md py-sm hover:bg-primary-container hover:text-on-primary-container transition-colors rounded-lg"
+              >
+                {copy.navConsole}
+              </Link>
+            )}
             <UserMenu />
           </div>
         </div>
@@ -212,13 +244,25 @@ export default async function LandingPage({
                 type="text"
               />
             </div>
-            <Link
-              href={consoleHref}
-              className="w-full sm:w-auto bg-primary text-on-primary text-label-md font-label-md px-lg py-sm h-12 flex items-center justify-center gap-xs hover:bg-primary-container hover:text-on-primary-container transition-colors whitespace-nowrap rounded-lg"
-            >
-              <span className="material-symbols-outlined text-[18px]">key</span>
-              {copy.heroCta}
-            </Link>
+            {showSignInDialog ? (
+              <SignInDialogTrigger callbackUrl={consoleHref} authUiConfig={authUiConfig}>
+                <button
+                  type="button"
+                  className="w-full sm:w-auto bg-primary text-on-primary text-label-md font-label-md px-lg py-sm h-12 flex items-center justify-center gap-xs hover:bg-primary-container hover:text-on-primary-container transition-colors whitespace-nowrap rounded-lg"
+                >
+                  <span className="material-symbols-outlined text-[18px]">key</span>
+                  {copy.heroCta}
+                </button>
+              </SignInDialogTrigger>
+            ) : (
+              <Link
+                href={consoleHref}
+                className="w-full sm:w-auto bg-primary text-on-primary text-label-md font-label-md px-lg py-sm h-12 flex items-center justify-center gap-xs hover:bg-primary-container hover:text-on-primary-container transition-colors whitespace-nowrap rounded-lg"
+              >
+                <span className="material-symbols-outlined text-[18px]">key</span>
+                {copy.heroCta}
+              </Link>
+            )}
           </div>
         </section>
 

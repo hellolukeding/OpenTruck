@@ -120,6 +120,10 @@
 - 已将前端 `UserMenu` 接到真实 session，移除原本的本地假登录逻辑
 - 已用浏览器验证 `http://localhost:3005/en` 会重定向到 `/auth/signin?callbackUrl=%2Fen`
 - 已用浏览器验证未配置 provider 时登录页会正常渲染并提示所需环境变量
+- 已将首页匿名登录入口改为可关闭弹窗，不再强制跳整页登录
+- 已为 Auth.js 补上首版账号密码登录，与 OAuth 共用一套登录面板
+- 已为本地开发补充默认凭据回退：`admin / opentruck-dev-password`
+- 已将 operator 凭据回退扩展到本地 `localhost / 127.0.0.1 / 局域网预览`，避免 `next start` 预览时密码入口消失
 
 ## 已知问题
 
@@ -131,6 +135,7 @@
 - `responses` 流式主链路已经可透传，并在缺少 terminal event、失败终态和 `in_progress` 预上报 usage 场景下做更明确记账；后续仍需要补更完整的断流恢复、更多 error 变体与更细的事件观测
 - 上游账号调度已补到首版优先级、故障摘除、会话粘性、进程内并发占位与基础租户配额/失败记账，但仍缺跨进程/分布式并发协调、按模型或账号的精细计费与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
+- 账号密码登录当前仍是首版 operator 入口，凭据来源于环境变量或本地开发回退值，尚未接入独立用户表与密码存储
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
 - JWT 首版已可用于网关，但当前还没有单独的 JWT 撤销/黑名单机制，失效主要依赖过期时间和底层 API Key / tenant 状态校验
 

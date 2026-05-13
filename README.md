@@ -97,6 +97,8 @@ poetry run uvicorn app.main:app --reload --port 8000
 ## Frontend Auth
 
 - frontend now uses `Auth.js` for OAuth-based sign-in
+- landing page login now opens as a closable modal instead of forcing a page navigation
+- credentials-based operator sign-in is available alongside OAuth
 - protected console routes:
   - `/en`
   - `/zh-CN`
@@ -106,8 +108,15 @@ poetry run uvicorn app.main:app --reload --port 8000
   - `GET /auth/signin`
 - supported provider env vars:
   - `AUTH_SECRET`
+  - `AUTH_CREDENTIALS_USERNAME`
+  - `AUTH_CREDENTIALS_PASSWORD`
+  - `AUTH_CREDENTIALS_NAME`
   - `AUTH_GITHUB_ID`
   - `AUTH_GITHUB_SECRET`
   - `AUTH_GOOGLE_ID`
   - `AUTH_GOOGLE_SECRET`
-- if no provider env vars are configured, the sign-in page still renders and explains what is missing
+- local development fallback credentials:
+  - account: `admin`
+  - password: `opentruck-dev-password`
+- the fallback credentials are exposed only for local / private-network previews when explicit operator credentials are not configured
+- if no OAuth provider env vars are configured, the sign-in UI still renders and explains what is missing
