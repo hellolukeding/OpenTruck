@@ -482,8 +482,12 @@ class GatewayService:
             return None
         return self._extract_usage_from_payload(response)
 
-    def _stream_failure_code_for_terminal_event(self, event_type: str) -> str:
+    def _stream_failure_code_for_terminal_event(self, event_type: str, *, error_type: str | None = None) -> str:
         if event_type == "response.failed":
+            if error_type == "safety_error":
+                return "upstream_terminal_safety_error"
+            if error_type:
+                return f"upstream_terminal_{error_type}"
             return "upstream_terminal_failed"
         if event_type in {"response.cancelled", "response.canceled"}:
             return "upstream_terminal_canceled"
@@ -501,6 +505,20 @@ class GatewayService:
             "event: response.failed\n"
             f"data: {json.dumps(payload, separators=(',', ':'))}\n\n"
         ).encode("utf-8")
+
+    def _parse_stream_event_payload(self, pending_data: list[str]) -> dict[str, Any] | None:
+        if not pending_data:
+            return None
+        raw_data = "\n".join(pending_data).strip()
+        if not raw_data or raw_data == "[DONE]":
+            return None
+        try:
+            payload = json.loads(raw_data)
+        except json.JSONDecodeError:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        return payload
 
     def _resolve_conversation_id(self, request_headers: Iterable[tuple[str, str]]) -> str | None:
         header_map = {name.lower(): value for name, value in request_headers}
@@ -987,7 +1005,10 @@ class GatewayService:
                     error_code=(
                         "upstream_missing_terminal_event"
                         if not saw_terminal_event
-                        else self._stream_failure_code_for_terminal_event(state.terminal_event_type)
+                        else self._stream_failure_code_for_terminal_event(
+                            state.terminal_event_type,
+                            error_type=state.terminal_error_type,
+                        )
                     ),
                     usage=usage,
                     status="incomplete" if not saw_terminal_event else "failed",
@@ -1012,6 +1033,7 @@ class GatewayService:
         client = getattr(upstream_response, "_client", None)
         account_id = getattr(upstream_response, "_opentruck_account_id", None)
         terminal_event_type: str | None = None
+        terminal_error_type: str | None = None
         try:
             for line in upstream_response.iter_lines():
                 if line is None:
@@ -1021,8 +1043,12 @@ class GatewayService:
                 elif line.startswith("data:"):
                     pending_data.append(line.partition(":")[2].lstrip())
                 elif line == "":
+                    payload = self._parse_stream_event_payload(pending_data)
                     if pending_event in RESPONSES_TERMINAL_EVENTS:
                         terminal_event_type = pending_event
+                        error = payload.get("error") if isinstance(payload, dict) else None
+                        if isinstance(error, dict) and isinstance(error.get("type"), str):
+                            terminal_error_type = error["type"]
                     usage = self._merge_stream_usage(
                         current=usage,
                         event_type=pending_event,
@@ -1033,8 +1059,12 @@ class GatewayService:
                 yield f"{line}\n".encode("utf-8")
 
             if pending_event or pending_data:
+                payload = self._parse_stream_event_payload(pending_data)
                 if pending_event in RESPONSES_TERMINAL_EVENTS:
                     terminal_event_type = pending_event
+                    error = payload.get("error") if isinstance(payload, dict) else None
+                    if isinstance(error, dict) and isinstance(error.get("type"), str):
+                        terminal_error_type = error["type"]
                 usage = self._merge_stream_usage(
                     current=usage,
                     event_type=pending_event,
@@ -1045,7 +1075,6 @@ class GatewayService:
                     error_type="upstream_disconnected",
                     message="Upstream stream disconnected before completion",
                 )
-                yield done_sse_chunk()
         finally:
             if terminal_event_type in {"response.completed", "response.done", "response.incomplete"}:
                 self._apply_usage_accounting(
@@ -1068,7 +1097,10 @@ class GatewayService:
                     error_code=(
                         "upstream_missing_terminal_event"
                         if not terminal_event_type
-                        else self._stream_failure_code_for_terminal_event(terminal_event_type)
+                        else self._stream_failure_code_for_terminal_event(
+                            terminal_event_type,
+                            error_type=terminal_error_type,
+                        )
                     ),
                     usage=usage,
                     status="incomplete" if not terminal_event_type else "failed",

@@ -146,6 +146,7 @@ class ChatCompletionsStreamState:
     include_usage: bool = False
     usage: dict[str, Any] | None = None
     terminal_event_type: str | None = None
+    terminal_error_type: str | None = None
 
 
 def responses_event_to_chat_chunks(
@@ -338,6 +339,8 @@ def responses_event_to_chat_chunks(
         if response.get("model"):
             state.model = response["model"]
         error = event_payload.get("error")
+        if isinstance(error, dict) and isinstance(error.get("type"), str):
+            state.terminal_error_type = error["type"]
         if isinstance(error, dict) and not isinstance(response.get("error"), dict):
             response = {**response, "error": error}
         usage = response.get("usage")

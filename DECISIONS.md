@@ -48,6 +48,7 @@
 - 在不重写整套状态机的前提下，优先兼容 `output_item` 级别的 message/reasoning 变体，因为这类事件在不同上游或版本间比 delta 事件更稳定
 - 对 `response.failed`、`response.cancelled/canceled` 这类终态事件，优先保证下游能收到可读的最后一跳信息：若上游没有正文输出，则回填一条 refusal/取消提示，再收口到最终 finish chunk，而不是静默结束
 - 对流式上游“缺少 terminal event 就提前断开”的场景，网关统一视为不完整请求：向下游补一条可读失败终态，并在 ledger 中记为失败/不完整，而不是继续按成功请求扣配额
+- 对 `responses` 原生 SSE 兜底，优先维持 Responses 协议风格：可补 `response.failed` 事件，但不额外注入 Chat 风格的 `[DONE]`；同时对 `response.failed` 的记账错误码尽量细化到上游错误类型，便于后续运营排查
 - 前端登录注册优先采用 `Auth.js`，先用 OAuth 统一承接“登录 + 首次注册”，避免在主线早期再单独造密码体系
 - 控制台访问先通过 Next.js `middleware` 保护 `/{locale}` 路由，未登录用户统一跳转到 `/auth/signin`
 - OAuth provider 首版先接 `GitHub` 与 `Google`，并通过环境变量开关决定是否展示入口；未配置 provider 时保留登录页占位提示
