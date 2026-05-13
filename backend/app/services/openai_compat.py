@@ -324,10 +324,20 @@ def responses_event_to_chat_chunks(
             return _handle_reasoning_output_item(item=item, state=state)
         return []
 
-    if event_type in {"response.completed", "response.done", "response.incomplete", "response.failed"}:
+    if event_type in {
+        "response.completed",
+        "response.done",
+        "response.incomplete",
+        "response.failed",
+        "response.cancelled",
+        "response.canceled",
+    }:
         response = event_payload.get("response") or {}
         if response.get("model"):
             state.model = response["model"]
+        error = event_payload.get("error")
+        if isinstance(error, dict) and not isinstance(response.get("error"), dict):
+            response = {**response, "error": error}
         usage = response.get("usage")
         if isinstance(usage, dict):
             state.usage = {
@@ -338,12 +348,22 @@ def responses_event_to_chat_chunks(
             details = usage.get("input_tokens_details")
             if isinstance(details, dict) and details.get("cached_tokens"):
                 state.usage["prompt_tokens_details"] = {"cached_tokens": details["cached_tokens"]}
-        return finalize_chat_stream(state=state, response=response)
+        chunks = _handle_terminal_event_message(
+            event_type=event_type,
+            event_payload=event_payload,
+            state=state,
+        )
+        return chunks + finalize_chat_stream(state=state, response=response, event_type=event_type)
 
     return []
 
 
-def finalize_chat_stream(*, state: ChatCompletionsStreamState, response: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+def finalize_chat_stream(
+    *,
+    state: ChatCompletionsStreamState,
+    response: dict[str, Any] | None = None,
+    event_type: str | None = None,
+) -> list[dict[str, Any]]:
     if state.finalized:
         return []
     state.finalized = True
@@ -355,6 +375,12 @@ def finalize_chat_stream(*, state: ChatCompletionsStreamState, response: dict[st
         finish_reason = "length"
     elif response.get("status") == "incomplete" and incomplete_details.get("reason") == "content_filter":
         finish_reason = "content_filter"
+    elif event_type == "response.failed":
+        error = response.get("error")
+        if not isinstance(error, dict):
+            error = {}
+        if error.get("type") == "safety_error":
+            finish_reason = "content_filter"
 
     chunks: list[dict[str, Any]] = [
         {
@@ -648,3 +674,42 @@ def _handle_reasoning_output_item(*, item: dict[str, Any], state: ChatCompletion
             _make_chat_delta_chunk(state=state, delta={"reasoning_content": reasoning_text}),
         ]
     return [_make_chat_delta_chunk(state=state, delta={"reasoning_content": reasoning_text})]
+
+
+def _handle_terminal_event_message(
+    *,
+    event_type: str,
+    event_payload: dict[str, Any],
+    state: ChatCompletionsStreamState,
+) -> list[dict[str, Any]]:
+    if event_type == "response.failed":
+        error = event_payload.get("error")
+        if not isinstance(error, dict):
+            error = {}
+        if state.saw_text or state.saw_refusal or state.saw_tool_call:
+            return []
+        message = error.get("message")
+        if not isinstance(message, str) or not message:
+            return []
+        state.saw_refusal = True
+        if not state.sent_role:
+            state.sent_role = True
+            return [
+                _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+                _make_chat_delta_chunk(state=state, delta={"refusal": message}),
+            ]
+        return [_make_chat_delta_chunk(state=state, delta={"refusal": message})]
+
+    if event_type not in {"response.cancelled", "response.canceled"}:
+        return []
+    if state.saw_text or state.saw_refusal or state.saw_tool_call:
+        return []
+    state.saw_refusal = True
+    cancellation_message = "The response was canceled before completion."
+    if not state.sent_role:
+        state.sent_role = True
+        return [
+            _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
+            _make_chat_delta_chunk(state=state, delta={"refusal": cancellation_message}),
+        ]
+    return [_make_chat_delta_chunk(state=state, delta={"refusal": cancellation_message})]

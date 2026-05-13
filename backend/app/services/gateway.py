@@ -467,7 +467,14 @@ class GatewayService:
         )
 
     def _extract_usage_from_stream_event(self, event_type: str, payload: dict[str, Any]) -> UsageAccounting | None:
-        if event_type not in {"response.completed", "response.done", "response.incomplete", "response.failed"}:
+        if event_type not in {
+            "response.completed",
+            "response.done",
+            "response.incomplete",
+            "response.failed",
+            "response.cancelled",
+            "response.canceled",
+        }:
             return None
         response = payload.get("response")
         if not isinstance(response, dict):

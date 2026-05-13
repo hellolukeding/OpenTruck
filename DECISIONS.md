@@ -46,6 +46,7 @@
 - `chat/completions` 的兼容策略采用 `Chat Completions -> Responses -> Chat Completions` 的翻译模式，与 `sub2api` 保持同方向；当前已支持首版 SSE 流式转换，但仍按“小步覆盖事件类型”的策略逐步补齐
 - `chat/completions` 的流式兼容层继续按“小步覆盖事件类型”的策略演进；优先补齐能直接影响客户端行为的 done/refusal/incomplete 事件，而不是一次性重写整套流式状态机
 - 在不重写整套状态机的前提下，优先兼容 `output_item` 级别的 message/reasoning 变体，因为这类事件在不同上游或版本间比 delta 事件更稳定
+- 对 `response.failed`、`response.cancelled/canceled` 这类终态事件，优先保证下游能收到可读的最后一跳信息：若上游没有正文输出，则回填一条 refusal/取消提示，再收口到最终 finish chunk，而不是静默结束
 - 前端登录注册优先采用 `Auth.js`，先用 OAuth 统一承接“登录 + 首次注册”，避免在主线早期再单独造密码体系
 - 控制台访问先通过 Next.js `middleware` 保护 `/{locale}` 路由，未登录用户统一跳转到 `/auth/signin`
 - OAuth provider 首版先接 `GitHub` 与 `Google`，并通过环境变量开关决定是否展示入口；未配置 provider 时保留登录页占位提示
