@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pricing | OpenTruck AI Model Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#3c4a42",
+                        "surface-tint": "#006c49",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-surface": "#1a1b22",
+                        "on-background": "#1a1b22",
+                        "tertiary": "#a43a3a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fbf8ff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-tertiary-fixed": "#410005",
+                        "on-secondary-container": "#656464",
+                        "on-secondary-fixed-variant": "#474646",
+                        "tertiary-container": "#fc7c78",
+                        "background": "#fbf8ff",
+                        "inverse-on-surface": "#f1effa",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#00422b",
+                        "inverse-primary": "#4edea3",
+                        "secondary": "#5f5e5e",
+                        "primary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#10b981",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c9c6c5",
+                        "surface-container": "#eeedf7",
+                        "on-primary-fixed": "#002113",
+                        "on-tertiary-container": "#711419",
+                        "surface-bright": "#fbf8ff",
+                        "outline": "#6c7a71",
+                        "surface-container-highest": "#e3e1ec",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "surface-variant": "#e3e1ec",
+                        "secondary-container": "#e5e2e1",
+                        "primary-fixed": "#6ffbbe",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#4edea3",
+                        "outline-variant": "#bbcabf",
+                        "surface-container-high": "#e8e7f1",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "surface-container-low": "#f4f2fd",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#dad9e3",
+                        "inverse-surface": "#2f3038",
+                        "secondary-fixed": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "max-width": "1280px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "base": "4px",
+                        "xl": "40px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "margin": "24px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Geist"],
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-md": ["Geist"],
+                        "display": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "code-md": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+        }
+        .airy-shadow {
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .active-glow {
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.2);
+        }
+        .grid-bg {
+            background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container/30">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+<div class="flex justify-between items-center h-16 px-gutter max-w-max-width mx-auto">
+<div class="flex items-center gap-sm">
+<span class="font-display text-headline-md font-bold text-on-surface">OpenTruck</span>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Models</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">API Docs</a>
+<a class="font-body-md text-body-md text-primary font-bold border-b-2 border-primary" href="#">Pricing</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Console</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-secondary hover:text-primary transition-colors p-sm">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/50">
+<img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1NSsFHAzmTHc7tTXxjBURV2OzjHrLLIWMzQ_GvXf9M8gPoFZbSR6dh1jZZkByXl9IV2lZOlUZgz6EVai3iHPbkdLYXdbN7WNZOnhLb7lAGC8SQZb8cal99kdd82iDYwJabNPeoVMDMHUC06PLHNhdlc1uLyMdw_WR4PXQnKHYl7bDM3g-AEsavy9cudbisGKibMekaHNzNuDBNYZLxRIfO-nKUIuCsdyb1NKpJjRI6qUtpT4lKNREes5omUQuK2-BFxIe4PmoQz8"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="pt-32 pb-xl grid-bg min-h-screen">
+<!-- Hero Header -->
+<section class="max-w-max-width mx-auto px-gutter text-center mb-xl">
+<span class="inline-block px-sm py-xs bg-primary-container/10 text-primary font-label-md text-label-md rounded-lg mb-md">
+                Simple &amp; Transparent
+            </span>
+<h1 class="font-display text-display text-on-surface mb-md">Intelligence Pricing</h1>
+<p class="font-body-lg text-body-lg text-secondary max-w-2xl mx-auto">
+                Scalable decentralized AI compute that adapts to your workflow. No hidden fees, no lock-ins, just pure performance.
+            </p>
+</section>
+<!-- Dynamic Rates Section (Bento Style) -->
+<section class="max-w-max-width mx-auto px-gutter mb-xl">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Large Status Card -->
+<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-lg airy-shadow relative overflow-hidden">
+<div class="flex justify-between items-start mb-lg">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Network Pulse</h3>
+<p class="font-body-sm text-body-sm text-secondary">Real-time aggregate network performance</p>
+</div>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-md text-label-md text-primary uppercase tracking-wider">Live</span>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<div class="p-sm bg-surface rounded-lg border border-outline-variant/20">
+<p class="font-label-md text-label-md text-secondary mb-xs">Global Latency</p>
+<p class="font-display text-headline-md text-on-surface">184ms</p>
+</div>
+<div class="p-sm bg-surface rounded-lg border border-outline-variant/20">
+<p class="font-label-md text-label-md text-secondary mb-xs">Uptime</p>
+<p class="font-display text-headline-md text-on-surface">99.99%</p>
+</div>
+<div class="p-sm bg-surface rounded-lg border border-outline-variant/20">
+<p class="font-label-md text-label-md text-secondary mb-xs">Nodes Online</p>
+<p class="font-display text-headline-md text-on-surface">4,281</p>
+</div>
+<div class="p-sm bg-surface rounded-lg border border-outline-variant/20">
+<p class="font-label-md text-label-md text-secondary mb-xs">Througput</p>
+<p class="font-display text-headline-md text-on-surface">1.2GB/s</p>
+</div>
+</div>
+<div class="mt-lg h-32 w-full rounded-lg bg-on-background relative flex items-end px-md pb-xs">
+<!-- Simulated Chart -->
+<div class="flex gap-1 w-full items-end h-full">
+<div class="w-full bg-primary-container h-1/2 rounded-t-sm opacity-50"></div>
+<div class="w-full bg-primary-container h-2/3 rounded-t-sm opacity-60"></div>
+<div class="w-full bg-primary-container h-1/3 rounded-t-sm opacity-40"></div>
+<div class="w-full bg-primary-container h-3/4 rounded-t-sm opacity-80"></div>
+<div class="w-full bg-primary-container h-1/2 rounded-t-sm opacity-50"></div>
+<div class="w-full bg-primary-container h-2/3 rounded-t-sm opacity-70"></div>
+<div class="w-full bg-primary-container h-5/6 rounded-t-sm opacity-90"></div>
+<div class="w-full bg-primary-container h-2/3 rounded-t-sm opacity-60"></div>
+<div class="w-full bg-primary-container h-3/4 rounded-t-sm opacity-80"></div>
+<div class="w-full bg-primary-container h-full rounded-t-sm"></div>
+</div>
+</div>
+</div>
+<!-- Rate Insight Card -->
+<div class="bg-primary-container text-on-primary-container rounded-xl p-lg airy-shadow flex flex-col justify-between">
+<div>
+<span class="material-symbols-outlined text-4xl mb-md">payments</span>
+<h3 class="font-headline-md text-headline-md mb-xs">Pay-as-you-go</h3>
+<p class="font-body-md text-body-md opacity-90">Only pay for the exact compute time your models consume. No upfront commitment required.</p>
+</div>
+<div class="mt-xl">
+<p class="font-label-md text-label-md opacity-70 uppercase mb-xs">Starting from</p>
+<p class="font-display text-display">$0.004 <span class="text-body-lg opacity-80">/1k tokens</span></p>
+</div>
+</div>
+</div>
+</section>
+<!-- Pricing Tiers Section -->
+<section class="max-w-max-width mx-auto px-gutter mb-xl">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg items-stretch">
+<!-- Developer Plan -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-lg airy-shadow flex flex-col">
+<div class="mb-lg">
+<h4 class="font-headline-md text-headline-md text-on-surface">Developer</h4>
+<p class="font-body-sm text-body-sm text-secondary">Ideal for small projects and solo architects.</p>
+</div>
+<div class="mb-lg">
+<span class="font-display text-display text-on-surface">$0</span>
+<span class="font-body-md text-body-md text-secondary">/mo platform fee</span>
+</div>
+<ul class="flex-grow space-y-md mb-xl">
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Shared API gateway access</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">5 AI models available</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Community support</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Standard token usage rates</span>
+</li>
+</ul>
+<button class="w-full py-md px-lg bg-surface border border-outline-variant rounded-lg font-body-md font-bold text-on-surface hover:bg-surface-container-high transition-all">Get Started</button>
+</div>
+<!-- Pro Plan (Highlighted) -->
+<div class="bg-surface-container-lowest border-2 border-primary rounded-xl p-lg airy-shadow flex flex-col relative active-glow">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-on-primary font-label-md text-label-md px-md py-1 rounded-full uppercase tracking-widest">Recommended</div>
+<div class="mb-lg">
+<h4 class="font-headline-md text-headline-md text-on-surface">Professional</h4>
+<p class="font-body-sm text-body-sm text-secondary">Enhanced throughput for scaling applications.</p>
+</div>
+<div class="mb-lg">
+<span class="font-display text-display text-on-surface">$49</span>
+<span class="font-body-md text-body-md text-secondary">/mo platform fee</span>
+</div>
+<ul class="flex-grow space-y-md mb-xl">
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-bold">Priority routing &amp; lower latency</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Unlimited AI model catalog access</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">15% Discount on token rates</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">API health monitoring dashboard</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Developer chat support</span>
+</li>
+</ul>
+<button class="w-full py-md px-lg bg-primary text-on-primary rounded-lg font-body-md font-bold hover:opacity-90 transition-all">Select Pro</button>
+</div>
+<!-- Enterprise Plan -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-lg airy-shadow flex flex-col">
+<div class="mb-lg">
+<h4 class="font-headline-md text-headline-md text-on-surface">Enterprise</h4>
+<p class="font-body-sm text-body-sm text-secondary">Customized solutions for massive scale.</p>
+</div>
+<div class="mb-lg">
+<span class="font-display text-display text-on-surface">Custom</span>
+</div>
+<ul class="flex-grow space-y-md mb-xl">
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Dedicated private node pools</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Customized SLAs &amp; uptime guarantees</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">On-premise deployment options</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Whitelabeling &amp; sub-branding</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface-variant">24/7 dedicated account engineer</span>
+</li>
+</ul>
+<button class="w-full py-md px-lg bg-on-surface text-background rounded-lg font-body-md font-bold hover:opacity-90 transition-all">Contact Sales</button>
+</div>
+</div>
+</section>
+<!-- FAQ Section -->
+<section class="max-w-4xl mx-auto px-gutter mb-xl">
+<h2 class="font-headline-md text-headline-md text-center mb-xl">Frequently Asked Questions</h2>
+<div class="space-y-md">
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/20">
+<button class="w-full flex justify-between items-center text-left">
+<span class="font-body-lg text-body-lg text-on-surface font-bold">How are tokens actually calculated?</span>
+<span class="material-symbols-outlined text-secondary">expand_more</span>
+</button>
+<div class="mt-sm">
+<p class="font-body-md text-body-md text-on-surface-variant">We follow the standard industry tokenization protocols (OpenAI, Anthropic, etc.). You are billed in real-time based on the cumulative count of input and output tokens across all active models in your stack.</p>
+</div>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/20">
+<button class="w-full flex justify-between items-center text-left">
+<span class="font-body-lg text-body-lg text-on-surface font-bold">Can I switch plans anytime?</span>
+<span class="material-symbols-outlined text-secondary">expand_more</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/20">
+<button class="w-full flex justify-between items-center text-left">
+<span class="font-body-lg text-body-lg text-on-surface font-bold">What happens if my balance runs out?</span>
+<span class="material-symbols-outlined text-secondary">expand_more</span>
+</button>
+</div>
+<div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/20">
+<button class="w-full flex justify-between items-center text-left">
+<span class="font-body-lg text-body-lg text-on-surface font-bold">Are there volume discounts for developers?</span>
+<span class="material-symbols-outlined text-secondary">expand_more</span>
+</button>
+</div>
+</div>
+</section>
+<!-- CTA Block -->
+<section class="max-w-max-width mx-auto px-gutter mb-xl">
+<div class="bg-primary text-on-primary p-xl rounded-3xl airy-shadow relative overflow-hidden text-center">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-container opacity-20 blur-3xl -mr-32 -mt-32"></div>
+<div class="absolute bottom-0 left-0 w-64 h-64 bg-primary-container opacity-20 blur-3xl -ml-32 -mb-32"></div>
+<h2 class="font-display text-display mb-md relative z-10">Ready to accelerate your AI builds?</h2>
+<p class="font-body-lg text-body-lg opacity-90 mb-lg max-w-xl mx-auto relative z-10">
+                    Join over 10,000 developers building on the most performant decentralized AI marketplace.
+                </p>
+<div class="flex flex-col sm:flex-row justify-center gap-md relative z-10">
+<button class="bg-on-primary text-primary px-xl py-md rounded-full font-body-md font-bold hover:bg-primary-container hover:text-on-primary-container transition-all shadow-lg">Create Developer Account</button>
+<button class="bg-transparent border-2 border-on-primary text-on-primary px-xl py-md rounded-full font-body-md font-bold hover:bg-on-primary/10 transition-all">View API Documentation</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-secondary-container border-t border-outline-variant">
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-md px-gutter py-xl max-w-max-width mx-auto">
+<div class="col-span-2">
+<span class="font-display text-body-lg font-bold text-on-surface">OpenTruck</span>
+<p class="mt-md font-body-sm text-body-sm text-on-secondary-container/80 max-w-xs">
+                    Building the infrastructure for the decentralized AI future. High-performance models, distributed worldwide.
+                </p>
+</div>
+<div>
+<h5 class="font-label-md text-label-md font-bold uppercase mb-md">Product</h5>
+<ul class="space-y-sm font-body-sm text-body-sm">
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Models</a></li>
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Marketplace</a></li>
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Pricing</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-md text-label-md font-bold uppercase mb-md">Resources</h5>
+<ul class="space-y-sm font-body-sm text-body-sm">
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Documentation</a></li>
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">API Keys</a></li>
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Status</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-md text-label-md font-bold uppercase mb-md">Legal</h5>
+<ul class="space-y-sm font-body-sm text-body-sm">
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Privacy</a></li>
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Terms</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-md text-label-md font-bold uppercase mb-md">Community</h5>
+<ul class="space-y-sm font-body-sm text-body-sm">
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">GitHub</a></li>
+<li><a class="text-on-secondary-container hover:text-primary transition-colors" href="#">Discord</a></li>
+</ul>
+</div>
+</div>
+<div class="max-w-max-width mx-auto px-gutter py-md border-t border-outline-variant/30 text-center">
+<p class="font-body-sm text-body-sm text-on-secondary-container/60">
+                © 2024 OpenTruck. All rights reserved. Built for the decentralized AI future.
+            </p>
+</div>
+</footer>
+</body></html>

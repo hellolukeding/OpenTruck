@@ -145,3 +145,6 @@
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
+5. 为新增的 Developer Console、Model Leaderboard、Merchant Dashboard 三页补充真实后端数据接入
+6. 将新增页面的多语言文案整合到 `i18n` 字典中
+7. 把前端新页面的导航入口接入 `PublicNav` 或控制台侧边栏

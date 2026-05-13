@@ -1,322 +1,375 @@
 <!DOCTYPE html>
 
-<html lang="en"><head>
+<html lang="zh-CN"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>OpenTruck - Decentralized API Protocol</title>
+<title>OpenTruck - 模型排行榜</title>
+<!-- Tailwind CSS v3 with Plugins -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "primary-container": "#1c1b1b",
-                        "secondary": "#24619d",
-                        "on-surface": "#1a1c1c",
-                        "on-surface-variant": "#444748",
-                        "on-primary": "#ffffff",
-                        "secondary-fixed": "#d2e4ff",
-                        "inverse-on-surface": "#f0f1f1",
-                        "secondary-container": "#87bcfe",
-                        "on-primary-fixed-variant": "#474646",
-                        "on-error": "#ffffff",
-                        "on-tertiary-fixed-variant": "#624000",
-                        "background": "#f9f9f9",
-                        "inverse-primary": "#c9c6c5",
-                        "on-secondary": "#ffffff",
-                        "primary": "#000000",
-                        "inverse-surface": "#2f3131",
-                        "surface-container-lowest": "#ffffff",
-                        "on-primary-container": "#858383",
-                        "on-background": "#1a1c1c",
-                        "tertiary-fixed": "#ffddb2",
-                        "tertiary": "#000000",
-                        "on-tertiary-fixed": "#291800",
-                        "error-container": "#ffdad6",
-                        "on-tertiary-container": "#b37800",
-                        "on-error-container": "#93000a",
-                        "outline": "#747878",
-                        "on-secondary-fixed-variant": "#004880",
-                        "on-primary-fixed": "#1c1b1b",
-                        "surface-container": "#eeeeee",
-                        "secondary-fixed-dim": "#a1c9ff",
-                        "surface-variant": "#e2e2e2",
-                        "primary-fixed-dim": "#c9c6c5",
-                        "surface-bright": "#f9f9f9",
-                        "surface-container-highest": "#e2e2e2",
-                        "surface-container-high": "#e8e8e8",
-                        "on-tertiary": "#ffffff",
-                        "surface-tint": "#5f5e5e",
-                        "tertiary-fixed-dim": "#ffb94c",
-                        "primary-fixed": "#e5e2e1",
-                        "tertiary-container": "#291800",
-                        "on-secondary-container": "#004b84",
-                        "surface-dim": "#dadada",
-                        "surface": "#f9f9f9",
-                        "on-secondary-fixed": "#001c37",
-                        "error": "#ba1a1a",
-                        "outline-variant": "#c4c7c7",
-                        "surface-container-low": "#f3f3f4"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "container-max": "1280px",
-                        "md": "16px",
-                        "gutter": "24px",
-                        "xl": "40px",
-                        "xxl": "64px",
-                        "xs": "4px",
-                        "lg": "24px",
-                        "sm": "8px",
-                        "unit": "4px"
-                    },
-                    "fontFamily": {
-                        "code-sm": ["Geist"],
-                        "body-md": ["Geist"],
-                        "headline-lg-mobile": ["Geist"],
-                        "display": ["Geist"],
-                        "headline-lg": ["Geist"],
-                        "label-md": ["Geist"],
-                        "headline-md": ["Geist"],
-                        "body-lg": ["Geist"]
-                    },
-                    "fontSize": {
-                        "code-sm": ["13px", { "lineHeight": "1.5", "fontWeight": "400" }],
-                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
-                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "500" }],
-                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600" }],
-                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "500" }],
-                        "label-md": ["14px", { "lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500" }],
-                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
-                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }]
-                    }
-                }
+<!-- Configuration for Brand Colors -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981', // Emerald Green
+              600: '#059669',
+              700: '#047857',
+              900: '#064e3b',
+            },
+            surface: {
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
             }
+          },
+          fontFamily: {
+            sans: ['Geist', 'Inter', 'system-ui', 'sans-serif'],
+          }
         }
-    </script>
-<style>
-        body { font-family: 'Geist', sans-serif; }
-    </style>
+      }
+    }
+  </script>
+<!-- Custom Styles for Table and Specific Components -->
+<style data-purpose="custom-layout">
+    .table-row-hover:hover {
+      background-color: rgba(16, 185, 129, 0.03);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e5e7eb;
+      border-radius: 10px;
+    }
+  </style>
 </head>
-<body class="bg-surface text-on-surface antialiased pt-16 selection:bg-surface-variant selection:text-primary min-h-screen flex flex-col">
-<!-- TopNavBar -->
-<nav class="fixed top-0 w-full z-50 bg-surface dark:bg-primary-container flex items-center justify-between px-md md:px-xl h-16 border-b border-outline-variant dark:border-on-primary-fixed-variant no shadows">
-<div class="flex items-center gap-xl">
-<a class="text-headline-md font-headline-md font-bold tracking-tight text-primary dark:text-on-primary" href="#">OpenTruck</a>
-<div class="hidden md:flex items-center gap-lg">
-<a class="text-on-surface-variant dark:text-on-primary-container font-medium text-label-md font-label-md hover:text-primary dark:hover:text-on-primary transition-colors duration-200" href="#">Models</a>
-<a class="text-on-surface-variant dark:text-on-primary-container font-medium text-label-md font-label-md hover:text-primary dark:hover:text-on-primary transition-colors duration-200" href="#">API Docs</a>
-<a class="text-on-surface-variant dark:text-on-primary-container font-medium text-label-md font-label-md hover:text-primary dark:hover:text-on-primary transition-colors duration-200" href="#">Pricing</a>
-<a class="text-on-surface-variant dark:text-on-primary-container font-medium text-label-md font-label-md hover:text-primary dark:hover:text-on-primary transition-colors duration-200" href="#">Enterprise</a>
+<body class="bg-white text-slate-900 font-sans min-h-screen flex flex-col">
+<!-- BEGIN: TopNavBar -->
+<header class="sticky top-0 z-50 bg-white border-b border-slate-200">
+<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2" data-purpose="logo">
+<div class="w-8 h-8 bg-brand-500 rounded flex items-center justify-center">
+<div class="w-4 h-4 border-2 border-white rounded-sm transform rotate-45"></div>
+</div>
+<span class="text-xl font-bold tracking-tight">OpenTruck</span>
+</div>
+<div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+<a class="hover:text-brand-500 transition-colors" href="#">模型中心</a>
+<a class="text-brand-600 border-b-2 border-brand-500 py-5" href="#">排行榜</a>
+<a class="hover:text-brand-500 transition-colors" href="#">API 文档</a>
+<a class="hover:text-brand-500 transition-colors" href="#">定价</a>
 </div>
 </div>
-<div class="flex items-center gap-md">
-<div class="hidden md:flex items-center border border-outline-variant rounded px-sm py-xs bg-surface-container-lowest">
-<span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-<input class="bg-transparent border-none text-code-sm font-code-sm focus:ring-0 w-48 text-on-surface placeholder:text-on-surface-variant h-6" placeholder="Search..." type="text"/>
-</div>
-<button class="hover:text-primary dark:hover:text-on-primary transition-colors duration-200 text-on-surface-variant dark:text-on-primary-container">
-<span class="material-symbols-outlined">notifications</span>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:text-slate-600 relative">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
 </button>
-<button class="hover:text-primary dark:hover:text-on-primary transition-colors duration-200 text-on-surface-variant dark:text-on-primary-container">
-<span class="material-symbols-outlined">settings</span>
-</button>
-<div class="w-8 h-8 rounded-full border border-outline-variant overflow-hidden ml-sm">
-<img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaLwZR1FF4A7AGqcJ7vxgxobxwQJcsi0yXJK02TIXEv1piLOKxAPAzWlsoM8cA1aLlquXvY91etJl0KYhbVnSbL2CfSN1g1jlEYPpeDkgyqgFAVtEqEYvW4wRfMUNLuQuRayaGY-xCJvgrZMeYtHeCV9_3_sGuB9_M4_7hXaHu-pwagkO6A5t4UMXyebUcXpMjaOXP-XFORFvJSYAM0LHkhlKRhVHneUzlgSjDgmMgu-VpcliSdFJ6fuhptF4xftq8nr09JEzgmzM"/>
+<div class="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full cursor-pointer hover:bg-slate-100">
+<div class="w-6 h-6 rounded-full overflow-hidden bg-slate-300">
+<img alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChMdWKohn-r51Gep9eMGFCFL71OcfNz8dbEgHqBWrk8jNUoqfIMntYFe9SkUiZbKb_K7Yc2DczlxVD31yOk8SVHNCZDuNdlaTSryaNhW5IEsL6lV3w5j_mdfcvvoAvsGIWjNl4WEwK82HVPoGmvn0rFlm3NAH8zloKk9ra2w8Zk9iVHW-bSo5DpDeG4bDzGqU0qhbV1mBLY5yxF7BXghqkjjPnmPET9UI9hCeeCd41KMhBw0cVHHvtZsZPa-OyQBwbgIxzsppdG3Q"/>
+</div>
+<span class="text-xs font-semibold">dev_architect_88</span>
 </div>
 </div>
 </nav>
-<main class="flex-grow flex flex-col items-center">
-<!-- Hero Section -->
-<section class="w-full max-w-container-max px-md md:px-xl py-xxl flex flex-col items-center text-center mt-xl">
-<img alt="OpenTruck Logo" class="w-48 h-auto mb-lg object-contain" src="https://placeholder.pics/svg/300"/>
-<h1 class="text-display font-display text-primary mb-md max-w-3xl">Open source decentralized API transfer station</h1>
-<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mb-xl">A high-performance conduit for intelligence distribution. Streamline your API access with enterprise-grade reliability and zero cognitive noise.</p>
-<div class="flex flex-col sm:flex-row items-center gap-md w-full max-w-xl">
-<div class="flex-grow w-full flex items-center border border-outline-variant rounded bg-surface-container-lowest px-md py-sm focus-within:border-primary transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant mr-sm">search</span>
-<input class="w-full bg-transparent border-none text-body-md font-body-md focus:ring-0 text-on-surface placeholder:text-on-surface-variant h-10 p-0" placeholder="Search models or providers..." type="text"/>
+</header>
+<!-- END: TopNavBar -->
+<main class="flex-grow">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<!-- BEGIN: Header Section -->
+<section class="mb-10" data-purpose="page-title">
+<h1 class="text-3xl font-bold text-slate-900 tracking-tight">模型排行榜</h1>
+<p class="text-slate-500 mt-2">按调用量和评分查看最受欢迎的 AI 模型。数据每小时更新一次。</p>
+</section>
+<!-- END: Header Section -->
+<!-- BEGIN: Filters and Toggles -->
+<section class="mb-6 space-y-4" data-purpose="table-filters">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<!-- Time Range Toggles -->
+<div class="flex items-center p-1 bg-slate-100 rounded-lg w-fit">
+<button class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-slate-900">实时 (24h)</button>
+<button class="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">周榜</button>
+<button class="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">月榜</button>
 </div>
-<button class="w-full sm:w-auto bg-primary text-on-primary text-label-md font-label-md px-lg py-sm h-12 rounded flex items-center justify-center gap-xs hover:bg-on-surface transition-colors whitespace-nowrap">
-<span class="material-symbols-outlined text-[18px]">key</span>
-                    Get API Key
-                </button>
+<!-- Search and Sort -->
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</span>
+<input class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 w-64 bg-slate-50" placeholder="搜索模型名称..." type="text"/>
+</div>
+<select class="border border-slate-200 rounded-lg text-sm bg-slate-50 py-2 pl-3 pr-8 focus:ring-brand-500 focus:border-brand-500">
+<option>按调用量排序</option>
+<option>按评分排序</option>
+<option>按可用性排序</option>
+</select>
+</div>
+</div>
+<!-- Category Tabs -->
+<div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+<button class="px-4 py-1.5 rounded-full text-sm font-medium bg-brand-500 text-white whitespace-nowrap">全部</button>
+<button class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 whitespace-nowrap">Chat (对话)</button>
+<button class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 whitespace-nowrap">Completion (补全)</button>
+<button class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 whitespace-nowrap">Embedding (向量)</button>
+<button class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 whitespace-nowrap">Image (图像)</button>
+<button class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 whitespace-nowrap">Audio (音频)</button>
+<button class="px-4 py-1.5 rounded-full text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 whitespace-nowrap">Video (视频)</button>
 </div>
 </section>
-<!-- Stats Section -->
-<section class="w-full max-w-container-max px-md md:px-xl py-lg mb-xxl">
-<div class="grid grid-cols-1 md:grid-cols-3 gap-lg border-y border-outline-variant py-xl">
-<div class="flex flex-col items-center text-center">
-<span class="text-headline-lg font-headline-lg text-primary">586+</span>
-<span class="text-code-sm font-code-sm text-on-surface-variant mt-xs">Available Models</span>
-</div>
-<div class="flex flex-col items-center text-center border-t md:border-t-0 md:border-l border-outline-variant pt-lg md:pt-0 md:pl-lg">
-<span class="text-headline-lg font-headline-lg text-primary">96+</span>
-<span class="text-code-sm font-code-sm text-on-surface-variant mt-xs">Active Nodes</span>
-</div>
-<div class="flex flex-col items-center text-center border-t md:border-t-0 md:border-l border-outline-variant pt-lg md:pt-0 md:pl-lg">
-<span class="text-headline-lg font-headline-lg text-primary">99.9%</span>
-<span class="text-code-sm font-code-sm text-on-surface-variant mt-xs">Uptime Guarantee</span>
-</div>
-</div>
-</section>
-<!-- Configuration & Endpoints -->
-<section class="w-full max-w-container-max px-md md:px-xl mb-xxl grid grid-cols-1 lg:grid-cols-2 gap-gutter">
-<!-- API Base URL -->
-<div class="border border-outline-variant bg-surface-container-lowest p-lg rounded flex flex-col h-full">
-<h3 class="text-headline-md font-headline-md text-primary mb-lg flex items-center gap-sm">
-<span class="material-symbols-outlined">api</span>
-                    Endpoints
-                </h3>
-<div class="space-y-md flex-grow">
-<div class="flex flex-col border border-outline-variant rounded overflow-hidden">
-<div class="bg-surface-variant px-sm py-xs text-code-sm font-code-sm text-on-surface-variant border-b border-outline-variant">Global Access</div>
-<div class="flex items-center justify-between px-md py-sm bg-surface-container-lowest">
-<code class="text-code-sm font-code-sm text-primary">https://api.opentruck.network/v1</code>
-<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
-</div>
-</div>
-<div class="flex flex-col border border-outline-variant rounded overflow-hidden">
-<div class="bg-surface-variant px-sm py-xs text-code-sm font-code-sm text-on-surface-variant border-b border-outline-variant">Direct Node</div>
-<div class="flex items-center justify-between px-md py-sm bg-surface-container-lowest">
-<code class="text-code-sm font-code-sm text-primary">https://node.us-east.opentruck.network/v1</code>
-<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
-</div>
-</div>
-</div>
-</div>
-<!-- Terminal Showcase -->
-<div class="border border-outline-variant bg-primary-container p-lg rounded flex flex-col h-full relative overflow-hidden">
-<div class="absolute top-0 left-0 w-full h-8 bg-inverse-surface border-b border-on-primary-fixed-variant flex items-center px-sm gap-xs">
-<div class="w-3 h-3 rounded-full bg-error"></div>
-<div class="w-3 h-3 rounded-full bg-tertiary-fixed-dim"></div>
-<div class="w-3 h-3 rounded-full bg-secondary-fixed"></div>
-</div>
-<div class="pt-xl overflow-x-auto">
-<pre class="text-code-sm font-code-sm text-on-primary"><span class="text-secondary-fixed-dim">curl</span> https://api.opentruck.network/v1/chat/completions \
-  <span class="text-tertiary-fixed-dim">-H</span> <span class="text-error-container">"Content-Type: application/json"</span> \
-  <span class="text-tertiary-fixed-dim">-H</span> <span class="text-error-container">"Authorization: Bearer sk-your-api-key"</span> \
-  <span class="text-tertiary-fixed-dim">-d</span> <span class="text-error-container">'{
-    "model": "gpt-4",
-    "messages": [
-      {
-        "role": "user",
-        "content": "Initialize transfer protocol."
-      }
-    ]
-  }'</span></pre>
-</div>
-</div>
-</section>
-<!-- Model Market -->
-<section class="w-full max-w-container-max px-md md:px-xl mb-xxl">
-<div class="flex items-center justify-between mb-lg border-b border-outline-variant pb-sm">
-<h2 class="text-headline-md font-headline-md text-primary">Model Directory</h2>
-<a class="text-label-md font-label-md text-secondary hover:underline flex items-center gap-xs" href="#">
-                    View All <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-</a>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
-<!-- Card 1 -->
-<div class="border border-outline-variant bg-surface-container-lowest p-md flex flex-col gap-md hover:bg-surface-bright transition-colors cursor-pointer group">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-sm">
-<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-[18px]">smart_toy</span>
+<!-- END: Filters and Toggles -->
+<!-- BEGIN: Data Table -->
+<div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm overflow-x-auto" data-purpose="ranking-table-container">
+<table class="w-full text-left border-collapse min-w-[1000px]">
+<thead class="bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+<tr>
+<th class="px-6 py-4">#</th>
+<th class="px-6 py-4">模型名称</th>
+<th class="px-6 py-4">分类</th>
+<th class="px-6 py-4">可用性</th>
+<th class="px-6 py-4">调用量 (24h)</th>
+<th class="px-6 py-4">Token 消耗</th>
+<th class="px-6 py-4">最近调用</th>
+<th class="px-6 py-4">评分</th>
+<th class="px-6 py-4 text-right">价格 (1M Tokens)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 text-sm">
+<!-- Row 1 -->
+<tr class="table-row-hover transition-colors">
+<td class="px-6 py-4 font-medium text-slate-400">1</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-brand-50 rounded flex items-center justify-center">
+<svg class="w-4 h-4 text-brand-600" fill="currentColor" viewbox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path></svg>
 </div>
 <div>
-<h4 class="text-label-md font-label-md text-primary">gpt-4</h4>
-<span class="text-code-sm font-code-sm text-on-surface-variant">OpenAI</span>
+<div class="font-bold text-slate-900">gpt-5.4-omni</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-tighter">OpenAI Central · 缓存命中率 88.2%</div>
 </div>
 </div>
-<span class="inline-flex items-center px-2 py-1 rounded bg-surface-variant text-code-sm font-code-sm text-on-surface"><span class="w-2 h-2 rounded-full bg-secondary-fixed mr-xs"></span>Active</span>
-</div>
-<div class="flex justify-between items-end border-t border-outline-variant pt-sm mt-auto">
-<div class="flex flex-col">
-<span class="text-code-sm font-code-sm text-on-surface-variant">Input</span>
-<span class="text-body-md font-body-md text-primary">$0.03 / 1K</span>
-</div>
-<div class="flex flex-col text-right">
-<span class="text-code-sm font-code-sm text-on-surface-variant">Output</span>
-<span class="text-body-md font-body-md text-primary">$0.06 / 1K</span>
-</div>
-</div>
-</div>
-<!-- Card 2 -->
-<div class="border border-outline-variant bg-surface-container-lowest p-md flex flex-col gap-md hover:bg-surface-bright transition-colors cursor-pointer group">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-sm">
-<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-[18px]">bolt</span>
-</div>
-<div>
-<h4 class="text-label-md font-label-md text-primary">gpt-3.5-turbo</h4>
-<span class="text-code-sm font-code-sm text-on-surface-variant">OpenAI</span>
+</td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold uppercase">chat</span></td>
+<td class="px-6 py-4 text-brand-600 font-bold">99.8%</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="font-semibold">1,208.9K</span>
+<div class="flex items-end gap-0.5 h-3">
+<div class="w-1 bg-brand-500 rounded-t h-1/2"></div>
+<div class="w-1 bg-brand-500 rounded-t h-3/4"></div>
+<div class="w-1 bg-brand-500 rounded-t h-full"></div>
 </div>
 </div>
-<span class="inline-flex items-center px-2 py-1 rounded bg-surface-variant text-code-sm font-code-sm text-on-surface"><span class="w-2 h-2 rounded-full bg-secondary-fixed mr-xs"></span>Active</span>
-</div>
-<div class="flex justify-between items-end border-t border-outline-variant pt-sm mt-auto">
-<div class="flex flex-col">
-<span class="text-code-sm font-code-sm text-on-surface-variant">Input</span>
-<span class="text-body-md font-body-md text-primary">$0.0005 / 1K</span>
-</div>
-<div class="flex flex-col text-right">
-<span class="text-code-sm font-code-sm text-on-surface-variant">Output</span>
-<span class="text-body-md font-body-md text-primary">$0.0015 / 1K</span>
-</div>
-</div>
-</div>
-<!-- Card 3 -->
-<div class="border border-outline-variant bg-surface-container-lowest p-md flex flex-col gap-md hover:bg-surface-bright transition-colors cursor-pointer group">
-<div class="flex justify-between items-start">
-<div class="flex items-center gap-sm">
-<div class="w-8 h-8 rounded bg-surface-variant flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-[18px]">memory</span>
+</td>
+<td class="px-6 py-4 font-medium">24.6B</td>
+<td class="px-6 py-4 text-slate-500">刚刚</td>
+<td class="px-6 py-4 text-amber-400">
+<div class="flex">★★★★★</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="font-semibold text-slate-900">¥0.45</div>
+<div class="text-[10px] text-slate-400">$0.062</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="table-row-hover transition-colors">
+<td class="px-6 py-4 font-medium text-slate-400">2</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-purple-50 rounded flex items-center justify-center">
+<svg class="w-4 h-4 text-purple-600" fill="currentColor" viewbox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"></path></svg>
 </div>
 <div>
-<h4 class="text-label-md font-label-md text-primary">claude-3-opus</h4>
-<span class="text-code-sm font-code-sm text-on-surface-variant">Anthropic</span>
+<div class="font-bold text-slate-900">claude-3.5-sonnet</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-tighter">Anthropic High-Speed · 命中率 94.5%</div>
 </div>
 </div>
-<span class="inline-flex items-center px-2 py-1 rounded bg-surface-variant text-code-sm font-code-sm text-on-surface"><span class="w-2 h-2 rounded-full bg-secondary-fixed mr-xs"></span>Active</span>
-</div>
-<div class="flex justify-between items-end border-t border-outline-variant pt-sm mt-auto">
-<div class="flex flex-col">
-<span class="text-code-sm font-code-sm text-on-surface-variant">Input</span>
-<span class="text-body-md font-body-md text-primary">$15.00 / 1M</span>
-</div>
-<div class="flex flex-col text-right">
-<span class="text-code-sm font-code-sm text-on-surface-variant">Output</span>
-<span class="text-body-md font-body-md text-primary">$75.00 / 1M</span>
-</div>
-</div>
+</td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold uppercase">chat</span></td>
+<td class="px-6 py-4 text-brand-600 font-bold">99.5%</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="font-semibold">942.4M</span>
+<div class="flex items-end gap-0.5 h-3">
+<div class="w-1 bg-brand-500 rounded-t h-full"></div>
+<div class="w-1 bg-brand-500 rounded-t h-3/4"></div>
+<div class="w-1 bg-brand-500 rounded-t h-1/2"></div>
 </div>
 </div>
-</section>
+</td>
+<td class="px-6 py-4 font-medium">18.2B</td>
+<td class="px-6 py-4 text-slate-500">2分钟前</td>
+<td class="px-6 py-4 text-amber-400">
+<div class="flex">★★★★★</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="font-semibold text-slate-900">¥0.75</div>
+<div class="text-[10px] text-slate-400">$0.104</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="table-row-hover transition-colors">
+<td class="px-6 py-4 font-medium text-slate-400">3</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-slate-100 rounded flex items-center justify-center">
+<svg class="w-4 h-4 text-slate-600" fill="currentColor" viewbox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+</div>
+<div>
+<div class="font-bold text-slate-900">llama-3-70b-pro</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-tighter">Groq Localhost · 命中率 37.8%</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase">completion</span></td>
+<td class="px-6 py-4 text-brand-600 font-bold">100.0%</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="font-semibold">785.1M</span>
+<div class="flex items-end gap-0.5 h-3">
+<div class="w-1 bg-slate-300 rounded-t h-1/4"></div>
+<div class="w-1 bg-slate-300 rounded-t h-1/2"></div>
+<div class="w-1 bg-brand-500 rounded-t h-full"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-medium">9.1B</td>
+<td class="px-6 py-4 text-slate-500">14分钟前</td>
+<td class="px-6 py-4 text-amber-400">
+<div class="flex text-slate-300">★★<span class="text-amber-400">★★★</span></div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="font-semibold text-slate-900">¥0.15</div>
+<div class="text-[10px] text-slate-400">$0.021</div>
+</td>
+</tr>
+<!-- Repeatable rows for density -->
+<tr class="table-row-hover transition-colors">
+<td class="px-6 py-4 font-medium text-slate-400">4</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-green-50 rounded flex items-center justify-center">
+<span class="text-xs font-bold text-green-600">G3</span>
+</div>
+<div>
+<div class="font-bold text-slate-900">gemini-1.5-pro</div>
+<div class="text-[10px] text-slate-400 uppercase tracking-tighter">Google Cloud · 命中率 74.2%</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold uppercase">chat</span></td>
+<td class="px-6 py-4 text-orange-500 font-bold">92.4%</td>
+<td class="px-6 py-4"><span class="font-semibold">696.1M</span></td>
+<td class="px-6 py-4 font-medium">7.4B</td>
+<td class="px-6 py-4 text-slate-500">1小时前</td>
+<td class="px-6 py-4 text-amber-400">★★★★☆</td>
+<td class="px-6 py-4 text-right">
+<div class="font-semibold text-slate-900">¥0.55</div>
+<div class="text-[10px] text-slate-400">$0.076</div>
+</td>
+</tr>
+<!-- Rows 5-10 simplified for visual length -->
+<tr class="table-row-hover transition-colors bg-slate-50/30">
+<td class="px-6 py-4 font-medium text-slate-400">5</td>
+<td class="px-6 py-4"><div class="font-bold text-slate-900">mistral-large-2407</div></td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold uppercase">chat</span></td>
+<td class="px-6 py-4 text-brand-600 font-bold">98.9%</td>
+<td class="px-6 py-4"><span class="font-semibold">522.2M</span></td>
+<td class="px-6 py-4 font-medium">5.0B</td>
+<td class="px-6 py-4 text-slate-500">刚刚</td>
+<td class="px-6 py-4 text-amber-400">★★★★☆</td>
+<td class="px-6 py-4 text-right"><div class="font-semibold">¥0.44</div></td>
+</tr>
+<tr class="table-row-hover transition-colors">
+<td class="px-6 py-4 font-medium text-slate-400">6</td>
+<td class="px-6 py-4"><div class="font-bold text-slate-900">text-embedding-3-small</div></td>
+<td class="px-6 py-4"><span class="px-2 py-1 bg-purple-50 text-purple-600 rounded text-[10px] font-bold uppercase">embedding</span></td>
+<td class="px-6 py-4 text-brand-600 font-bold">99.9%</td>
+<td class="px-6 py-4"><span class="font-semibold">412.1M</span></td>
+<td class="px-6 py-4 font-medium">12.5B</td>
+<td class="px-6 py-4 text-slate-500">5秒前</td>
+<td class="px-6 py-4 text-amber-400">★★★★★</td>
+<td class="px-6 py-4 text-right"><div class="font-semibold">¥0.01</div></td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+<div class="text-sm text-slate-500">显示 1 到 10，共 542 个模型</div>
+<div class="flex items-center gap-2">
+<button class="p-2 border border-slate-200 rounded-md bg-white hover:bg-slate-50 text-slate-400 disabled:opacity-50" disabled="">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center text-sm font-bold bg-brand-500 text-white rounded-md">1</button>
+<button class="w-8 h-8 flex items-center justify-center text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md">2</button>
+<button class="w-8 h-8 flex items-center justify-center text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md">3</button>
+<span class="px-2 text-slate-400">...</span>
+<button class="w-8 h-8 flex items-center justify-center text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md">55</button>
+</div>
+<button class="p-2 border border-slate-200 rounded-md bg-white hover:bg-slate-50 text-slate-600">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+</div>
+</div>
+<!-- END: Data Table -->
+</div>
 </main>
-<!-- Footer -->
-<footer class="bg-surface dark:bg-primary-container w-full py-xl px-md md:px-xl max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md border-t border-outline-variant dark:border-on-primary-fixed-variant mt-auto">
-<div class="flex items-center gap-sm">
-<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-on-primary">OpenTruck</span>
-<span class="text-body-md font-body-md text-on-surface-variant dark:text-on-primary-container">© 2024 OpenTruck. Decentralized API Protocol.</span>
+<!-- BEGIN: Footer -->
+<footer class="bg-slate-50 border-t border-slate-200 pt-16 pb-8">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
+<div class="col-span-1 md:col-span-2">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-6 h-6 bg-brand-500 rounded flex items-center justify-center">
+<div class="w-3 h-3 border-2 border-white rounded-sm transform rotate-45"></div>
 </div>
-<div class="flex flex-wrap items-center gap-md justify-center">
-<a class="text-code-sm font-code-sm text-on-surface-variant dark:text-on-primary-container hover:text-primary dark:hover:text-on-primary transition-colors" href="#">Documentation</a>
-<a class="text-code-sm font-code-sm text-on-surface-variant dark:text-on-primary-container hover:text-primary dark:hover:text-on-primary transition-colors" href="#">Privacy Policy</a>
-<a class="text-code-sm font-code-sm text-on-surface-variant dark:text-on-primary-container hover:text-primary dark:hover:text-on-primary transition-colors" href="#">Service Terms</a>
-<a class="text-code-sm font-code-sm text-on-surface-variant dark:text-on-primary-container hover:text-primary dark:hover:text-on-primary transition-colors" href="#">Status</a>
-<a class="text-code-sm font-code-sm text-on-surface-variant dark:text-on-primary-container hover:text-primary dark:hover:text-on-primary transition-colors" href="#">GitHub</a>
-<a class="text-code-sm font-code-sm text-on-surface-variant dark:text-on-primary-container hover:text-primary dark:hover:text-on-primary transition-colors" href="#">Discord</a>
+<span class="text-lg font-bold">OpenTruck</span>
+</div>
+<p class="text-sm text-slate-500 max-w-xs leading-relaxed">
+            为去中心化的 AI 未来而建。为高性能模型编排提供底层基础设施。
+          </p>
+</div>
+<div>
+<h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-4">产品</h4>
+<ul class="space-y-2 text-sm text-slate-500">
+<li><a class="hover:text-brand-500 transition-colors" href="#">技术文档</a></li>
+<li><a class="hover:text-brand-500 transition-colors" href="#">API 参考</a></li>
+<li><a class="hover:text-brand-500 transition-colors" href="#">价格体系</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-4">支持</h4>
+<ul class="space-y-2 text-sm text-slate-500">
+<li><a class="hover:text-brand-500 transition-colors" href="#">帮助中心</a></li>
+<li><a class="hover:text-brand-500 transition-colors" href="#">服务状态</a></li>
+<li><a class="hover:text-brand-500 transition-colors" href="#">联系我们</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-xs font-bold text-slate-900 uppercase tracking-widest mb-4">法律</h4>
+<ul class="space-y-2 text-sm text-slate-500">
+<li><a class="hover:text-brand-500 transition-colors" href="#">隐私协议</a></li>
+<li><a class="hover:text-brand-500 transition-colors" href="#">服务条款</a></li>
+</ul>
+</div>
+</div>
+<div class="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-xs text-slate-400">© 2024 OpenTruck. 保留所有权利。</p>
+<div class="flex items-center gap-6">
+<a class="text-slate-400 hover:text-slate-600" href="#"><svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg></a>
+<a class="text-slate-400 hover:text-slate-600" href="#"><svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path></svg></a>
+</div>
+</div>
 </div>
 </footer>
+<!-- END: Footer -->
 </body></html>

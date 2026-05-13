@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OpenTruck | Intelligence Models Marketplace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#3c4a42",
+                        "surface-tint": "#006c49",
+                        "tertiary-fixed": "#ffdad7",
+                        "on-surface": "#1a1b22",
+                        "on-background": "#1a1b22",
+                        "tertiary": "#a43a3a",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fbf8ff",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#005236",
+                        "on-tertiary-fixed": "#410005",
+                        "on-secondary-container": "#656464",
+                        "on-secondary-fixed-variant": "#474646",
+                        "tertiary-container": "#fc7c78",
+                        "background": "#fbf8ff",
+                        "inverse-on-surface": "#f1effa",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#00422b",
+                        "inverse-primary": "#4edea3",
+                        "secondary": "#5f5e5e",
+                        "primary": "#006c49",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#10b981",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c9c6c5",
+                        "surface-container": "#eeedf7",
+                        "on-primary-fixed": "#002113",
+                        "on-tertiary-container": "#711419",
+                        "surface-bright": "#fbf8ff",
+                        "outline": "#6c7a71",
+                        "surface-container-highest": "#e3e1ec",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "surface-variant": "#e3e1ec",
+                        "secondary-container": "#e5e2e1",
+                        "primary-fixed": "#6ffbbe",
+                        "tertiary-fixed-dim": "#ffb3af",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#4edea3",
+                        "outline-variant": "#bbcabf",
+                        "surface-container-high": "#e8e7f1",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#842225",
+                        "surface-container-low": "#f4f2fd",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#dad9e3",
+                        "inverse-surface": "#2f3038",
+                        "secondary-fixed": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "max-width": "1280px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "base": "4px",
+                        "xl": "40px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "margin": "24px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Geist"],
+                        "body-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "code-md": ["JetBrains Mono"],
+                        "label-md": ["Geist"],
+                        "display": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "code-md": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+        }
+        .grid-pattern {
+            background-image: radial-gradient(#bbcabf 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10B981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+<div class="flex justify-between items-center h-16 px-gutter max-w-max-width mx-auto">
+<div class="flex items-center gap-xl">
+<span class="font-display text-headline-md font-bold text-on-surface">OpenTruck</span>
+<nav class="hidden md:flex gap-md">
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors" href="#">Models</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors" href="#">API Docs</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors" href="#">Pricing</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors" href="#">Console</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant bg-surface-container">
+<img alt="User profile avatar" data-alt="A professional headshot of a software engineer with a neutral expression, captured in a brightly lit, modern office environment. The lighting is soft and flattering, emphasizing a clean-cut and professional appearance suitable for a high-end corporate user profile. The background is a soft-focus office interior with minimalist architectural lines in shades of white and grey." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIs1dIYZLZ9NKRklVr0omx2zTYYTd0uma68ewcO3SU1niooWd-EcNr4MS9s56G78b_RiCcTLUAfArivNV87bqAXjDGm1woVXXh_mQtpSqnStGUdUQoMczn8zGwy1mht-nLEMlMvbcDkugnkKuWzLocPepT6RR0C62_IBpeu_vb0LPFNPqZe-qbU2odEmzh1Bu6x6YjcTv3j9FSIhQVR6kvZqccEkNrJ8MIyrzWSHCCkfpc4N2TXozvE4eGPYryOul62ZyEF1fT8Yo"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-xl px-gutter max-w-max-width mx-auto">
+<!-- Hero & Header -->
+<section class="mb-xl relative overflow-hidden rounded-xl bg-surface-container-low p-lg grid-pattern">
+<div class="relative z-10">
+<h1 class="font-display text-display text-on-surface mb-sm">Intelligence Models</h1>
+<p class="font-body-lg text-body-lg text-secondary max-w-2xl mb-lg">
+                    Discover and deploy state-of-the-art AI models. From high-performance LLMs to specialized embedding architectures, optimized for the OpenTruck decentralized network.
+                </p>
+<!-- Filters -->
+<div class="flex flex-wrap gap-sm items-center">
+<span class="font-label-md text-label-md text-on-surface-variant mr-base">Filter by:</span>
+<button class="px-md py-xs rounded-full bg-primary-container text-on-primary-container font-label-md text-label-md border border-primary-container">All Models</button>
+<button class="px-md py-xs rounded-full bg-white border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-colors">LLM</button>
+<button class="px-md py-xs rounded-full bg-white border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-colors">Image</button>
+<button class="px-md py-xs rounded-full bg-white border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-colors">Audio</button>
+<button class="px-md py-xs rounded-full bg-white border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container-high transition-colors">Embedding</button>
+<div class="ml-auto relative flex-1 max-w-xs">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[18px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-white border border-outline-variant rounded-lg font-body-sm text-body-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none" placeholder="Search models..." type="text"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Models Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Model Card: GPT-4o -->
+<div class="bg-surface-bright border border-outline-variant/30 rounded-xl p-md hover:-translate-y-1 transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div>
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface">GPT-4o</h3>
+<p class="font-label-md text-label-md text-outline">OpenAI</p>
+</div>
+</div>
+<div class="flex items-center gap-xs px-2 py-1 rounded bg-primary-container/10 border border-primary/20">
+<div class="pulse-dot"></div>
+<span class="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">Active</span>
+</div>
+</div>
+<div class="space-y-sm mb-lg">
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Input Pricing</span>
+<span class="font-code-md text-on-surface">$5.00 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Output Pricing</span>
+<span class="font-code-md text-on-surface">$15.00 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Latency (avg)</span>
+<span class="font-code-md text-primary">240ms</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors">Deploy Endpoint</button>
+</div>
+<!-- Model Card: Claude 3.5 Sonnet -->
+<div class="bg-surface-bright border border-outline-variant/30 rounded-xl p-md hover:-translate-y-1 transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface">Claude 3.5 Sonnet</h3>
+<p class="font-label-md text-label-md text-outline">Anthropic</p>
+</div>
+</div>
+<div class="flex items-center gap-xs px-2 py-1 rounded bg-primary-container/10 border border-primary/20">
+<div class="pulse-dot"></div>
+<span class="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">Active</span>
+</div>
+</div>
+<div class="space-y-sm mb-lg">
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Input Pricing</span>
+<span class="font-code-md text-on-surface">$3.00 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Output Pricing</span>
+<span class="font-code-md text-on-surface">$15.00 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Latency (avg)</span>
+<span class="font-code-md text-primary">310ms</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors">Deploy Endpoint</button>
+</div>
+<!-- Model Card: Llama 3 70B -->
+<div class="bg-surface-bright border border-outline-variant/30 rounded-xl p-md hover:-translate-y-1 transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<div>
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface">Llama 3 70B</h3>
+<p class="font-label-md text-label-md text-outline">Meta (Open Source)</p>
+</div>
+</div>
+<div class="flex items-center gap-xs px-2 py-1 rounded bg-primary-container/10 border border-primary/20">
+<div class="pulse-dot"></div>
+<span class="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">Active</span>
+</div>
+</div>
+<div class="space-y-sm mb-lg">
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Input Pricing</span>
+<span class="font-code-md text-on-surface">$0.59 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Output Pricing</span>
+<span class="font-code-md text-on-surface">$0.79 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Latency (avg)</span>
+<span class="font-code-md text-primary">180ms</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors">Deploy Endpoint</button>
+</div>
+<!-- Model Card: Mixtral 8x7B -->
+<div class="bg-surface-bright border border-outline-variant/30 rounded-xl p-md hover:-translate-y-1 transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">terminal</span>
+</div>
+<div>
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface">Mixtral 8x7B</h3>
+<p class="font-label-md text-label-md text-outline">Mistral AI</p>
+</div>
+</div>
+<div class="flex items-center gap-xs px-2 py-1 rounded bg-primary-container/10 border border-primary/20">
+<div class="pulse-dot"></div>
+<span class="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">Active</span>
+</div>
+</div>
+<div class="space-y-sm mb-lg">
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Input Pricing</span>
+<span class="font-code-md text-on-surface">$0.25 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Output Pricing</span>
+<span class="font-code-md text-on-surface">$0.25 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Latency (avg)</span>
+<span class="font-code-md text-primary">145ms</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors">Deploy Endpoint</button>
+</div>
+<!-- Model Card: Gemini 1.5 Pro -->
+<div class="bg-surface-bright border border-outline-variant/30 rounded-xl p-md hover:-translate-y-1 transition-all duration-300 group">
+<div class="flex justify-between items-start mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div>
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface">Gemini 1.5 Pro</h3>
+<p class="font-label-md text-label-md text-outline">Google DeepMind</p>
+</div>
+</div>
+<div class="flex items-center gap-xs px-2 py-1 rounded bg-primary-container/10 border border-primary/20">
+<div class="pulse-dot"></div>
+<span class="font-label-md text-label-md text-primary uppercase font-bold tracking-wider">Active</span>
+</div>
+</div>
+<div class="space-y-sm mb-lg">
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Input Pricing</span>
+<span class="font-code-md text-on-surface">$3.50 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Output Pricing</span>
+<span class="font-code-md text-on-surface">$10.50 / 1M tokens</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-secondary">Latency (avg)</span>
+<span class="font-code-md text-primary">420ms</span>
+</div>
+</div>
+<button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors">Deploy Endpoint</button>
+</div>
+<!-- CTA Card: Deploy Custom Model -->
+<div class="bg-white border-2 border-dashed border-outline-variant rounded-xl p-md flex flex-col items-center justify-center text-center group cursor-pointer hover:border-primary/50 transition-all">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center mb-md group-hover:bg-primary-container/20 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add</span>
+</div>
+<h3 class="font-headline-md text-body-lg font-bold text-on-surface">Deploy Custom Model</h3>
+<p class="font-body-sm text-body-sm text-secondary mt-xs px-lg">
+                    Upload weights or link your own decentralized compute provider to host private model instances.
+                </p>
+</div>
+</div>
+<!-- Terminal Snippet -->
+<section class="mt-xl">
+<div class="flex items-center justify-between mb-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Quick Start</h2>
+<button class="flex items-center gap-xs font-label-md text-label-md text-primary hover:underline">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span> Full Documentation
+                </button>
+</div>
+<div class="bg-[#0E0E0E] rounded-xl p-lg relative group border border-white/5">
+<button class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 hover:bg-white/20 p-2 rounded-lg text-white">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+<div class="flex gap-2 mb-lg">
+<div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+</div>
+<pre class="font-code-md text-code-md text-white/90 overflow-x-auto"><code><span class="text-primary-container">curl</span> -X POST https://api.opentruck.ai/v1/chat/completions \
+  -H <span class="text-tertiary-fixed-dim">"Authorization: Bearer $TRUCK_API_KEY"</span> \
+  -H <span class="text-tertiary-fixed-dim">"Content-Type: application/json"</span> \
+  -d '{
+    <span class="text-primary-container">"model"</span>: <span class="text-tertiary-fixed-dim">"gpt-4o"</span>,
+    <span class="text-primary-container">"messages"</span>: [{"role": "user", "content": "How does decentralized AI scale?"}]
+  }'</code></pre>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-secondary-container border-t border-outline-variant mt-24">
+<div class="max-w-max-width mx-auto px-gutter py-xl">
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-md mb-xl">
+<div class="col-span-2">
+<span class="font-display text-body-lg font-bold text-on-surface mb-md block">OpenTruck</span>
+<p class="text-on-secondary-container font-body-sm text-body-sm max-w-xs mb-lg">
+                        The unified middleware for decentralized intelligence. Scaling AI through permissionless compute markets.
+                    </p>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface mb-md">Product</h4>
+<ul class="space-y-sm">
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Documentation</a></li>
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Status</a></li>
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Changelog</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface mb-md">Developers</h4>
+<ul class="space-y-sm">
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">GitHub</a></li>
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Discord</a></li>
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">API Keys</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-label-md text-label-md font-bold text-on-surface mb-md">Legal</h4>
+<ul class="space-y-sm">
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Privacy</a></li>
+<li><a class="text-on-secondary-container font-body-sm text-body-sm hover:text-primary transition-colors" href="#">Terms</a></li>
+</ul>
+</div>
+<div class="flex justify-end items-start gap-sm">
+<div class="w-10 h-10 rounded-lg bg-on-secondary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container">language</span>
+</div>
+</div>
+</div>
+<div class="border-t border-outline-variant/30 pt-lg flex flex-col md:flex-row justify-between items-center gap-md">
+<p class="text-on-secondary-container font-body-sm text-body-sm">© 2024 OpenTruck. All rights reserved. Built for the decentralized AI future.</p>
+<div class="flex gap-md">
+<span class="flex items-center gap-xs font-label-md text-label-md text-primary">
+<div class="w-2 h-2 rounded-full bg-primary"></div> All Systems Operational
+                    </span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
