@@ -338,8 +338,8 @@ def responses_event_to_chat_chunks(
         response = event_payload.get("response") or {}
         if response.get("model"):
             state.model = response["model"]
-        error = event_payload.get("error")
-        if isinstance(error, dict) and isinstance(error.get("type"), str):
+        error = _extract_terminal_error(event_payload=event_payload, response=response)
+        if isinstance(error.get("type"), str):
             state.terminal_error_type = error["type"]
         if isinstance(error, dict) and not isinstance(response.get("error"), dict):
             response = {**response, "error": error}
@@ -688,9 +688,8 @@ def _handle_terminal_event_message(
     state: ChatCompletionsStreamState,
 ) -> list[dict[str, Any]]:
     if event_type == "response.failed":
-        error = event_payload.get("error")
-        if not isinstance(error, dict):
-            error = {}
+        response = event_payload.get("response") or {}
+        error = _extract_terminal_error(event_payload=event_payload, response=response)
         if state.saw_text or state.saw_refusal or state.saw_tool_call:
             return []
         message = error.get("message")
@@ -718,3 +717,13 @@ def _handle_terminal_event_message(
             _make_chat_delta_chunk(state=state, delta={"refusal": cancellation_message}),
         ]
     return [_make_chat_delta_chunk(state=state, delta={"refusal": cancellation_message})]
+
+
+def _extract_terminal_error(*, event_payload: dict[str, Any], response: dict[str, Any]) -> dict[str, Any]:
+    response_error = response.get("error")
+    if isinstance(response_error, dict):
+        return response_error
+    top_level_error = event_payload.get("error")
+    if isinstance(top_level_error, dict):
+        return top_level_error
+    return {}

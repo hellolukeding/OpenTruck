@@ -520,6 +520,19 @@ class GatewayService:
             return None
         return payload
 
+    def _extract_stream_error_type(self, payload: dict[str, Any] | None) -> str | None:
+        if not isinstance(payload, dict):
+            return None
+        response = payload.get("response")
+        if isinstance(response, dict):
+            response_error = response.get("error")
+            if isinstance(response_error, dict) and isinstance(response_error.get("type"), str):
+                return response_error["type"]
+        error = payload.get("error")
+        if isinstance(error, dict) and isinstance(error.get("type"), str):
+            return error["type"]
+        return None
+
     def _resolve_conversation_id(self, request_headers: Iterable[tuple[str, str]]) -> str | None:
         header_map = {name.lower(): value for name, value in request_headers}
         value = header_map.get("conversation_id")
@@ -1046,9 +1059,7 @@ class GatewayService:
                     payload = self._parse_stream_event_payload(pending_data)
                     if pending_event in RESPONSES_TERMINAL_EVENTS:
                         terminal_event_type = pending_event
-                        error = payload.get("error") if isinstance(payload, dict) else None
-                        if isinstance(error, dict) and isinstance(error.get("type"), str):
-                            terminal_error_type = error["type"]
+                        terminal_error_type = self._extract_stream_error_type(payload)
                     usage = self._merge_stream_usage(
                         current=usage,
                         event_type=pending_event,
@@ -1062,9 +1073,7 @@ class GatewayService:
                 payload = self._parse_stream_event_payload(pending_data)
                 if pending_event in RESPONSES_TERMINAL_EVENTS:
                     terminal_event_type = pending_event
-                    error = payload.get("error") if isinstance(payload, dict) else None
-                    if isinstance(error, dict) and isinstance(error.get("type"), str):
-                        terminal_error_type = error["type"]
+                    terminal_error_type = self._extract_stream_error_type(payload)
                 usage = self._merge_stream_usage(
                     current=usage,
                     event_type=pending_event,
