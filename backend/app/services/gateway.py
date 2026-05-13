@@ -55,6 +55,14 @@ ALLOWED_RESPONSE_HEADERS = {
     "x-codex-turn-state",
     "x-request-id",
 }
+RESPONSES_TERMINAL_EVENTS = {
+    "response.completed",
+    "response.done",
+    "response.incomplete",
+    "response.failed",
+    "response.cancelled",
+    "response.canceled",
+}
 
 
 @dataclass(slots=True)
@@ -467,19 +475,32 @@ class GatewayService:
         )
 
     def _extract_usage_from_stream_event(self, event_type: str, payload: dict[str, Any]) -> UsageAccounting | None:
-        if event_type not in {
-            "response.completed",
-            "response.done",
-            "response.incomplete",
-            "response.failed",
-            "response.cancelled",
-            "response.canceled",
-        }:
+        if event_type not in RESPONSES_TERMINAL_EVENTS:
             return None
         response = payload.get("response")
         if not isinstance(response, dict):
             return None
         return self._extract_usage_from_payload(response)
+
+    def _stream_failure_code_for_terminal_event(self, event_type: str) -> str:
+        if event_type == "response.failed":
+            return "upstream_terminal_failed"
+        if event_type in {"response.cancelled", "response.canceled"}:
+            return "upstream_terminal_canceled"
+        return "upstream_terminal_incomplete"
+
+    def _build_responses_failure_sse(self, *, error_type: str, message: str) -> bytes:
+        payload = {
+            "type": "response.failed",
+            "error": {
+                "type": error_type,
+                "message": message,
+            },
+        }
+        return (
+            "event: response.failed\n"
+            f"data: {json.dumps(payload, separators=(',', ':'))}\n\n"
+        ).encode("utf-8")
 
     def _resolve_conversation_id(self, request_headers: Iterable[tuple[str, str]]) -> str | None:
         header_map = {name.lower(): value for name, value in request_headers}
@@ -883,11 +904,14 @@ class GatewayService:
         pending_data: list[str] = []
         client = getattr(upstream_response, "_client", None)
         account_id = getattr(upstream_response, "_opentruck_account_id", None)
+        saw_terminal_event = False
         try:
             for line in upstream_response.iter_lines():
                 if line is None:
                     continue
                 if line == "":
+                    if pending_event in RESPONSES_TERMINAL_EVENTS:
+                        saw_terminal_event = True
                     yield from self._flush_sse_event(
                         pending_event=pending_event,
                         pending_data=pending_data,
@@ -904,12 +928,29 @@ class GatewayService:
                 if line.startswith("data:"):
                     pending_data.append(line.partition(":")[2].lstrip())
             if pending_event or pending_data:
+                if pending_event in RESPONSES_TERMINAL_EVENTS:
+                    saw_terminal_event = True
                 yield from self._flush_sse_event(
                     pending_event=pending_event,
                     pending_data=pending_data,
                     state=state,
                 )
-            if not state.finalized:
+            if not saw_terminal_event:
+                for chunk in responses_event_to_chat_chunks(
+                    "response.failed",
+                    {
+                        "error": {
+                            "type": "upstream_disconnected",
+                            "message": "Upstream stream disconnected before completion",
+                        },
+                        "response": {
+                            "model": state.model or "openai/responses",
+                        },
+                    },
+                    state=state,
+                ):
+                    yield format_chat_chunk_sse(chunk)
+            elif not state.finalized:
                 for chunk in finalize_chat_stream(state=state):
                     yield format_chat_chunk_sse(chunk)
             yield done_sse_chunk()
@@ -925,15 +966,32 @@ class GatewayService:
                 if state.usage
                 else None
             )
-            self._apply_usage_accounting(
-                identity=identity,
-                request_kind="chat_completions_stream",
-                request_path=request_path,
-                conversation_id=conversation_id,
-                upstream_status_code=upstream_response.status_code,
-                account_id=self._extract_response_account_id(upstream_response),
-                usage=usage,
-            )
+            if state.terminal_event_type in {"response.completed", "response.done", "response.incomplete"}:
+                self._apply_usage_accounting(
+                    identity=identity,
+                    request_kind="chat_completions_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=upstream_response.status_code,
+                    account_id=self._extract_response_account_id(upstream_response),
+                    usage=usage,
+                )
+            else:
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="chat_completions_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=upstream_response.status_code,
+                    account_id=self._extract_response_account_id(upstream_response),
+                    error_code=(
+                        "upstream_missing_terminal_event"
+                        if not saw_terminal_event
+                        else self._stream_failure_code_for_terminal_event(state.terminal_event_type)
+                    ),
+                    usage=usage,
+                    status="incomplete" if not saw_terminal_event else "failed",
+                )
             upstream_response.close()
             if client is not None:
                 client.close()
@@ -953,6 +1011,7 @@ class GatewayService:
         usage: UsageAccounting | None = None
         client = getattr(upstream_response, "_client", None)
         account_id = getattr(upstream_response, "_opentruck_account_id", None)
+        terminal_event_type: str | None = None
         try:
             for line in upstream_response.iter_lines():
                 if line is None:
@@ -962,6 +1021,8 @@ class GatewayService:
                 elif line.startswith("data:"):
                     pending_data.append(line.partition(":")[2].lstrip())
                 elif line == "":
+                    if pending_event in RESPONSES_TERMINAL_EVENTS:
+                        terminal_event_type = pending_event
                     usage = self._merge_stream_usage(
                         current=usage,
                         event_type=pending_event,
@@ -972,21 +1033,46 @@ class GatewayService:
                 yield f"{line}\n".encode("utf-8")
 
             if pending_event or pending_data:
+                if pending_event in RESPONSES_TERMINAL_EVENTS:
+                    terminal_event_type = pending_event
                 usage = self._merge_stream_usage(
                     current=usage,
                     event_type=pending_event,
                     pending_data=pending_data,
                 )
+            if not terminal_event_type:
+                yield self._build_responses_failure_sse(
+                    error_type="upstream_disconnected",
+                    message="Upstream stream disconnected before completion",
+                )
+                yield done_sse_chunk()
         finally:
-            self._apply_usage_accounting(
-                identity=identity,
-                request_kind="responses_stream",
-                request_path=request_path,
-                conversation_id=conversation_id,
-                upstream_status_code=upstream_response.status_code,
-                account_id=self._extract_response_account_id(upstream_response),
-                usage=usage,
-            )
+            if terminal_event_type in {"response.completed", "response.done", "response.incomplete"}:
+                self._apply_usage_accounting(
+                    identity=identity,
+                    request_kind="responses_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=upstream_response.status_code,
+                    account_id=self._extract_response_account_id(upstream_response),
+                    usage=usage,
+                )
+            else:
+                self._apply_failed_accounting(
+                    identity=identity,
+                    request_kind="responses_stream",
+                    request_path=request_path,
+                    conversation_id=conversation_id,
+                    upstream_status_code=upstream_response.status_code,
+                    account_id=self._extract_response_account_id(upstream_response),
+                    error_code=(
+                        "upstream_missing_terminal_event"
+                        if not terminal_event_type
+                        else self._stream_failure_code_for_terminal_event(terminal_event_type)
+                    ),
+                    usage=usage,
+                    status="incomplete" if not terminal_event_type else "failed",
+                )
             upstream_response.close()
             if client is not None:
                 client.close()

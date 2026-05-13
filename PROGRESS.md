@@ -66,6 +66,7 @@
 - 已继续扩展 `chat/completions` 流式兼容层，新增 `response.output_text.done` 与 `response.refusal.delta/done` 支持
 - 已继续扩展 `chat/completions` 流式兼容层，支持从 `response.output_item.added/done` 中提取 `message.refusal` 与 `reasoning.summary`
 - 已继续扩展 `chat/completions` 流式兼容层，支持 `response.failed` 在无正文输出时回填错误消息，并补齐 `response.cancelled/canceled` 终态兼容
+- 已继续补强 `responses stream` 与 `chat/completions stream` 的断流处理：缺少 terminal event 时会补可读失败终态，并按失败/不完整请求记账，而不再误记为成功
 - 已修正流式工具参数映射逻辑，未匹配到 `output_index` 时不再错误写入默认工具槽位
 - 已支持在缺少 delta 事件时，从 `message/function_call/reasoning` 的 done 事件回填 Chat Completions chunk
 - 已将 `response.incomplete` 的 `content_filter` 原因映射为 `finish_reason=content_filter`
@@ -73,6 +74,7 @@
 - 已用本地冒烟验证 `output_text.done` 可回填文本，`refusal.done + content_filter` 可回填 refusal 并给出正确 `finish_reason`
 - 已用本地冒烟验证 `output_item` 级别的 `message.refusal` 与 `reasoning.summary` 也能回填为 Chat Completions chunk
 - 已用本地冒烟验证 `response.failed` 会回填 refusal，`safety_error` 会给出 `content_filter`，`response.cancelled` 会生成可读终态 chunk
+- 已用本地冒烟验证“无输出断流”和“已输出部分内容后断流”都会生成明确终态，且 ledger 记录为 `upstream_missing_terminal_event`
 - 已为 `upstream_accounts` 增加调度字段：`priority`、`last_used_at`、`last_error_at`、`last_error_code`、`consecutive_failures`、`cooldown_until`
 - 已将租户内上游选择策略升级为“优先级 + 最久未使用”排序，并在转发前跳过冷却中的账号
 - 已接入上游 token 过期自动禁用、`429/5xx/网络错误` 冷却摘除，以及 `401/403` 禁用处理
@@ -116,7 +118,7 @@
 - 其余前端资源页仍缺更完整的排序切换、更多筛选维度与详情面板；当前这类增强已优先补到 `upstream_accounts`
 - 当前管理页摘要卡片仍以“当前页快照”为主，尚未拆出专门的聚合统计接口
 - `chat/completions` 流式兼容层已覆盖更多 done/failed/canceled 事件与回填逻辑，但后续仍需要补更完整的错误事件、更多 tool/reasoning 变体和断流恢复策略
-- `responses` 流式主链路已经可透传并做 usage 记账，但后续仍需要补更完整的流式终态区分、断流恢复和更细的事件观测
+- `responses` 流式主链路已经可透传，并在缺少 terminal event 时改为失败/不完整记账；后续仍需要补更完整的断流恢复与更细的事件观测
 - 上游账号调度已补到首版优先级、故障摘除、会话粘性、进程内并发占位与基础租户配额/失败记账，但仍缺跨进程/分布式并发协调、按模型或账号的精细计费与更细的负载均衡策略
 - OAuth 登录虽然已经接通，但本地还未配置 `GitHub` / `Google` provider 凭据，因此当前只能验证门禁和登录页骨架，不能完成真实第三方授权往返
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果

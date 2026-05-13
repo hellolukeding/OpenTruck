@@ -145,6 +145,7 @@ class ChatCompletionsStreamState:
     output_indices_with_tool_args: set[int] = field(default_factory=set)
     include_usage: bool = False
     usage: dict[str, Any] | None = None
+    terminal_event_type: str | None = None
 
 
 def responses_event_to_chat_chunks(
@@ -332,6 +333,7 @@ def responses_event_to_chat_chunks(
         "response.cancelled",
         "response.canceled",
     }:
+        state.terminal_event_type = event_type
         response = event_payload.get("response") or {}
         if response.get("model"):
             state.model = response["model"]
