@@ -240,6 +240,8 @@ def responses_event_to_chat_chunks(
             )
         if item_type == "message":
             return _handle_message_output_item(item=item, state=state)
+        if item_type == "reasoning":
+            return _handle_reasoning_output_item(item=item, state=state)
         return []
 
     if event_type == "response.function_call_arguments.delta":
@@ -316,8 +318,10 @@ def responses_event_to_chat_chunks(
                 state=state,
                 include_arguments_when_missing=True,
             )
-        if item.get("type") == "message" and not state.saw_text:
+        if item.get("type") == "message" and not (state.saw_text or state.saw_refusal):
             return _handle_message_output_item(item=item, state=state)
+        if item.get("type") == "reasoning" and not state.saw_reasoning:
+            return _handle_reasoning_output_item(item=item, state=state)
         return []
 
     if event_type in {"response.completed", "response.done", "response.incomplete", "response.failed"}:
@@ -603,14 +607,44 @@ def _handle_message_output_item(*, item: dict[str, Any], state: ChatCompletionsS
         for part in content_parts
         if isinstance(part, dict) and part.get("type") == "output_text" and isinstance(part.get("text"), str)
     )
-    if not text:
+    refusal = "".join(
+        part.get("text", "")
+        for part in content_parts
+        if isinstance(part, dict) and part.get("type") == "refusal" and isinstance(part.get("text"), str)
+    )
+
+    chunks: list[dict[str, Any]] = []
+    if not state.sent_role and (text or refusal):
+        state.sent_role = True
+        chunks.append(_make_chat_delta_chunk(state=state, delta={"role": "assistant"}))
+
+    if text:
+        state.saw_text = True
+        chunks.append(_make_chat_delta_chunk(state=state, delta={"content": text}))
+    if refusal:
+        state.saw_refusal = True
+        chunks.append(_make_chat_delta_chunk(state=state, delta={"refusal": refusal}))
+    return chunks
+
+
+def _handle_reasoning_output_item(*, item: dict[str, Any], state: ChatCompletionsStreamState) -> list[dict[str, Any]]:
+    summary_parts = item.get("summary")
+    if not isinstance(summary_parts, list):
         return []
 
-    state.saw_text = True
+    reasoning_text = "".join(
+        part.get("text", "")
+        for part in summary_parts
+        if isinstance(part, dict) and part.get("type") == "summary_text" and isinstance(part.get("text"), str)
+    )
+    if not reasoning_text:
+        return []
+
+    state.saw_reasoning = True
     if not state.sent_role:
         state.sent_role = True
         return [
             _make_chat_delta_chunk(state=state, delta={"role": "assistant"}),
-            _make_chat_delta_chunk(state=state, delta={"content": text}),
+            _make_chat_delta_chunk(state=state, delta={"reasoning_content": reasoning_text}),
         ]
-    return [_make_chat_delta_chunk(state=state, delta={"content": text})]
+    return [_make_chat_delta_chunk(state=state, delta={"reasoning_content": reasoning_text})]
