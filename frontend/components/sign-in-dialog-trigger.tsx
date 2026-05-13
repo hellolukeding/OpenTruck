@@ -19,14 +19,10 @@ export function SignInDialogTrigger({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!open) return;
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
+      if (event.key === "Escape") setOpen(false);
     }
 
     document.body.style.overflow = "hidden";
@@ -38,18 +34,14 @@ export function SignInDialogTrigger({
     };
   }, [open]);
 
-  if (!isValidElement(children)) {
-    return null;
-  }
+  if (!isValidElement(children)) return null;
 
   return (
     <>
       <span
         className="contents"
         onClick={(event: MouseEvent<HTMLSpanElement>) => {
-          if (!event.defaultPrevented) {
-            setOpen(true);
-          }
+          if (!event.defaultPrevented) setOpen(true);
         }}
       >
         {children}
@@ -57,34 +49,24 @@ export function SignInDialogTrigger({
 
       {open ? (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-md py-xl"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm"
           onClick={() => setOpen(false)}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label="OpenTruck sign in"
-            className="relative w-full max-w-xl rounded-2xl border border-outline-variant bg-surface-container p-lg shadow-[0_24px_80px_rgba(0,0,0,0.28)]"
-            onClick={(event) => event.stopPropagation()}
+            className="relative w-auto min-w-[360px] max-w-[680px] rounded-2xl border border-outline-variant bg-surface-container p-6 shadow-[0_32px_80px_rgba(0,0,0,0.35)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               type="button"
               aria-label="Close sign in dialog"
-              className="absolute right-4 top-4 text-on-surface-variant transition-colors hover:text-primary"
+              className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-lg text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-primary"
               onClick={() => setOpen(false)}
             >
-              <span className="material-symbols-outlined text-[20px]">close</span>
+              <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
-
-            <div className="mb-md pr-xl">
-              <p className="text-code-sm uppercase tracking-[0.18em] text-on-surface-variant">
-                OpenTruck access
-              </p>
-              <h2 className="mt-xs text-title-lg text-primary">Sign in without leaving the page</h2>
-              <p className="mt-xs text-body-sm text-on-surface-variant">
-                Use OAuth or an operator account. You can close this dialog at any time.
-              </p>
-            </div>
 
             <SignInPanel
               callbackUrl={callbackUrl}

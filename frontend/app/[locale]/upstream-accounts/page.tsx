@@ -6,18 +6,45 @@ import { PaginationControls } from "@/components/pagination-controls";
 import { ResourceStatusBadge, ResourceTableCard } from "@/components/resource-table-card";
 import { UpstreamAccountFilters } from "@/components/upstream-account-filters";
 import { UpstreamAccountRowActions } from "@/components/upstream-account-row-actions";
-import { getAdminOverview, getTenantsPage, getUpstreamAccountsPage } from "@/lib/admin-api";
+import { UpstreamAccountSummary } from "@/components/upstream-account-summary";
+import { getAdminOverview, getTenantsPage, getUpstreamAccountsPage, type UpstreamAccount } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
-function formatDate(value: string | null, locale: "en" | "zh-CN", fallback: string) {
+function fmt(value: string | null, locale: "en" | "zh-CN", fallback: string) {
   if (!value) return fallback;
-
   return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : "en", {
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function ErrorBadge({ code }: { code: string | null }) {
+  if (!code) return <span className="text-code-sm text-on-surface-variant">—</span>;
+  const isAuthError = code.startsWith("4");
+  return (
+    <span
+      className={`inline-block rounded-md px-2 py-0.5 text-code-sm font-code-sm ${
+        isAuthError
+          ? "bg-error/10 text-error"
+          : "bg-tertiary/10 text-tertiary"
+      }`}
+    >
+      {code}
+    </span>
+  );
+}
+
+function RefreshDot({ has }: { has: boolean }) {
+  return (
+    <span
+      className={`inline-block h-2 w-2 rounded-full ${
+        has ? "bg-primary" : "bg-on-surface-variant/40"
+      }`}
+      title={has ? "Has refresh token" : "No refresh token"}
+    />
+  );
 }
 
 export default async function UpstreamAccountsPage({
@@ -68,7 +95,7 @@ export default async function UpstreamAccountsPage({
   });
   const tenantMap = new Map(tenantOptions.items.map((tenant) => [tenant.id, tenant.name]));
 
-  const copy =
+  const t =
     typedLocale === "zh-CN"
       ? {
           eyebrow: "上游账号池",
@@ -79,14 +106,6 @@ export default async function UpstreamAccountsPage({
           noteTitle: "调度说明",
           noteBody:
             "网关现在会优先选择更低的 priority，并避开冷却中或已过期的账号。这里的字段就是调度层正在使用的真实状态。",
-          summary: {
-            count: "账号数量",
-            countNote: "租户账号池中的总记录数",
-            active: "活跃账号",
-            activeNote: "当前仍可参与路由的记录",
-            cooling: "冷却中",
-            coolingNote: "暂时被摘除等待恢复的账号",
-          },
           labels: {
             tenant: "租户",
             status: "状态",
@@ -95,6 +114,7 @@ export default async function UpstreamAccountsPage({
             cooldown: "冷却至",
             lastError: "最近错误",
             email: "邮箱",
+            failures: "失败次数",
             never: "从未",
             clear: "无",
           },
@@ -108,14 +128,6 @@ export default async function UpstreamAccountsPage({
           noteTitle: "Scheduler note",
           noteBody:
             "The gateway now prefers lower priority accounts and skips identities that are cooling down or already expired. The table reflects the same live scheduler metadata the backend is using.",
-          summary: {
-            count: "Accounts",
-            countNote: "Records inside the tenant upstream pool",
-            active: "Active accounts",
-            activeNote: "Currently eligible for routing",
-            cooling: "Cooling down",
-            coolingNote: "Temporarily removed after recent failures",
-          },
           labels: {
             tenant: "Tenant",
             status: "Status",
@@ -124,6 +136,7 @@ export default async function UpstreamAccountsPage({
             cooldown: "Cooldown until",
             lastError: "Last error",
             email: "Email",
+            failures: "Failures",
             never: "Never",
             clear: "Clear",
           },
@@ -150,76 +163,84 @@ export default async function UpstreamAccountsPage({
         sortOrder={sortOrder}
         tenants={tenantOptions.items}
       />
+      <UpstreamAccountSummary
+        accounts={upstreamPage.items}
+        total={upstreamPage.pagination.total}
+        locale={typedLocale}
+      />
       <ResourceTableCard
-        eyebrow={copy.eyebrow}
-        title={copy.title}
-        description={copy.description}
-        emptyLabel={copy.empty}
-        noteTitle={copy.noteTitle}
-        noteBody={copy.noteBody}
-        summary={[
-          {
-            label: copy.summary.count,
-            value: upstreamPage.pagination.total,
-            note: copy.summary.countNote,
-          },
-          {
-            label: copy.summary.active,
-            value: upstreamPage.items.filter((account) => account.status === "active").length,
-            note: copy.summary.activeNote,
-          },
-          {
-            label: copy.summary.cooling,
-            value: upstreamPage.items.filter((account) => account.cooldown_until !== null).length,
-            note: copy.summary.coolingNote,
-          },
-        ]}
+        eyebrow={t.eyebrow}
+        title={t.title}
+        description={t.description}
+        emptyLabel={t.empty}
+        noteTitle={t.noteTitle}
+        noteBody={t.noteBody}
+        summary={[]}
         items={upstreamPage.items}
         columns={[
           {
             key: "name",
             label: dictionary.labels.name,
-            render: (account) => <span className="font-medium text-black">{account.name}</span>,
+            render: (account: UpstreamAccount) => (
+              <span className="font-medium text-primary">{account.name}</span>
+            ),
           },
           {
             key: "tenant",
-            label: copy.labels.tenant,
-            render: (account) => tenantMap.get(account.tenant_id) ?? account.tenant_id,
+            label: t.labels.tenant,
+            render: (account: UpstreamAccount) => tenantMap.get(account.tenant_id) ?? account.tenant_id,
           },
           {
             key: "email",
-            label: copy.labels.email,
-            render: (account) => account.email ?? copy.labels.clear,
+            label: t.labels.email,
+            render: (account: UpstreamAccount) => account.email ?? t.labels.clear,
           },
           {
             key: "status",
-            label: copy.labels.status,
-            render: (account) => <ResourceStatusBadge status={account.status} />,
+            label: t.labels.status,
+            render: (account: UpstreamAccount) => <ResourceStatusBadge status={account.status} />,
           },
           {
-            key: "priority",
-            label: copy.labels.priority,
-            render: (account) => account.priority,
-          },
-          {
-            key: "last_used_at",
-            label: copy.labels.lastUsed,
-            render: (account) => formatDate(account.last_used_at, typedLocale, copy.labels.never),
-          },
-          {
-            key: "cooldown_until",
-            label: copy.labels.cooldown,
-            render: (account) => formatDate(account.cooldown_until, typedLocale, copy.labels.clear),
+            key: "failures",
+            label: t.labels.failures,
+            render: (account: UpstreamAccount) =>
+              account.consecutive_failures > 0 ? (
+                <span className="text-code-sm font-code-sm text-error">{account.consecutive_failures}</span>
+              ) : (
+                <span className="text-code-sm text-on-surface-variant">0</span>
+              ),
           },
           {
             key: "last_error_code",
-            label: copy.labels.lastError,
-            render: (account) => account.last_error_code ?? copy.labels.clear,
+            label: t.labels.lastError,
+            render: (account: UpstreamAccount) => <ErrorBadge code={account.last_error_code} />,
+          },
+          {
+            key: "priority",
+            label: t.labels.priority,
+            render: (account: UpstreamAccount) => (
+              <span className="text-code-sm font-code-sm">{account.priority}</span>
+            ),
+          },
+          {
+            key: "last_used_at",
+            label: t.labels.lastUsed,
+            render: (account: UpstreamAccount) => fmt(account.last_used_at, typedLocale, t.labels.never),
+          },
+          {
+            key: "cooldown_until",
+            label: t.labels.cooldown,
+            render: (account: UpstreamAccount) => fmt(account.cooldown_until, typedLocale, t.labels.clear),
+          },
+          {
+            key: "refresh",
+            label: "Refresh",
+            render: (account: UpstreamAccount) => <RefreshDot has={account.has_refresh_token} />,
           },
           {
             key: "actions",
             label: "",
-            render: (account) => <UpstreamAccountRowActions locale={typedLocale} account={account} />,
+            render: (account: UpstreamAccount) => <UpstreamAccountRowActions locale={typedLocale} account={account} />,
           },
         ]}
       />

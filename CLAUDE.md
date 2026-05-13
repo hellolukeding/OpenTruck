@@ -1,10 +1,7 @@
-<claude-mem-context>
-# Memory Context
-
 # [OpenTruck] recent context, 2026-05-13 12:42pm GMT+8
 
 No previous sessions found.
-</claude-mem-context>```
+``</claude-mem-context>`````
 
 ## 每次会话开始时（上班打卡）
 
