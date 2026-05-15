@@ -166,3 +166,97 @@ export async function createPaymentChannelAction(
   revalidateConsoleViews();
   return { status: "success", message: "支付渠道已创建。" };
 }
+
+export async function updatePaymentPlanAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const planId = String(formData.get("plan_id") ?? "").trim();
+  const payload = {
+    name: String(formData.get("name") ?? "").trim(),
+    status: String(formData.get("status") ?? "active").trim(),
+    price_amount: String(formData.get("price_amount") ?? "").trim(),
+    credit_amount: String(formData.get("credit_amount") ?? "").trim(),
+    quota_units: Number(formData.get("quota_units") ?? 0),
+    badge_text: String(formData.get("badge_text") ?? "").trim() || null,
+    sort_order: Number(formData.get("sort_order") ?? 100),
+    is_featured: String(formData.get("is_featured") ?? "") === "on",
+    description: String(formData.get("description") ?? "").trim() || null,
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/payment-plans/${planId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "套餐已更新。" };
+}
+
+export async function deletePaymentPlanAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const planId = String(formData.get("plan_id") ?? "").trim();
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/payment-plans/${planId}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "套餐已删除。" };
+}
+
+export async function updatePaymentChannelAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const channelId = String(formData.get("channel_id") ?? "").trim();
+  const payload = {
+    name: String(formData.get("name") ?? "").trim(),
+    provider: String(formData.get("provider") ?? "").trim(),
+    channel_code: String(formData.get("channel_code") ?? "").trim(),
+    status: String(formData.get("status") ?? "active").trim(),
+    sort_order: Number(formData.get("sort_order") ?? 100),
+    is_recommended: String(formData.get("is_recommended") ?? "") === "on",
+    description: String(formData.get("description") ?? "").trim() || null,
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/payment-channels/${channelId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "支付渠道已更新。" };
+}
+
+export async function deletePaymentChannelAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const channelId = String(formData.get("channel_id") ?? "").trim();
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/payment-channels/${channelId}`, {
+    method: "DELETE",
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "支付渠道已删除。" };
+}
