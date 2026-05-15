@@ -1,6 +1,5 @@
 "use client";
 
-import { BarChart3 } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -17,10 +16,7 @@ export function AdminOverviewAnalysis() {
   return (
     <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
       <div className="flex flex-col gap-4 border-b border-outline-variant/10 px-5 py-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-3">
-          <BarChart3 className="h-5 w-5 text-on-surface" />
-          <h2 className="text-[1.25rem] font-semibold text-on-surface">模型数据分析</h2>
-        </div>
+
         <Tabs defaultValue="spend-distribution" className="w-full md:w-auto">
           <TabsList className="w-full justify-start rounded-2xl bg-surface-container-low px-1 py-1 md:w-auto">
             {tabLabels.map((tab) => (

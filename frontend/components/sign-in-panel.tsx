@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { signIn } from "next-auth/react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { AuthProviderMeta } from "@/lib/auth-providers";
@@ -28,9 +27,9 @@ function GoogleIcon() {
 }
 
 function ProviderIcon({ id }: { id: string }) {
-  if (id === "github") return <GitHubIcon />;
   if (id === "google") return <GoogleIcon />;
-  return null;
+  if (id === "github") return <GitHubIcon />;
+  return <span className="material-symbols-outlined text-[18px]">login</span>;
 }
 
 type SignInPanelProps = {
@@ -46,14 +45,22 @@ export function SignInPanel({
   credentialsHint,
   mode = "page",
 }: SignInPanelProps) {
-  const credentialsEnabled = providers.some((p) => p.id === "credentials");
-  const oauthProviders = providers.filter((p) => p.id !== "credentials");
+  const credentialsEnabled = providers.some((provider) => provider.id === "credentials");
+  const oauthProviders = useMemo(
+    () =>
+      providers
+        .filter((provider) => provider.id !== "credentials")
+        .sort((a, b) => {
+          const order = ["google", "github"];
+          return order.indexOf(a.id) - order.indexOf(b.id);
+        }),
+    [providers],
+  );
 
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [showPassword, setShowPassword] = useState(mode !== "modal");
 
   async function handleCredentialsSignIn() {
     setErrorMessage(null);
@@ -77,197 +84,125 @@ export function SignInPanel({
     await signIn(provider.id, { redirectTo: callbackUrl });
   }
 
+  const compact = mode === "modal";
+
   return (
-    <div className="flex">
-      {/* ========== LEFT PANEL ========== */}
-      <div className="min-w-0">
-        {/* Branding in modal mode */}
-        {mode === "modal" ? (
-          <div className="mb-5">
-            <img src="/logo.png" alt="OpenTruck" className="h-7 w-auto" />
-            <p className="mt-1.5 text-body-sm text-on-surface-variant">
-              Multi-tenant AI API relay station
-            </p>
-          </div>
-        ) : (
-          <div className="mb-5">
-            <p className="text-code-sm uppercase tracking-[0.18em] text-on-surface-variant">
-              Sign in
-            </p>
-            <h2 className="mt-1 text-title-lg text-primary">
-              Choose a sign-in method
-            </h2>
-            <p className="mt-1 text-body-md text-on-surface-variant">
-              Use OAuth or a local operator account to enter the OpenTruck
-              control surface.
-            </p>
-          </div>
-        )}
-
-        {/* OAuth provider buttons */}
-        {oauthProviders.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {oauthProviders.map((provider) => (
-              <button
-                key={provider.id}
-                type="button"
-                onClick={() => void handleOAuthSignIn(provider)}
-                className="group flex w-full items-center gap-3 rounded-xl border border-outline-variant bg-surface px-4 py-3 text-left transition-all hover:border-primary hover:bg-primary/[0.03] hover:shadow-sm active:scale-[0.98]"
-              >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant group-hover:text-primary">
-                  <ProviderIcon id={provider.id} />
-                </span>
-                <span className="flex-1 text-body-md font-body-md text-on-surface group-hover:text-primary">
-                  Continue with {provider.name}
-                </span>
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant transition-all group-hover:translate-x-0.5 group-hover:text-primary">
-                  arrow_forward
-                </span>
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        {/* Password toggle divider */}
-        {credentialsEnabled ? (
-          <div className="mt-5">
-            {!showPassword ? (
-              <div className="flex items-center gap-3">
-                <div className="h-px flex-1 bg-outline-variant" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(true)}
-                  className="group flex items-center gap-1.5 whitespace-nowrap text-code-sm text-on-surface-variant transition-colors hover:text-primary"
-                >
-                  Sign in with password
-                  <span className="material-symbols-outlined text-[16px] transition-transform group-hover:translate-x-0.5">
-                    arrow_forward
-                  </span>
-                </button>
-                <div className="h-px flex-1 bg-outline-variant" />
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowPassword(false);
-                  setErrorMessage(null);
-                }}
-                className="flex items-center gap-1.5 text-code-sm text-on-surface-variant transition-colors hover:text-primary"
-              >
-                <span className="material-symbols-outlined text-[16px]">
-                  arrow_back
-                </span>
-                Back to OAuth
-              </button>
-            )}
-          </div>
-        ) : null}
-
-        {/* Empty state */}
-        {!credentialsEnabled && oauthProviders.length === 0 ? (
-          <div className="mt-5 rounded-xl border border-dashed border-outline-variant bg-surface p-4">
-            <p className="text-title-sm text-primary">
-              No sign-in method configured yet
-            </p>
-            <p className="mt-1 text-body-sm text-on-surface-variant">
-              Add OAuth provider env vars, or set `AUTH_CREDENTIALS_USERNAME`
-              and `AUTH_CREDENTIALS_PASSWORD` for operator login.
-            </p>
-          </div>
-        ) : null}
-
-        {/* Redirect hint (page only) */}
-        {mode === "page" ? (
-          <div className="mt-5 rounded-xl border border-outline-variant bg-surface px-4 py-2.5 text-body-sm text-on-surface-variant">
-            After sign-in you will be redirected to{" "}
-            <span className="font-code-sm text-primary">{callbackUrl}</span>.
-          </div>
-        ) : null}
-      </div>
-
-      {/* ========== RIGHT PANEL — slides in ========== */}
-      <div
-        className="overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{
-          width: showPassword ? 340 : 0,
-          opacity: showPassword ? 1 : 0,
-        }}
-      >
-        <div className="flex w-[340px]">
-          <div className="ml-5 w-full border-l border-outline-variant pl-5">
-            {showPassword ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-title-sm text-primary">
-                    Account password
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowPassword(false);
-                      setErrorMessage(null);
-                    }}
-                    className="text-code-sm text-on-surface-variant transition-colors hover:text-primary"
-                  >
-                    Cancel
-                  </button>
-                </div>
-
-                {credentialsHint ? (
-                  <p className="text-body-xs text-on-surface-variant">
-                    {credentialsHint}
-                  </p>
-                ) : null}
-
-                <div className="flex flex-col gap-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="auth-identifier">Account</Label>
-                    <Input
-                      id="auth-identifier"
-                      autoComplete="username"
-                      placeholder="Username or email"
-                      value={identifier}
-                      onChange={(e) => setIdentifier(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="auth-password">Password</Label>
-                    <Input
-                      id="auth-password"
-                      type="password"
-                      autoComplete="current-password"
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !isPending) {
-                          e.preventDefault();
-                          void handleCredentialsSignIn();
-                        }
-                      }}
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={() => void handleCredentialsSignIn()}
-                    disabled={isPending || !identifier.trim() || !password}
-                    className="w-full"
-                  >
-                    {isPending ? "Signing in…" : "Sign in"}
-                  </Button>
-                </div>
-
-                {errorMessage ? (
-                  <div className="rounded-xl border border-error/20 bg-error/5 px-4 py-2.5 text-body-sm text-error">
-                    {errorMessage}
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
+    <div className={`w-full ${compact ? "space-y-4" : "space-y-5"}`}>
+      {oauthProviders.length > 0 ? (
+        <div className="space-y-2.5">
+          {oauthProviders.map((provider) => (
+            <button
+              key={provider.id}
+              type="button"
+              onClick={() => void handleOAuthSignIn(provider)}
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-surface-variant bg-surface-container-lowest px-4 py-3 text-[0.78rem] font-medium uppercase tracking-[0.02em] text-on-surface transition-colors hover:bg-surface-container-high focus:outline-none focus:ring-2 focus:ring-primary-container/20 dark:bg-surface-container dark:hover:bg-surface-container-high"
+            >
+              <span className="flex h-6 w-6 items-center justify-center text-current">
+                <ProviderIcon id={provider.id} />
+              </span>
+              <span>Continue with {provider.name}</span>
+            </button>
+          ))}
         </div>
-      </div>
+      ) : null}
+
+      {credentialsEnabled && oauthProviders.length > 0 ? (
+        <div className="flex items-center gap-3 py-1">
+          <div className="h-px flex-1 bg-surface-variant" />
+          <span className="text-[0.74rem] uppercase tracking-[0.08em] text-on-surface-variant">
+            or
+          </span>
+          <div className="h-px flex-1 bg-surface-variant" />
+        </div>
+      ) : null}
+
+      {credentialsEnabled ? (
+        <div className="space-y-3.5">
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="auth-identifier"
+              className="text-[0.74rem] font-medium uppercase tracking-[0.04em] text-on-surface-variant"
+            >
+              Email address
+            </Label>
+            <Input
+              id="auth-identifier"
+              autoComplete="username"
+              placeholder="name@company.com"
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
+              className="h-11 rounded-xl border-outline-variant bg-surface-container-lowest px-4 text-[0.92rem] shadow-sm placeholder:text-secondary-fixed-dim focus:border-primary-container focus:ring-1 focus:ring-primary-container dark:bg-surface-container"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3">
+              <Label
+                htmlFor="auth-password"
+                className="text-[0.74rem] font-medium uppercase tracking-[0.04em] text-on-surface-variant"
+              >
+                Password
+              </Label>
+              <button
+                type="button"
+                className="text-[0.74rem] font-medium uppercase tracking-[0.04em] text-primary transition-colors hover:text-primary-container hover:underline"
+              >
+                Forgot password?
+              </button>
+            </div>
+            <Input
+              id="auth-password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !isPending) {
+                  event.preventDefault();
+                  void handleCredentialsSignIn();
+                }
+              }}
+              className="h-11 rounded-xl border-outline-variant bg-surface-container-lowest px-4 text-[0.92rem] shadow-sm focus:border-primary-container focus:ring-1 focus:ring-primary-container dark:bg-surface-container"
+            />
+          </div>
+
+          {credentialsHint ? (
+            <div className="rounded-xl border border-outline-variant/70 bg-surface-container-low px-4 py-2.5 text-[0.74rem] leading-6 text-on-surface-variant">
+              {credentialsHint}
+            </div>
+          ) : null}
+
+          {errorMessage ? (
+            <div className="rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-[0.82rem] text-error">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => void handleCredentialsSignIn()}
+            disabled={isPending || !identifier.trim() || !password}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-container px-5 py-3.5 text-[0.78rem] font-medium uppercase tracking-[0.04em] text-on-primary transition-all hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary dark:text-on-primary"
+          >
+            <span>{isPending ? "Signing in..." : "Sign In"}</span>
+            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </button>
+        </div>
+      ) : null}
+
+      {!credentialsEnabled && oauthProviders.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-outline-variant bg-surface p-4 text-[0.82rem] text-on-surface-variant">
+          No sign-in method configured yet.
+        </div>
+      ) : null}
+
+      {!compact ? (
+        <div className="rounded-xl border border-surface-variant bg-surface-container-lowest px-4 py-2.5 text-[0.74rem] text-on-surface-variant dark:bg-surface-container">
+          After sign-in you will be redirected to{" "}
+          <span className="break-all font-code-sm text-primary">{callbackUrl}</span>.
+        </div>
+      ) : null}
     </div>
   );
 }

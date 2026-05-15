@@ -1,10 +1,35 @@
-import { PublicNav } from "@/components/public-nav";
 import { MerchantSubNav, MerchantHero, MerchantKeysCard, MerchantBookmarks, MerchantModelsTable } from "@/components/merchant-dashboard";
 
 export default function MerchantPage() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen">
-      <PublicNav activeId="console" />
+      {/* Header matching opentruck_6 design */}
+      <header className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+        <div className="flex items-center justify-between px-margin py-sm max-w-max-width mx-auto">
+          <div className="flex items-center gap-xl">
+            <span className="text-headline-md font-headline-md font-bold text-on-background">OpenTruck</span>
+            <nav className="hidden md:flex items-center gap-lg">
+              <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Models</a>
+              <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">API Docs</a>
+              <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Pricing</a>
+              <a className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary" href="#">Console</a>
+            </nav>
+          </div>
+          <div className="flex items-center gap-md">
+            <button className="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+              <span className="material-symbols-outlined">notifications</span>
+            </button>
+            <button className="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+              <span className="material-symbols-outlined">settings</span>
+            </button>
+            <div className="flex items-center gap-sm pl-sm border-l border-outline-variant/30">
+              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary text-label-md">O</div>
+              <span className="text-body-sm font-medium">oidc_5118</span>
+              <span className="material-symbols-outlined text-[16px]">expand_more</span>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <main className="mt-[72px] max-w-max-width mx-auto px-margin py-xl space-y-lg">
         <MerchantSubNav />

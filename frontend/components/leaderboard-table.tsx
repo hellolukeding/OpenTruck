@@ -1,26 +1,26 @@
 const models = [
   {
     rank: 1, name: "gpt-5.4-omni", provider: "OpenAI Central · 缓存命中率 88.2%",
-    category: "chat", color: "bg-brand-50", icon: "text-primary",
+    category: "chat", color: "bg-primary-container/10", icon: "text-primary",
     iconSvg: <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />,
-    availability: "99.8%", availabilityColor: "text-brand-600",
-    calls: "1,208.9K", barHeights: [50, 75, 100], barColor: "bg-brand-500",
+    availability: "99.8%", availabilityColor: "text-primary",
+    calls: "1,208.9K", barHeights: [50, 75, 100], barColor: "bg-primary-container",
     tokens: "24.6B", lastCall: "刚刚", stars: 5, priceCny: "¥0.45", priceUsd: "$0.062",
   },
   {
     rank: 2, name: "claude-3.5-sonnet", provider: "Anthropic High-Speed · 命中率 94.5%",
     category: "chat", color: "bg-purple-50", icon: "text-purple-600",
     iconSvg: <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />,
-    availability: "99.5%", availabilityColor: "text-brand-600",
-    calls: "942.4M", barHeights: [100, 75, 50], barColor: "bg-brand-500",
+    availability: "99.5%", availabilityColor: "text-primary",
+    calls: "942.4M", barHeights: [100, 75, 50], barColor: "bg-primary-container",
     tokens: "18.2B", lastCall: "2分钟前", stars: 5, priceCny: "¥0.75", priceUsd: "$0.104",
   },
   {
     rank: 3, name: "llama-3-70b-pro", provider: "Groq Localhost · 命中率 37.8%",
     category: "completion", color: "bg-slate-100", icon: "text-slate-600",
     iconSvg: <path d="M13 10V3L4 14h7v7l9-11h-7z" />,
-    availability: "100.0%", availabilityColor: "text-brand-600",
-    calls: "785.1M", barHeights: [25, 50, 100], barColor: "bg-brand-500",
+    availability: "100.0%", availabilityColor: "text-primary",
+    calls: "785.1M", barHeights: [25, 50, 100], barColor: "bg-primary-container",
     tokens: "9.1B", lastCall: "14分钟前", stars: 3, partialStars: 2, priceCny: "¥0.15", priceUsd: "$0.021",
   },
   {
@@ -28,22 +28,22 @@ const models = [
     category: "chat", color: "bg-green-50", icon: "",
     iconContent: "G3",
     availability: "92.4%", availabilityColor: "text-orange-500",
-    calls: "696.1M", barHeights: [], barColor: "bg-brand-500",
+    calls: "696.1M", barHeights: [], barColor: "bg-primary-container",
     tokens: "7.4B", lastCall: "1小时前", stars: 4, priceCny: "¥0.55", priceUsd: "$0.076",
   },
   {
     rank: 5, name: "mistral-large-2407", provider: "",
     category: "chat", color: "", icon: "",
-    availability: "98.9%", availabilityColor: "text-brand-600",
+    availability: "98.9%", availabilityColor: "text-primary",
     calls: "522.2M", tokens: "5.0B", lastCall: "刚刚", stars: 4, priceCny: "¥0.44", priceUsd: "",
-    barHeights: [], barColor: "bg-brand-500",
+    barHeights: [], barColor: "bg-primary-container",
   },
   {
     rank: 6, name: "text-embedding-3-small", provider: "",
     category: "embedding", color: "", icon: "",
-    availability: "99.9%", availabilityColor: "text-brand-600",
+    availability: "99.9%", availabilityColor: "text-primary",
     calls: "412.1M", tokens: "12.5B", lastCall: "5秒前", stars: 5, priceCny: "¥0.01", priceUsd: "",
-    barHeights: [], barColor: "bg-brand-500",
+    barHeights: [], barColor: "bg-primary-container",
   },
 ];
 
@@ -118,7 +118,7 @@ export function LeaderboardTable() {
                   {categoryLabels[m.category] || m.category}
                 </span>
               </td>
-              <td className={`px-6 py-4 font-bold ${m.availabilityColor || "text-brand-600"}`}>{m.availability}</td>
+              <td className={`px-6 py-4 font-bold ${m.availabilityColor || "text-primary"}`}>{m.availability}</td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{m.calls}</span>
@@ -150,7 +150,7 @@ export function LeaderboardTable() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
           </button>
           <div className="flex items-center gap-1">
-            <button className="w-8 h-8 flex items-center justify-center text-sm font-bold bg-brand-500 text-white rounded-md">1</button>
+            <button className="w-8 h-8 flex items-center justify-center text-sm font-bold bg-primary-container text-white rounded-md">1</button>
             <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md">2</button>
             <button className="w-8 h-8 flex items-center justify-center text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md">3</button>
             <span className="px-2 text-slate-400">...</span>

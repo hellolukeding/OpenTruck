@@ -1,5 +1,27 @@
 import type { Metadata } from "next";
+import { JetBrains_Mono, Manrope, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
+
+const fontSansEn = Manrope({
+  subsets: ["latin"],
+  variable: "--font-sans-en",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const fontSansZh = Noto_Sans_SC({
+  subsets: ["latin"],
+  variable: "--font-sans-zh",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500", "600"],
+});
 
 export const metadata: Metadata = {
   title: "OpenTruck — Decentralized API Protocol",
@@ -29,18 +51,14 @@ export default function RootLayout({
             `,
           }}
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body className={`${fontSansEn.variable} ${fontSansZh.variable} ${fontMono.variable}`}>
+        {children}
+      </body>
     </html>
   );
 }

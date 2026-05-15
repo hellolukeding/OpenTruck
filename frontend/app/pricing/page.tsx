@@ -82,7 +82,7 @@ export default function PricingPage() {
     <div className="bg-background text-on-surface font-body-md selection:bg-primary-container/30">
       <PublicNav activeId="pricing" />
 
-      <main className="pt-32 pb-xl min-h-screen">
+      <main className="pt-32 pb-xl grid-bg min-h-screen">
         <section className="max-w-container-max mx-auto px-gutter text-center mb-xl">
           <span className="inline-block px-sm py-xs bg-primary-container/10 text-primary font-label-md text-label-md rounded-lg mb-md">
             Simple & Transparent

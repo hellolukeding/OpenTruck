@@ -53,10 +53,12 @@ export function DeveloperSidebar() {
 
         <div className="px-md mt-auto pt-lg border-t border-outline-variant/10">
           <div className="flex items-center gap-3 px-xs">
-            <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
-              <div className="w-full h-full bg-primary-container/30 flex items-center justify-center text-label-md font-bold text-primary">
-                d
-              </div>
+            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+              <img
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyJYaQgZ3rwm0gzICiXRF0alg7oTuT6FaAURrs94S7V0vn3G4KSm7HLhZcnW8udGd6SZXsE4wEiR4k2nuV-ksQMgiuB7piRJGbC94C4imEq8rDeGqL5i8uhUZ3cZdFTzjqUqFL-T4J14H3vzNfuLE74krzNHtC_GdTY8WCOizRbIrd4SAo7BZVrLQD6YT7EjKdUCbxdRL9XkfXkvRfcHHgJ0E9tvJgg4TXZbMyzCm9YUXJMcVTZHymT9PqS3yKoQH982VzR7GAIYA"
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-label-md text-label-md text-on-surface truncate w-32">dev_architect_88</span>

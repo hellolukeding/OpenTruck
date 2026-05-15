@@ -1,6 +1,7 @@
 "use client";
 
 import { isValidElement, useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import { SignInPanel } from "@/components/sign-in-panel";
 import type { AuthUiConfig } from "@/lib/auth-providers";
@@ -47,9 +48,9 @@ export function SignInDialogTrigger({
         {children}
       </span>
 
-      {open ? (
+      {open ? createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-4 py-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 px-4 pt-[10vh] pb-6 backdrop-blur-sm overflow-y-auto"
           onClick={() => setOpen(false)}
         >
           <div
@@ -75,7 +76,8 @@ export function SignInDialogTrigger({
               mode="modal"
             />
           </div>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </>
   );

@@ -1,6 +1,6 @@
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -27,82 +27,99 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-surface text-on-surface">
-      <div className="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-md py-2xl">
-        <div className="grid w-full overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-low shadow-[0_24px_80px_rgba(0,0,0,0.18)] md:grid-cols-[1fr_1fr]">
-          {/* Brand panel */}
-          <section className="relative flex flex-col justify-between gap-xl bg-gradient-to-br from-primary/[0.07] to-primary/[0.02] p-xl">
-            <div className="space-y-lg">
-              <div className="inline-flex items-center gap-sm rounded-full border border-outline-variant bg-surface/80 px-md py-xs text-code-sm text-on-surface-variant backdrop-blur-sm">
-                <span className="h-2 w-2 rounded-full bg-primary" />
-                OAuth Access Layer
-              </div>
-              <div className="space-y-md">
-                <Image
-                  src="/logo.png"
-                  alt="OpenTruck"
-                  width={144}
-                  height={40}
-                  className="h-10 w-auto"
-                  priority
-                />
-                <h1 className="text-balance font-headline-lg text-headline-lg text-primary">
-                  Sign in to the OpenTruck control surface
-                </h1>
-                <p className="text-balance text-body-lg text-on-surface-variant">
-                  Use OAuth or an operator account. If you opened this route by mistake, you can
-                  head back and reopen login from the landing page modal.
+    <main className="h-dvh overflow-hidden bg-background text-on-background">
+      <div className="relative flex h-dvh items-center justify-center overflow-hidden px-4 py-4 sm:px-6">
+        <div className="absolute inset-0 grid-bg opacity-60 dark:opacity-40" />
+        <div className="pointer-events-none absolute left-1/2 top-[18%] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary-container/10 blur-[110px] dark:bg-primary/10" />
+        <section className="relative z-10 w-full max-w-[940px] rounded-[28px]  border-surface-variant  backdrop-blur-xl dark:bg-[color:rgba(18,19,24,0.88)] dark:shadow-[0_28px_90px_rgba(0,0,0,0.45)]">
+          <div className="grid items-center gap-8 px-6 py-6 sm:px-8 md:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] md:gap-10 md:px-10 md:py-8 lg:px-12">
+            <div className="hidden md:block">
+              <div className="max-w-[24rem]">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-primary dark:text-primary-fixed-dim">
+                  Community Gateway
+                </p>
+                <div className="mt-4">
+                  <Image
+                    src="/logo.png"
+                    alt="OpenTruck logo"
+                    width={520}
+                    height={132}
+                    priority
+                    className="h-16 w-auto lg:h-[4.5rem]"
+                  />
+                </div>
+                <p className="mt-4 max-w-[22rem] text-[0.98rem] leading-7 text-on-surface-variant">
+                  Sign in to manage routing, model access, and upstream capacity from a
+                  single operator console.
                 </p>
               </div>
+
+              <div className="mt-8 space-y-3">
+                {[
+                  "Tenant-aware routing and quota controls",
+                  "OAuth upstream accounts with health scheduling",
+                  "Unified console for models, merchants, and docs",
+                ].map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-3 rounded-2xl border border-surface-variant/80 bg-surface-container-lowest/80 px-4 py-3 dark:bg-surface-container-low/60"
+                  >
+                    <span className="h-2.5 w-2.5 rounded-full bg-primary-container shadow-[0_0_0_6px_rgba(16,185,129,0.12)] dark:bg-primary" />
+                    <span className="text-[0.88rem] text-on-surface">{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 text-[0.84rem] text-on-surface-variant">
+                <span>Don&apos;t have an account? </span>
+                <Link href="/" className="font-medium text-primary transition-colors hover:text-primary-container hover:underline">
+                  Sign Up
+                </Link>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-x-lg gap-y-md">
-              <div className="flex items-center gap-sm">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <span className="material-symbols-outlined text-lg">alt_route</span>
-                </span>
-                <div>
-                  <p className="text-code-sm text-on-surface-variant">Access</p>
-                  <p className="text-title-sm text-primary">Tenant-scoped routing</p>
-                </div>
+            <div className="rounded-[24px] ml-10 border border-surface-variant/80 bg-surface-bright/90 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_28px_rgba(0,0,0,0.05)] dark:bg-surface-container-low/85 dark:shadow-[0_16px_36px_rgba(0,0,0,0.28)] sm:p-6">
+              <div className="mb-5 text-center md:hidden">
+                <Image
+                  src="/logo.png"
+                  alt="OpenTruck logo"
+                  width={520}
+                  height={132}
+                  priority
+                  className="mx-auto h-10 w-auto"
+                />
+                <p className="mt-2 text-[0.92rem] text-on-surface-variant">
+                  Sign in to manage your infrastructure.
+                </p>
               </div>
-              <div className="flex items-center gap-sm">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <span className="material-symbols-outlined text-lg">fingerprint</span>
-                </span>
-                <div>
-                  <p className="text-code-sm text-on-surface-variant">Identity</p>
-                  <p className="text-title-sm text-primary">OAuth + Credentials</p>
-                </div>
+
+              <div className="mb-5 hidden md:block">
+                <p className="text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-primary dark:text-primary-fixed-dim">
+                  Operator Sign In
+                </p>
+                <h2 className="mt-2 text-[1.4rem] font-semibold tracking-[-0.04em] text-on-surface">
+                  Welcome back
+                </h2>
+                <p className="mt-1 text-[0.88rem] text-on-surface-variant">
+                  Continue to the OpenTruck control surface.
+                </p>
               </div>
-              <div className="flex items-center gap-sm">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <span className="material-symbols-outlined text-lg">dashboard</span>
-                </span>
-                <div>
-                  <p className="text-code-sm text-on-surface-variant">Target</p>
-                  <p className="text-title-sm text-primary">Console gate</p>
-                </div>
+
+              <SignInPanel
+                callbackUrl={callbackUrl}
+                providers={authUiConfig.providers}
+                credentialsHint={authUiConfig.credentialsHint}
+              />
+
+              <div className="mt-5 text-center text-[0.82rem] text-on-surface-variant md:hidden">
+                <span>Don&apos;t have an account? </span>
+                <Link href="/" className="font-medium text-primary transition-colors hover:text-primary-container hover:underline">
+                  Sign Up
+                </Link>
               </div>
             </div>
-          </section>
-
-          {/* Sign-in panel */}
-          <section className="flex flex-col justify-center p-xl">
-            <SignInPanel
-              callbackUrl={callbackUrl}
-              providers={authUiConfig.providers}
-              credentialsHint={authUiConfig.credentialsHint}
-            />
-            <Link
-              href="/"
-              className="mt-lg inline-flex items-center gap-xs text-body-sm text-on-surface-variant transition-colors hover:text-primary"
-            >
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Back to landing page
-            </Link>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </main>
   );
