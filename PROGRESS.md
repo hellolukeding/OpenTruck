@@ -177,3 +177,6 @@
 - 已为控制台新增 `钱包 / 日志 / 工单` 三个子 tab，并补齐 `/{locale}/wallet`、`/{locale}/logs`、`/{locale}/tickets` 路由
 - 已按参考图完成钱包页和日志页的高保真静态骨架，并为工单页补齐同一设计语言下的支持面板与空态
 - 已将控制台顶部主导航改为与公共页面一致的左侧对齐布局，切换到控制台时不再改变导航起始位置
+- 已新增 `payment_orders`、`wallet_ledger`、`support_tickets` 三张后端业务表，并补齐 Alembic 迁移 `20260515_0005_wallet_and_support`
+- 已新增 `/admin/dashboard`、`/admin/logs`、`/admin/wallet`、`/admin/tickets` 四组首版后端接口，为总览统计、日志查询、钱包概览/充值单和工单流转提供数据骨架
+- 已将新后端模块接入 `make check` 的校验清单，并实际执行 `alembic upgrade head` 验证本地 PostgreSQL 可成功落表

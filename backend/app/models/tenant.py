@@ -21,4 +21,7 @@ class Tenant(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     api_keys = relationship("ApiKey", back_populates="tenant", cascade="all, delete-orphan")
     gateway_usage_entries = relationship("GatewayUsageLedger", back_populates="tenant", cascade="all, delete-orphan")
     oauth_sessions = relationship("OAuthSession", back_populates="tenant", cascade="all, delete-orphan")
+    payment_orders = relationship("PaymentOrder", back_populates="tenant", cascade="all, delete-orphan")
+    support_tickets = relationship("SupportTicket", back_populates="tenant", cascade="all, delete-orphan")
     upstream_accounts = relationship("UpstreamAccount", back_populates="tenant", cascade="all, delete-orphan")
+    wallet_entries = relationship("WalletLedger", back_populates="tenant", cascade="all, delete-orphan")
