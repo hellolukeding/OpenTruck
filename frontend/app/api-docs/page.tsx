@@ -75,7 +75,7 @@ export default function ApiDocsPage() {
         <ApiDocsSidebar />
 
         <main className="flex-1 ml-0 md:ml-64 grid-bg">
-          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row">
+          <div className="max-w-container-max mx-auto flex flex-col lg:flex-row">
             <div className="flex-1 px-8 py-12 lg:px-12 border-r border-outline-variant/10 bg-white/50 backdrop-blur-sm">
               <div className="mb-12">
                 <div className="flex items-center gap-2 mb-4">

@@ -12,7 +12,7 @@ const navItems = [
 export function MerchantMarketplaceHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#d8d6de] bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5">
+      <div className="mx-auto flex h-16 max-w-container-max items-center justify-between px-5">
         <div className="flex items-center gap-10">
           <Link href="/" className="text-[2.1rem] font-bold tracking-[-0.04em] text-[#12141a]">
             OpenTruck

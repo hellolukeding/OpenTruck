@@ -189,3 +189,12 @@
 - 已为控制台总览、钱包、日志、工单页补充后端取数容错，接口临时失败时页面会退回空数据而不是直接 500
 - 已为工单页新增真实提交表单，打通 `/admin/tickets` 的创建 action，可直接从控制台提交工单
 - 已为工单页新增 URL 驱动的搜索、状态、优先级筛选和分页，使工单列表进入可运营状态
+
+### 2026-05-15 — 前端布局与性能优化
+
+- 已新增 `lib/date-formatters.ts` 统一日期格式化工具，消除重复代码
+- 已将 `upstream-account-row-actions.tsx` 从 370 行拆分为 5 个文件（主组件 50 行 + 4 个对话框组件）
+- 已将 `create-upstream-account-form.tsx` 从 367 行拆分为 3 个文件（主组件 91 行 + 2 个标签页组件）
+- 已统一所有页面容器宽度为 `max-w-container-max` (1280px)，消除公共页面与后台页面的宽度不一致
+- 已更新 `public-nav.tsx`、`merchant-marketplace-header.tsx`、`app/api-docs/page.tsx`、`app/merchant/page.tsx` 使用统一容器宽度
+- 已通过 `pnpm build` 验证所有更改构建成功，upstream-accounts 页面包体积从 8.32KB 减少到 7.88KB
