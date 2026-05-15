@@ -118,7 +118,7 @@ export function AdminTicketsPage({
                 ))}
               </div>
             ) : (
-              <div className="flex min-h-[260px] flex-col items-center justify-center">
+              <div className="flex min-h-ticket-card flex-col items-center justify-center">
                 <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
                   <CircleHelp className="h-12 w-12" />
                 </div>

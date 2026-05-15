@@ -1,11 +1,14 @@
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
-import { AdminTicketsPage } from "@/components/admin-tickets-page";
 import { getSupportTicketsPage } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 import { PaginationControls } from "@/components/pagination-controls";
+
+// 动态导入工单页面组件
+const AdminTicketsPage = dynamic(() => import("@/components/admin-tickets-page").then(mod => ({ default: mod.AdminTicketsPage })), { ssr: true });
 
 export default async function TicketsPage({
   params,

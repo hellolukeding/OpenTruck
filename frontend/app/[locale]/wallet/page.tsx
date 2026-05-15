@@ -1,10 +1,13 @@
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
-import { AdminWalletPage } from "@/components/admin-wallet-page";
 import { getWalletOverview } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
+
+// 动态导入钱包页面组件以减少初始包大小
+const AdminWalletPage = dynamic(() => import("@/components/admin-wallet-page").then(mod => ({ default: mod.AdminWalletPage })), { ssr: true });
 
 export default async function WalletPage({
   params,

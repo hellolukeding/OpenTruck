@@ -81,7 +81,7 @@ export function AdminLogsPage({
             ))}
           </div>
         ) : (
-          <div className="flex min-h-[460px] flex-col items-center justify-center rounded-[20px] border border-outline-variant/10 bg-surface dark:bg-surface-container-low">
+          <div className="flex min-h-log-card flex-col items-center justify-center rounded-[20px] border border-outline-variant/10 bg-surface dark:bg-surface-container-low">
             <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
               <Search className="h-12 w-12" />
             </div>

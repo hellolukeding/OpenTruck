@@ -15,7 +15,7 @@ const sidebarLinks = [
 
 export function ApiDocsSidebar() {
   return (
-    <aside className="fixed left-0 h-[calc(100vh-64px)] w-64 bg-surface-container-low border-r border-outline-variant/20 overflow-y-auto scrollbar-hide py-lg hidden md:block">
+    <aside className="fixed left-0 h-[calc(100vh-header)] w-64 bg-surface-container-low border-r border-outline-variant/20 overflow-y-auto scrollbar-hide py-lg hidden md:block">
       <div className="px-6 mb-8">
         <div className="flex items-center gap-3 mb-1">
           <span className="material-symbols-outlined text-primary">developer_board</span>

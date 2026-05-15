@@ -99,9 +99,16 @@ const config: Config = {
         xxl: "64px",
         gutter: "16px",
         "container-max": "1280px",
+        header: "64px",
+        sidebar: "240px",
+        "card-icon": "56px",
       },
       maxWidth: {
         "container-max": "1280px",
+      },
+      minHeight: {
+        "ticket-card": "160px",
+        "log-card": "460px",
       },
     },
   },

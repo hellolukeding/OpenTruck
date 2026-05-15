@@ -1,11 +1,14 @@
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
-import { AdminLogsPage } from "@/components/admin-logs-page";
 import { AdminShell } from "@/components/admin-shell";
 import { getGatewayLogsPage } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 import { PaginationControls } from "@/components/pagination-controls";
+
+// 动态导入日志页面组件
+const AdminLogsPage = dynamic(() => import("@/components/admin-logs-page").then(mod => ({ default: mod.AdminLogsPage })), { ssr: true });
 
 export default async function LogsPage({
   params,

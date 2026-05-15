@@ -204,3 +204,7 @@
 - 已统一所有页面容器宽度为 `max-w-container-max` (1280px)，消除公共页面与后台页面的宽度不一致
 - 已更新 `public-nav.tsx`、`merchant-marketplace-header.tsx`、`app/api-docs/page.tsx`、`app/merchant/page.tsx` 使用统一容器宽度
 - 已通过 `pnpm build` 验证所有更改构建成功，upstream-accounts 页面包体积从 8.32KB 减少到 7.88KB
+- 已为首页添加动态导入，将 `LandingStats`、`LandingModels`、`LandingFeatures`、`LandingCta` 改为按需加载
+- 已为控制台次要页面添加动态导入：`AdminWalletPage`、`AdminLogsPage`、`AdminTicketsPage`
+- 已在 `tailwind.config.ts` 新增自定义 spacing tokens：`header`、`sidebar`、`card-icon`、`ticket-card`、`log-card`
+- 已将硬编码尺寸替换为 Tailwind tokens：`h-[calc(100vh-64px)]` → `h-[calc(100vh-header)]`，`min-h-[460px]` → `min-h-log-card`，`min-h-[260px]` → `min-h-ticket-card`
