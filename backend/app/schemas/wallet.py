@@ -6,6 +6,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.payment_catalog import PaymentChannelRead, PaymentPlanRead
+
 
 class WalletLedgerEntryRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -54,36 +56,6 @@ class PaymentOrderRead(BaseModel):
     note: str | None = None
     paid_at: datetime | None = None
     created_at: datetime
-
-
-class PaymentPlanRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: uuid.UUID
-    name: str
-    status: str
-    price_amount: Decimal
-    credit_amount: Decimal
-    currency: str
-    quota_units: int
-    badge_text: str | None = None
-    sort_order: int
-    is_featured: bool
-    description: str | None = None
-
-
-class PaymentChannelRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: uuid.UUID
-    name: str
-    provider: str
-    channel_code: str
-    status: str
-    sort_order: int
-    is_recommended: bool
-    description: str | None = None
-
 
 class WalletOverviewRead(BaseModel):
     tenant_id: uuid.UUID

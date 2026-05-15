@@ -19,6 +19,8 @@ check:
 		backend/app/api/routes/gateway.py \
 		backend/app/api/routes/models.py \
 		backend/app/api/routes/admin_dashboard.py \
+		backend/app/api/routes/admin_payment_channels.py \
+		backend/app/api/routes/admin_payment_plans.py \
 		backend/app/api/routes/admin_tenants.py \
 		backend/app/api/routes/admin_nodes.py \
 		backend/app/api/routes/admin_api_keys.py \
@@ -51,6 +53,7 @@ check:
 		backend/app/services/security.py \
 		backend/app/schemas/dashboard.py \
 		backend/app/schemas/logs.py \
+		backend/app/schemas/payment_catalog.py \
 		backend/app/schemas/tenant.py \
 		backend/app/schemas/node.py \
 		backend/app/schemas/api_key.py \

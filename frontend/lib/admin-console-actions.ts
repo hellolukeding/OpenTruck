@@ -107,3 +107,62 @@ export async function createSupportTicketAction(
   revalidateConsoleViews();
   return { status: "success", message: "工单已提交。" };
 }
+
+export async function createPaymentPlanAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const payload = {
+    name: String(formData.get("name") ?? "").trim(),
+    status: "active",
+    price_amount: String(formData.get("price_amount") ?? "").trim(),
+    credit_amount: String(formData.get("credit_amount") ?? "").trim(),
+    currency: "CNY",
+    quota_units: Number(formData.get("quota_units") ?? 0),
+    badge_text: String(formData.get("badge_text") ?? "").trim() || null,
+    sort_order: Number(formData.get("sort_order") ?? 100),
+    is_featured: String(formData.get("is_featured") ?? "") === "on",
+    description: String(formData.get("description") ?? "").trim() || null,
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/payment-plans`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "套餐已创建。" };
+}
+
+export async function createPaymentChannelAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const payload = {
+    name: String(formData.get("name") ?? "").trim(),
+    provider: String(formData.get("provider") ?? "").trim(),
+    channel_code: String(formData.get("channel_code") ?? "").trim(),
+    status: "active",
+    sort_order: Number(formData.get("sort_order") ?? 100),
+    is_recommended: String(formData.get("is_recommended") ?? "") === "on",
+    description: String(formData.get("description") ?? "").trim() || null,
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/payment-channels`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "支付渠道已创建。" };
+}

@@ -1,10 +1,9 @@
-import { BadgeDollarSign, Banknote, CircleDollarSign, Copy, Crown, Gift, WalletCards } from "lucide-react";
+import { BadgeDollarSign, CircleDollarSign, Copy, Crown, Gift, WalletCards } from "lucide-react";
 
-import { AdminWalletChannelList } from "@/components/admin-wallet-channel-list";
+import { AdminWalletCatalogPanel } from "@/components/admin-wallet-catalog-panel";
 import { AdminWalletHistoryCard } from "@/components/admin-wallet-history-card";
 import { AdminWalletOrderForm } from "@/components/admin-wallet-order-form";
 import { AdminWalletOrderRow } from "@/components/admin-wallet-order-row";
-import { AdminWalletPlanList } from "@/components/admin-wallet-plan-list";
 import type { WalletOverviewData } from "@/lib/admin-console-api";
 
 function StatPanel({
@@ -146,7 +145,7 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
 
         {/* Right column: payment methods + affiliate */}
         <div className="space-y-6">
-          <AdminWalletChannelList channels={wallet?.payment_channels ?? []} />
+          <AdminWalletCatalogPanel wallet={wallet} />
 
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
             <div className="border-b border-outline-variant/10 px-5 py-4">
@@ -205,34 +204,6 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Subscription section */}
-      <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
-        <div className="flex items-center justify-between border-b border-outline-variant/10 px-5 py-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <Banknote className="h-5 w-5 text-primary" />
-              <h3 className="text-[1.2rem] font-semibold text-on-surface">订阅套餐</h3>
-            </div>
-            <p className="mt-1 text-[0.88rem] text-on-surface-variant">购买订阅获得模型额度/次数</p>
-          </div>
-          <button className="rounded-full border border-outline-variant/20 px-4 py-2 text-[0.82rem] text-on-surface">优先订阅</button>
-        </div>
-        <div className="px-5 py-5">
-          <div className="rounded-[16px] border border-outline-variant/20 bg-surface-container-low px-4 py-4 dark:bg-surface">
-            <div className="flex items-center gap-3">
-              <h4 className="text-[1.05rem] font-semibold text-on-surface">我的订阅</h4>
-              <span className="rounded-full border border-outline-variant/20 px-3 py-1 text-[0.74rem] text-on-surface-variant">无生效</span>
-            </div>
-            <p className="mt-3 text-[0.88rem] text-on-surface-variant">购买套餐后即可享受模型权益</p>
-          </div>
-          {wallet && wallet.payment_plans.length > 0 ? (
-            <AdminWalletPlanList plans={wallet.payment_plans} />
-          ) : (
-            <div className="py-12 text-center text-[1rem] text-on-surface-variant">暂无可购买套餐</div>
-          )}
         </div>
       </div>
 
