@@ -1,5 +1,8 @@
 import { BadgeDollarSign, Banknote, CircleDollarSign, Copy, Crown, Gift, WalletCards } from "lucide-react";
 
+import { AdminWalletHistoryCard } from "@/components/admin-wallet-history-card";
+import type { WalletOverviewData } from "@/lib/admin-console-api";
+
 function StatPanel({
   title,
   values,
@@ -41,8 +44,14 @@ function StatPanel({
   );
 }
 
-export function AdminWalletPage() {
+export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null }) {
   const amountOptions = ["68 ￥", "136 ￥", "340 ￥", "680 ￥", "1360 ￥", "3400 ￥"];
+  const balance = wallet ? formatMoney(wallet.balance) : "¥0.00";
+  const spent = wallet ? formatMoney(wallet.total_spent) : "¥0.00";
+  const requestCount = wallet ? String(wallet.total_requests) : "0";
+  const rechargeTotal = wallet ? formatMoney(wallet.total_recharged) : "¥0.00";
+  const successCount = wallet ? String(wallet.successful_requests) : "0";
+  const failedCount = wallet ? String(wallet.failed_requests) : "0";
 
   return (
     <div className="space-y-6 p-6">
@@ -66,9 +75,9 @@ export function AdminWalletPage() {
       <StatPanel
         title="账户统计"
         values={[
-          { label: "当前余额", value: "¥0.00", icon: "account_balance_wallet" },
-          { label: "历史消耗", value: "¥0.00", icon: "monitoring" },
-          { label: "请求次数", value: "0", icon: "bar_chart" },
+          { label: "当前余额", value: balance, icon: "account_balance_wallet" },
+          { label: "历史消耗", value: spent, icon: "monitoring" },
+          { label: "请求次数", value: requestCount, icon: "bar_chart" },
         ]}
       />
 
@@ -168,9 +177,9 @@ export function AdminWalletPage() {
                 title="佣金统计"
                 actions={["提现", "划转到余额"]}
                 values={[
-                  { label: "可用佣金", value: "¥0.000000", icon: "monitoring" },
-                  { label: "累计佣金", value: "¥0.000000", icon: "bar_chart" },
-                  { label: "邀请人数", value: "0", icon: "group" },
+                  { label: "累计充值", value: rechargeTotal, icon: "monitoring" },
+                  { label: "成功请求", value: successCount, icon: "bar_chart" },
+                  { label: "失败请求", value: failedCount, icon: "group" },
                 ]}
               />
               <div className="mt-5 overflow-hidden rounded-[16px] border border-outline-variant/20">
@@ -234,6 +243,31 @@ export function AdminWalletPage() {
           <div className="py-12 text-center text-[1rem] text-on-surface-variant">暂无可购买套餐</div>
         </div>
       </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <AdminWalletHistoryCard
+          title="最近充值单"
+          empty="暂无充值订单"
+          items={(wallet?.recent_orders ?? []).map((item) => ({
+            title: item.order_number,
+            meta: `${item.payment_provider ?? "manual"} / ${item.status}`,
+            value: formatMoney(item.amount),
+          }))}
+        />
+        <AdminWalletHistoryCard
+          title="最近账本记录"
+          empty="暂无账本变动"
+          items={(wallet?.recent_entries ?? []).map((item) => ({
+            title: item.description,
+            meta: `${item.direction} / 余额 ${formatMoney(item.balance_after)}`,
+            value: formatMoney(item.amount),
+          }))}
+        />
+      </div>
     </div>
   );
+}
+
+function formatMoney(value: string) {
+  return `¥${Number(value || 0).toFixed(2)}`;
 }

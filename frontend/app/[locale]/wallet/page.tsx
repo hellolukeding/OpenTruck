@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
 import { AdminWalletPage } from "@/components/admin-wallet-page";
+import { getWalletOverview } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
@@ -19,6 +20,9 @@ export default async function WalletPage({
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
   const overview = await getAdminOverview();
+  const wallet = overview.tenants[0]
+    ? await getWalletOverview(overview.tenants[0].id)
+    : null;
 
   return (
     <AdminShell
@@ -28,7 +32,7 @@ export default async function WalletPage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
-      <AdminWalletPage />
+      <AdminWalletPage wallet={wallet} />
     </AdminShell>
   );
 }

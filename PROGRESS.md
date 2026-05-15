@@ -180,3 +180,7 @@
 - 已新增 `payment_orders`、`wallet_ledger`、`support_tickets` 三张后端业务表，并补齐 Alembic 迁移 `20260515_0005_wallet_and_support`
 - 已新增 `/admin/dashboard`、`/admin/logs`、`/admin/wallet`、`/admin/tickets` 四组首版后端接口，为总览统计、日志查询、钱包概览/充值单和工单流转提供数据骨架
 - 已将新后端模块接入 `make check` 的校验清单，并实际执行 `alembic upgrade head` 验证本地 PostgreSQL 可成功落表
+- 已新增 `frontend/lib/admin-console-api.ts`，将总览、钱包、日志、工单四类控制台数据读取从旧 admin 资源接口中拆分
+- 已将控制台总览页接入 `/admin/dashboard` 真实统计，并将分析图切到真实近 7 日 usage 趋势数据
+- 已将钱包、日志、工单页面接入真实后端取数，改为展示最近订单、账本记录、usage 日志和工单列表，不再只是静态空壳
+- 已将钱包历史卡片拆分到独立组件，继续保持前端单文件不超过 300 行

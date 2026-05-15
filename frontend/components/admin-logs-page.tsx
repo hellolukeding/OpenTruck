@@ -1,13 +1,24 @@
 import { CalendarDays, ListFilter, RotateCcw, Search } from "lucide-react";
 
-export function AdminLogsPage() {
+import type { PaginatedResponse } from "@/lib/admin-console-api";
+import type { GatewayUsageLog } from "@/lib/admin-console-api";
+
+export function AdminLogsPage({
+  logsPage,
+}: {
+  logsPage: PaginatedResponse<GatewayUsageLog>;
+}) {
+  const totalSpend = logsPage.items.reduce((sum, item) => sum + Number(item.quota_delta), 0);
+  const totalTokens = logsPage.items.reduce((sum, item) => sum + item.total_tokens, 0);
+  const avgTokens = logsPage.items.length > 0 ? totalTokens / logsPage.items.length : 0;
+
   return (
     <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-outline-variant/10 px-5 py-5">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge text="消耗额度: ¥0.00" tone="teal" />
-          <Badge text="RPM: 0" tone="amber" />
-          <Badge text="TPM: 0" tone="neutral" />
+          <Badge text={`消耗额度: ¥${totalSpend.toFixed(2)}`} tone="teal" />
+          <Badge text={`记录数: ${logsPage.pagination.total}`} tone="amber" />
+          <Badge text={`平均 Tokens: ${avgTokens.toFixed(0)}`} tone="neutral" />
         </div>
         <button className="text-[1rem] font-semibold text-on-surface">紧凑列表</button>
       </div>
@@ -36,12 +47,49 @@ export function AdminLogsPage() {
           </div>
         </div>
 
-        <div className="flex min-h-[460px] flex-col items-center justify-center rounded-[20px] border border-outline-variant/10 bg-surface dark:bg-surface-container-low">
-          <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
-            <Search className="h-12 w-12" />
+        {logsPage.items.length > 0 ? (
+          <div className="overflow-hidden rounded-[20px] border border-outline-variant/10 bg-surface dark:bg-surface-container-low">
+            {logsPage.items.map((item) => (
+              <article
+                key={item.id}
+                className="grid gap-3 border-t border-outline-variant/10 px-5 py-4 first:border-t-0 md:grid-cols-[1.2fr_0.9fr_0.9fr_0.7fr]"
+              >
+                <div>
+                  <p className="text-[0.92rem] font-semibold text-on-surface">{item.model ?? item.endpoint}</p>
+                  <p className="mt-1 text-[0.78rem] text-on-surface-variant">
+                    {item.api_key_name ?? "unknown-key"} / {item.request_kind} / {item.response_id ?? "no-response-id"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[0.82rem] text-on-surface-variant">租户 / 上游</p>
+                  <p className="mt-1 text-[0.9rem] text-on-surface">
+                    {item.tenant_name ?? "unknown"} / {item.upstream_account_name ?? "pending"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[0.82rem] text-on-surface-variant">Tokens / 消耗</p>
+                  <p className="mt-1 text-[0.9rem] text-on-surface">
+                    {item.total_tokens} / ¥{Number(item.quota_delta).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[0.82rem] text-on-surface-variant">状态</p>
+                  <p className="mt-1 text-[0.9rem] font-medium text-on-surface">
+                    {item.status}
+                    {item.error_code ? ` · ${item.error_code}` : ""}
+                  </p>
+                </div>
+              </article>
+            ))}
           </div>
-          <p className="mt-6 text-[1.55rem] font-semibold text-on-surface-variant">搜索无结果</p>
-        </div>
+        ) : (
+          <div className="flex min-h-[460px] flex-col items-center justify-center rounded-[20px] border border-outline-variant/10 bg-surface dark:bg-surface-container-low">
+            <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
+              <Search className="h-12 w-12" />
+            </div>
+            <p className="mt-6 text-[1.55rem] font-semibold text-on-surface-variant">搜索无结果</p>
+          </div>
+        )}
       </div>
     </section>
   );

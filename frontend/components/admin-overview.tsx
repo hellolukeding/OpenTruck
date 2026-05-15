@@ -1,6 +1,7 @@
-import { Filter, RefreshCw, SunMedium, Wallet, ChartColumn, Rocket, Hash, Coins, Database, Gauge, Cpu, Megaphone } from "lucide-react";
+import { Filter, RefreshCw, SunMedium, Wallet, ChartColumn, Rocket, Hash, Coins, Database, Gauge, Cpu } from "lucide-react";
 
 import type { ApiKey, Node, NodeModel, Tenant } from "@/lib/admin-api";
+import type { DashboardOverviewData } from "@/lib/admin-console-api";
 import type { DashboardDictionary } from "@/lib/i18n";
 import { AdminOverviewAnalysis } from "@/components/admin-overview-analysis";
 import { AdminOverviewNotices } from "@/components/admin-overview-notices";
@@ -11,6 +12,7 @@ type AdminOverviewProps = {
   nodes: Node[];
   apiKeys: ApiKey[];
   nodeModels: NodeModel[];
+  dashboard: DashboardOverviewData;
   dictionary: DashboardDictionary;
 };
 
@@ -19,20 +21,23 @@ export function AdminOverview({
   nodes,
   apiKeys,
   nodeModels,
+  dashboard,
   dictionary,
 }: AdminOverviewProps) {
-  const totalQuota = tenants.reduce((sum, item) => sum + parseNumber(item.quota_balance), 0);
-  const avgRpm = average(tenants.map((item) => item.rate_limit_rpm));
+  const totalQuota = parseNumber(dashboard.total_balance);
+  const totalSpend = dashboard.usage_trend.reduce((sum, item) => sum + parseNumber(item.spend), 0);
+  const totalRequests = dashboard.usage_trend.reduce((sum, item) => sum + item.requests, 0);
+  const avgRpm = totalRequests / Math.max(dashboard.usage_trend.length, 1);
   const avgTpm = average(tenants.map((item) => item.rate_limit_tpm));
   const greeting = getGreeting();
 
   const stats = [
     { label: "当前余额", value: money(totalQuota), icon: Wallet, accent: "text-[#12a594]", action: "充值" },
-    { label: "历史消耗", value: "¥0.00", icon: ChartColumn, accent: "text-[#7b7af7]" },
-    { label: "请求次数", value: String(apiKeys.length), icon: Rocket, accent: "text-[#22b85a]" },
-    { label: "统计次数", value: String(nodeModels.length), icon: Hash, accent: "text-[#0ea5a7]" },
+    { label: "历史消耗", value: money(totalSpend), icon: ChartColumn, accent: "text-[#7b7af7]" },
+    { label: "请求次数", value: String(totalRequests), icon: Rocket, accent: "text-[#22b85a]" },
+    { label: "统计次数", value: String(dashboard.tenant_count), icon: Hash, accent: "text-[#0ea5a7]" },
     { label: "统计额度", value: money(totalQuota), icon: Coins, accent: "text-[#f59e0b]" },
-    { label: "统计Tokens", value: "0", icon: Database, accent: "text-[#ef476f]" },
+    { label: "统计Tokens", value: String(dashboard.recent_failed_requests), icon: Database, accent: "text-[#ef476f]" },
     { label: "平均RPM", value: avgRpm.toFixed(3), icon: Gauge, accent: "text-[#2aa8ff]" },
     { label: "平均TPM", value: String(Math.round(avgTpm)), icon: Cpu, accent: "text-[#ff7a1a]" },
   ];
@@ -70,7 +75,7 @@ export function AdminOverview({
 
       <AdminOverviewStats stats={stats} />
 
-      <AdminOverviewAnalysis />
+      <AdminOverviewAnalysis usageTrend={dashboard.usage_trend} />
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <AdminOverviewNotices
@@ -85,11 +90,11 @@ export function AdminOverview({
           </div>
           <div className="space-y-4 px-6 py-6">
             <StatusRow label="健康节点" value={`${nodes.filter((item) => item.health_status === "ok").length}/${nodes.length || 0}`} />
-            <StatusRow label="活跃密钥" value={String(apiKeys.filter((item) => item.status === "active").length)} />
-            <StatusRow label="已发布模型" value={String(new Set(nodeModels.map((item) => item.public_model)).size)} />
-            <StatusRow label="租户数" value={String(tenants.length)} />
+            <StatusRow label="活跃密钥" value={String(dashboard.active_api_keys || apiKeys.filter((item) => item.status === "active").length)} />
+            <StatusRow label="已发布模型" value={String(dashboard.published_models || new Set(nodeModels.map((item) => item.public_model)).size)} />
+            <StatusRow label="租户数" value={String(dashboard.tenant_count || tenants.length)} />
             <div className="rounded-[18px] border border-outline-variant/20 bg-surface-container-low px-4 py-4 text-[0.82rem] leading-6 text-on-surface-variant dark:bg-surface-container">
-              当前总览以静态运营视角为主。后续接入真实 usage、tokens、消费和公告流后，这块会进一步和参考台面靠齐。
+              当前总览已接入真实近 7 日 usage、余额与失败请求统计。下一步会继续补公告流、模型维度排行和更细的 tokens 指标。
             </div>
           </div>
         </section>

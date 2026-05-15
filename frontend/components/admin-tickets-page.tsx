@@ -1,10 +1,19 @@
 import { CircleHelp, Clock3, FilePlus2, MessageSquareMore, MessagesSquare, ShieldCheck } from "lucide-react";
 
-export function AdminTicketsPage() {
+import type { PaginatedResponse, SupportTicket } from "@/lib/admin-console-api";
+
+export function AdminTicketsPage({
+  ticketsPage,
+}: {
+  ticketsPage: PaginatedResponse<SupportTicket>;
+}) {
+  const openCount = ticketsPage.items.filter((item) => item.status === "open").length;
+  const processingCount = ticketsPage.items.filter((item) => item.status === "processing").length;
+  const resolvedCount = ticketsPage.items.filter((item) => item.status === "resolved").length;
   const categories = [
-    { label: "待处理", value: "0", color: "bg-[#fff3d6] text-[#b45309]" },
-    { label: "处理中", value: "0", color: "bg-[#eaf5ff] text-[#2563eb]" },
-    { label: "已解决", value: "0", color: "bg-[#e9fbf2] text-[#059669]" },
+    { label: "待处理", value: String(openCount), color: "bg-[#fff3d6] text-[#b45309]" },
+    { label: "处理中", value: String(processingCount), color: "bg-[#eaf5ff] text-[#2563eb]" },
+    { label: "已解决", value: String(resolvedCount), color: "bg-[#e9fbf2] text-[#059669]" },
   ];
 
   return (
@@ -79,12 +88,45 @@ export function AdminTicketsPage() {
           </div>
         </div>
 
-        <div className="flex min-h-[260px] flex-col items-center justify-center rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
-          <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
-            <CircleHelp className="h-12 w-12" />
+        <div className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
+          <div className="border-b border-outline-variant/10 px-5 py-4">
+            <h3 className="text-[1.2rem] font-semibold text-on-surface">最近工单</h3>
           </div>
-          <p className="mt-6 text-[1.4rem] font-semibold text-on-surface">暂无工单记录</p>
-          <p className="mt-2 text-[0.9rem] text-on-surface-variant">当你提交第一张工单后，处理进度会显示在这里。</p>
+          <div className="px-5 py-5">
+            {ticketsPage.items.length > 0 ? (
+              <div className="space-y-3">
+                {ticketsPage.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-[18px] border border-outline-variant/20 bg-surface px-4 py-4 dark:bg-surface-container-low"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[0.92rem] font-semibold text-on-surface">{item.subject}</p>
+                        <p className="mt-1 text-[0.8rem] text-on-surface-variant">
+                          {item.ticket_number} / {item.category} / {item.contact_email}
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-outline-variant/20 px-3 py-1 text-[0.74rem] text-on-surface-variant">
+                        {item.status}
+                      </span>
+                    </div>
+                    <p className="mt-3 line-clamp-2 text-[0.88rem] leading-7 text-on-surface-variant">
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex min-h-[260px] flex-col items-center justify-center">
+                <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
+                  <CircleHelp className="h-12 w-12" />
+                </div>
+                <p className="mt-6 text-[1.4rem] font-semibold text-on-surface">暂无工单记录</p>
+                <p className="mt-2 text-[0.9rem] text-on-surface-variant">当你提交第一张工单后，处理进度会显示在这里。</p>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>
