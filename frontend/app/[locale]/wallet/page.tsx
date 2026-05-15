@@ -21,7 +21,7 @@ export default async function WalletPage({
   const dictionary = getDictionary(typedLocale);
   const overview = await getAdminOverview();
   const wallet = overview.tenants[0]
-    ? await getWalletOverview(overview.tenants[0].id)
+    ? await getWalletOverview(overview.tenants[0].id).catch(() => null)
     : null;
 
   return (

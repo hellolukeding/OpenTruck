@@ -1,6 +1,8 @@
 import { BadgeDollarSign, Banknote, CircleDollarSign, Copy, Crown, Gift, WalletCards } from "lucide-react";
 
 import { AdminWalletHistoryCard } from "@/components/admin-wallet-history-card";
+import { AdminWalletOrderForm } from "@/components/admin-wallet-order-form";
+import { AdminWalletOrderRow } from "@/components/admin-wallet-order-row";
 import type { WalletOverviewData } from "@/lib/admin-console-api";
 
 function StatPanel({
@@ -245,15 +247,21 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <AdminWalletHistoryCard
-          title="最近充值单"
-          empty="暂无充值订单"
-          items={(wallet?.recent_orders ?? []).map((item) => ({
-            title: item.order_number,
-            meta: `${item.payment_provider ?? "manual"} / ${item.status}`,
-            value: formatMoney(item.amount),
-          }))}
-        />
+        <div className="space-y-6">
+          {wallet ? <AdminWalletOrderForm tenantId={wallet.tenant_id} /> : null}
+          <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
+            <div className="border-b border-outline-variant/10 px-5 py-4 text-[1rem] font-semibold text-on-surface">
+              最近充值单
+            </div>
+            <div className="space-y-3 px-5 py-5">
+              {wallet && wallet.recent_orders.length > 0 ? (
+                wallet.recent_orders.map((order) => <AdminWalletOrderRow key={order.id} order={order} />)
+              ) : (
+                <div className="py-8 text-center text-[0.92rem] text-on-surface-variant">暂无充值订单</div>
+              )}
+            </div>
+          </div>
+        </div>
         <AdminWalletHistoryCard
           title="最近账本记录"
           empty="暂无账本变动"

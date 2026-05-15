@@ -1,12 +1,22 @@
 import { CalendarDays, ListFilter, RotateCcw, Search } from "lucide-react";
 
+import { AdminLogsFilters } from "@/components/admin-logs-filters";
 import type { PaginatedResponse } from "@/lib/admin-console-api";
 import type { GatewayUsageLog } from "@/lib/admin-console-api";
 
 export function AdminLogsPage({
   logsPage,
+  path,
+  query,
 }: {
   logsPage: PaginatedResponse<GatewayUsageLog>;
+  path: string;
+  query: {
+    search?: string;
+    status?: string;
+    model?: string;
+    requestKind?: string;
+  };
 }) {
   const totalSpend = logsPage.items.reduce((sum, item) => sum + Number(item.quota_delta), 0);
   const totalTokens = logsPage.items.reduce((sum, item) => sum + item.total_tokens, 0);
@@ -27,25 +37,13 @@ export function AdminLogsPage({
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <InputLike icon={<CalendarDays className="h-4 w-4" />} label="年 / 月 / 日  --:--" />
           <InputLike icon={<CalendarDays className="h-4 w-4" />} label="年 / 月 / 日  --:--" />
-          <InputLike icon={<Search className="h-4 w-4" />} label="令牌名称" />
-          <InputLike icon={<Search className="h-4 w-4" />} label="模型名称" />
-          <InputLike icon={<Search className="h-4 w-4" />} label="分组" />
-          <InputLike icon={<Search className="h-4 w-4" />} label="Request ID" />
+          <InputLike icon={<Search className="h-4 w-4" />} label={query.search || "令牌名称"} />
+          <InputLike icon={<Search className="h-4 w-4" />} label={query.model || "模型名称"} />
+          <InputLike icon={<Search className="h-4 w-4" />} label={query.requestKind || "请求类型"} />
+          <InputLike icon={<Search className="h-4 w-4" />} label={query.status || "状态"} />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <button className="flex min-w-[96px] items-center justify-between rounded-[14px] border border-outline-variant/20 bg-surface px-4 py-3 text-[0.94rem] text-on-surface dark:bg-surface-container-low">
-              全部
-              <span className="material-symbols-outlined text-[18px]">expand_more</span>
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <ActionButton icon={<Search className="h-4 w-4" />} label="查询" />
-            <ActionButton icon={<RotateCcw className="h-4 w-4" />} label="重置" subtle />
-            <ActionButton icon={<ListFilter className="h-4 w-4" />} label="列设置" subtle />
-          </div>
-        </div>
+        <AdminLogsFilters path={path} query={query} />
 
         {logsPage.items.length > 0 ? (
           <div className="overflow-hidden rounded-[20px] border border-outline-variant/10 bg-surface dark:bg-surface-container-low">
@@ -111,28 +109,5 @@ function InputLike({ icon, label }: { icon: React.ReactNode; label: string }) {
       {icon}
       <span>{label}</span>
     </div>
-  );
-}
-
-function ActionButton({
-  icon,
-  label,
-  subtle = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  subtle?: boolean;
-}) {
-  return (
-    <button
-      className={`inline-flex items-center gap-2 rounded-[14px] border px-4 py-3 text-[0.9rem] font-medium ${
-        subtle
-          ? "border-outline-variant/20 bg-surface text-on-surface dark:bg-surface-container-low"
-          : "border-primary-container bg-primary-container text-on-primary"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }

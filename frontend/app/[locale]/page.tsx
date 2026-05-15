@@ -17,12 +17,21 @@ export default async function LocalePage({
     notFound();
   }
 
-  const [overview, dashboard] = await Promise.all([
-    getAdminOverview(),
-    getDashboardOverview(),
-  ]);
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
+  const [overview, dashboard] = await Promise.all([
+    getAdminOverview(),
+    getDashboardOverview().catch(() => ({
+      tenant_count: 0,
+      active_api_keys: 0,
+      active_upstream_accounts: 0,
+      published_models: 0,
+      total_balance: "0",
+      recent_failed_requests: 0,
+      metrics: [],
+      usage_trend: [],
+    })),
+  ]);
 
   return (
     <AdminShell

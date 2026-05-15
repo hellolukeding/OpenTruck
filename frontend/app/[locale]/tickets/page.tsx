@@ -20,7 +20,15 @@ export default async function TicketsPage({
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
   const overview = await getAdminOverview();
-  const ticketsPage = await getSupportTicketsPage({ pageSize: 10 });
+  const ticketsPage = await getSupportTicketsPage({ pageSize: 10 }).catch(() => ({
+    items: [],
+    pagination: {
+      total: 0,
+      page: 1,
+      page_size: 10,
+      total_pages: 0,
+    },
+  }));
 
   return (
     <AdminShell
