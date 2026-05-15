@@ -176,3 +176,4 @@
 - 已将总览页实现拆分为 `admin-overview-analysis / admin-overview-stats / admin-overview-notices`，保持单文件可读性并控制在 300 行以内
 - 已为控制台新增 `钱包 / 日志 / 工单` 三个子 tab，并补齐 `/{locale}/wallet`、`/{locale}/logs`、`/{locale}/tickets` 路由
 - 已按参考图完成钱包页和日志页的高保真静态骨架，并为工单页补齐同一设计语言下的支持面板与空态
+- 已将控制台顶部主导航改为与公共页面一致的左侧对齐布局，切换到控制台时不再改变导航起始位置
