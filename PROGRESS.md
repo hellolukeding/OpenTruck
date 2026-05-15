@@ -172,3 +172,5 @@
 - 已按 `design/opentruck_6` 重做后台首页 `AdminOverview`，替换为 emerald Hero、三段核心指标和分区信息卡片流
 - 已将后台资源页共用的 `ResourceTableCard` 调整为与新控制台一致的标题、统计卡和圆角表格视觉
 - 已在干净的 `next dev --port 3013` 实例上实际验收 `/zh-CN` 与 `/zh-CN/api-keys`，确认新后台骨架和首页/资源页都可正常渲染
+- 已将后台总览页重构为参考图同类结构：问候区、8 项概览指标、分析面板 tabs、公告流与状态卡
+- 已将总览页实现拆分为 `admin-overview-analysis / admin-overview-stats / admin-overview-notices`，保持单文件可读性并控制在 300 行以内
