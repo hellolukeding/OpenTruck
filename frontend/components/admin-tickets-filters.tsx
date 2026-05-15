@@ -6,12 +6,14 @@ type Props = {
     search?: string;
     status?: string;
     priority?: string;
+    ticketId?: string;
   };
 };
 
 export function AdminTicketsFilters({ path, query }: Props) {
   return (
     <form action={path} className="grid gap-3 md:grid-cols-[1.1fr_0.8fr_0.8fr_auto_auto]">
+      {query.ticketId ? <input type="hidden" name="ticket_id" value={query.ticketId} /> : null}
       <InputField name="search" defaultValue={query.search} placeholder="按标题、类型、邮箱搜索" />
       <InputField name="priority" defaultValue={query.priority} placeholder="优先级" />
       <select

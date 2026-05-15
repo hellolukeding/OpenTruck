@@ -29,3 +29,9 @@ class SupportTicket(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     tenant = relationship("Tenant", back_populates="support_tickets")
+    messages = relationship(
+        "SupportTicketMessage",
+        back_populates="ticket",
+        cascade="all, delete-orphan",
+        order_by="SupportTicketMessage.created_at",
+    )

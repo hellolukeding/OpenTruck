@@ -108,6 +108,58 @@ export async function createSupportTicketAction(
   return { status: "success", message: "工单已提交。" };
 }
 
+export async function updateSupportTicketAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const ticketId = String(formData.get("ticket_id") ?? "").trim();
+  const payload = {
+    status: String(formData.get("status") ?? "").trim() || null,
+    priority: String(formData.get("priority") ?? "").trim() || null,
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/tickets/${ticketId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "工单状态已更新。" };
+}
+
+export async function createSupportTicketMessageAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const ticketId = String(formData.get("ticket_id") ?? "").trim();
+  const payload = {
+    author_type: String(formData.get("author_type") ?? "customer").trim(),
+    author_name: String(formData.get("author_name") ?? "").trim() || null,
+    body: String(formData.get("body") ?? "").trim(),
+    is_internal: String(formData.get("is_internal") ?? "") === "on",
+    status: String(formData.get("status") ?? "").trim() || null,
+    priority: String(formData.get("priority") ?? "").trim() || null,
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/tickets/${ticketId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "工单回复已发送。" };
+}
+
 export async function createPaymentPlanAction(
   _prevState: ConsoleActionState,
   formData: FormData,

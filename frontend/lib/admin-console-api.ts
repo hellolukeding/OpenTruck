@@ -142,6 +142,21 @@ export type SupportTicket = {
   updated_at: string;
 };
 
+export type SupportTicketMessage = {
+  id: string;
+  ticket_id: string;
+  author_type: string;
+  author_name: string | null;
+  body: string;
+  is_internal: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SupportTicketDetail = SupportTicket & {
+  messages: SupportTicketMessage[];
+};
+
 type ConsoleQuery = {
   tenantId?: string;
   apiKeyId?: string;
@@ -151,6 +166,7 @@ type ConsoleQuery = {
   responseId?: string;
   priority?: string;
   search?: string;
+  ticketId?: string;
   page?: number;
   pageSize?: number;
 };
@@ -175,6 +191,7 @@ function buildUrl(path: string, query: ConsoleQuery = {}) {
   if (query.responseId) params.set("response_id", query.responseId);
   if (query.priority) params.set("priority", query.priority);
   if (query.search) params.set("search", query.search);
+  if (query.ticketId) params.set("ticket_id", query.ticketId);
   if (query.page) params.set("page", String(query.page));
   if (query.pageSize) params.set("page_size", String(query.pageSize));
   const text = params.toString();
@@ -195,4 +212,8 @@ export async function getGatewayLogsPage(query: ConsoleQuery = {}) {
 
 export async function getSupportTicketsPage(query: ConsoleQuery = {}) {
   return fetchJson<PaginatedResponse<SupportTicket>>(buildUrl("/admin/tickets", query));
+}
+
+export async function getSupportTicketDetail(ticketId: string) {
+  return fetchJson<SupportTicketDetail>(`/admin/tickets/${ticketId}`);
 }

@@ -35,6 +35,32 @@ class SupportTicketRead(BaseModel):
     updated_at: datetime
 
 
+class SupportTicketMessageCreate(BaseModel):
+    author_type: str = Field(default="customer", min_length=3, max_length=32)
+    author_name: str | None = Field(default=None, max_length=128)
+    body: str = Field(min_length=2, max_length=4000)
+    is_internal: bool = False
+    status: str | None = Field(default=None, min_length=3, max_length=32)
+    priority: str | None = Field(default=None, min_length=3, max_length=32)
+
+
+class SupportTicketMessageRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    ticket_id: uuid.UUID
+    author_type: str
+    author_name: str | None = None
+    body: str
+    is_internal: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class SupportTicketDetailRead(SupportTicketRead):
+    messages: list[SupportTicketMessageRead]
+
+
 class SupportTicketUpdate(BaseModel):
     status: str | None = Field(default=None, min_length=3, max_length=32)
     priority: str | None = Field(default=None, min_length=3, max_length=32)

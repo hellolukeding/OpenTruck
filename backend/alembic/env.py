@@ -17,6 +17,7 @@ from app.models import (
     payment_order,
     payment_plan,
     support_ticket,
+    support_ticket_message,
     tenant,
     upstream_account,
     wallet_ledger,

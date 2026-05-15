@@ -197,6 +197,11 @@
 - 已实际通过 `curl` 验证支付套餐与支付渠道列表接口返回真实种子数据，前端钱包页构建与后端检查也全部通过
 - 已为钱包页的套餐卡片与支付渠道卡片补齐编辑/删除入口，控制台现在可以直接维护目录数据而不只支持新增
 - 已新增套餐与支付渠道的前端更新/删除 server action，并通过 `make check` 与 `pnpm --dir frontend build` 验证整条钱包目录管理链路可用
+- 已新增 `support_ticket_messages` 工单消息表，并通过 `20260515_0007_support_ticket_messages` 迁移为工单系统补齐线程数据结构
+- 已为工单后端新增详情接口、回复接口和更完整的状态流转，支持 `GET /admin/tickets/{id}`、`POST /admin/tickets/{id}/messages` 与线程级状态更新
+- 已将新建工单的首条描述自动写入消息流，线程页不再出现“工单已创建但对话为空”的断层
+- 已将控制台工单页改为左侧列表 + 右侧线程详情，支持查看完整对话、回复工单以及直接调整状态和优先级
+- 已通过 `make check`、`alembic upgrade head` 与 `pnpm --dir frontend build` 验证工单线程能力完整接入前后端
 
 ### 2026-05-15 — 前端布局与性能优化
 

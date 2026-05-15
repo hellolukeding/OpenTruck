@@ -7,6 +7,7 @@ from app.models.payment_channel import PaymentChannel
 from app.models.payment_order import PaymentOrder
 from app.models.payment_plan import PaymentPlan
 from app.models.support_ticket import SupportTicket
+from app.models.support_ticket_message import SupportTicketMessage
 from app.models.tenant import Tenant
 from app.models.upstream_account import UpstreamAccount
 from app.models.wallet_ledger import WalletLedger
@@ -21,6 +22,7 @@ __all__ = [
     "PaymentOrder",
     "PaymentPlan",
     "SupportTicket",
+    "SupportTicketMessage",
     "Tenant",
     "UpstreamAccount",
     "WalletLedger",

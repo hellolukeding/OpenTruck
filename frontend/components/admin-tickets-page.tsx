@@ -1,22 +1,26 @@
 import { CircleHelp, Clock3, FilePlus2, MessageSquareMore, MessagesSquare, ShieldCheck } from "lucide-react";
 
+import { AdminTicketDetailPanel } from "@/components/admin-ticket-detail-panel";
 import { AdminTicketForm } from "@/components/admin-ticket-form";
 import { AdminTicketsFilters } from "@/components/admin-tickets-filters";
-import type { PaginatedResponse, SupportTicket } from "@/lib/admin-console-api";
+import type { PaginatedResponse, SupportTicket, SupportTicketDetail } from "@/lib/admin-console-api";
 
 export function AdminTicketsPage({
   ticketsPage,
+  selectedTicket,
   tenantId,
   path,
   query,
 }: {
   ticketsPage: PaginatedResponse<SupportTicket>;
+  selectedTicket: SupportTicketDetail | null;
   tenantId?: string;
   path: string;
   query: {
     search?: string;
     status?: string;
     priority?: string;
+    ticketId?: string;
   };
 }) {
   const openCount = ticketsPage.items.filter((item) => item.status === "open").length;
@@ -29,7 +33,7 @@ export function AdminTicketsPage({
   ];
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+    <div className="grid gap-5 xl:grid-cols-[0.86fr_1.14fr]">
       <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
         <div className="flex items-start justify-between border-b border-outline-variant/10 px-5 py-5">
           <div className="flex items-start gap-4">
@@ -98,7 +102,11 @@ export function AdminTicketsPage({
                 {ticketsPage.items.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-[18px] border border-outline-variant/20 bg-surface px-4 py-4 dark:bg-surface-container-low"
+                    className={`rounded-[18px] border px-4 py-4 dark:bg-surface-container-low ${
+                      query.ticketId === item.id
+                        ? "border-primary-container bg-[linear-gradient(180deg,rgba(83,214,180,0.08),transparent)]"
+                        : "border-outline-variant/20 bg-surface"
+                    }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
@@ -114,6 +122,12 @@ export function AdminTicketsPage({
                     <p className="mt-3 line-clamp-2 text-[0.88rem] leading-7 text-on-surface-variant">
                       {item.description}
                     </p>
+                    <a
+                      href={`${path}?${buildTicketQuery(query, item.id)}`}
+                      className="mt-4 inline-flex text-[0.82rem] font-medium text-primary"
+                    >
+                      查看线程
+                    </a>
                   </div>
                 ))}
               </div>
@@ -128,7 +142,20 @@ export function AdminTicketsPage({
             )}
           </div>
         </div>
+        <AdminTicketDetailPanel ticket={selectedTicket} />
       </section>
     </div>
   );
+}
+
+function buildTicketQuery(
+  query: { search?: string; status?: string; priority?: string },
+  ticketId: string,
+) {
+  const params = new URLSearchParams();
+  if (query.search) params.set("search", query.search);
+  if (query.status) params.set("status", query.status);
+  if (query.priority) params.set("priority", query.priority);
+  params.set("ticket_id", ticketId);
+  return params.toString();
 }

@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 
 import { AdminShell } from "@/components/admin-shell";
-import { getSupportTicketsPage } from "@/lib/admin-console-api";
+import { getSupportTicketDetail, getSupportTicketsPage } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 import { PaginationControls } from "@/components/pagination-controls";
@@ -20,6 +20,7 @@ export default async function TicketsPage({
     search?: string;
     status?: string;
     priority?: string;
+    ticket_id?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -36,6 +37,7 @@ export default async function TicketsPage({
   const search = query.search?.trim() || undefined;
   const status = query.status?.trim() || undefined;
   const priority = query.priority?.trim() || undefined;
+  const ticketId = query.ticket_id?.trim() || undefined;
   const ticketsPage = await getSupportTicketsPage({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: 10,
@@ -51,6 +53,10 @@ export default async function TicketsPage({
       total_pages: 0,
     },
   }));
+  const selectedTicketId = ticketId ?? ticketsPage.items[0]?.id;
+  const selectedTicket = selectedTicketId
+    ? await getSupportTicketDetail(selectedTicketId).catch(() => null)
+    : null;
   const path = `/${typedLocale}/tickets`;
 
   return (
@@ -63,15 +69,16 @@ export default async function TicketsPage({
     >
       <AdminTicketsPage
         ticketsPage={ticketsPage}
+        selectedTicket={selectedTicket}
         tenantId={overview.tenants[0]?.id}
         path={path}
-        query={{ search, status, priority }}
+        query={{ search, status, priority, ticketId: selectedTicketId }}
       />
       <PaginationControls
         locale={typedLocale}
         path={path}
         pagination={ticketsPage.pagination}
-        query={{ search, status, priority }}
+        query={{ search, status, priority, ticket_id: selectedTicketId }}
       />
     </AdminShell>
   );

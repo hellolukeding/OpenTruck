@@ -4,17 +4,26 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.deps import get_db
 from app.api.utils import build_search_filter, commit_or_409, paginate, resolve_sort
 from app.core.errors import not_found
 from app.models.common import utc_now
 from app.models.support_ticket import SupportTicket
+from app.models.support_ticket_message import SupportTicketMessage
 from app.models.tenant import Tenant
 from app.schemas.common import SortOrder
+from app.schemas.error import ErrorResponse
 from app.schemas.pagination import PaginatedResponse
-from app.schemas.support_ticket import SupportTicketCreate, SupportTicketRead, SupportTicketUpdate
+from app.schemas.support_ticket import (
+    SupportTicketCreate,
+    SupportTicketDetailRead,
+    SupportTicketMessageCreate,
+    SupportTicketMessageRead,
+    SupportTicketRead,
+    SupportTicketUpdate,
+)
 
 
 router = APIRouter(prefix="/tickets", tags=["admin-tickets"])
@@ -22,6 +31,15 @@ router = APIRouter(prefix="/tickets", tags=["admin-tickets"])
 
 def _build_ticket_number() -> str:
     return f"TKT{utc_now().strftime('%Y%m%d%H%M%S')}{uuid.uuid4().hex[:5].upper()}"
+
+
+def _apply_ticket_state(ticket: SupportTicket, status_value: str | None, priority_value: str | None) -> None:
+    if status_value is not None:
+        ticket.status = status_value
+        ticket.resolved_at = utc_now() if status_value == "resolved" else None
+    if priority_value is not None:
+        ticket.priority = priority_value
+    ticket.latest_reply_at = utc_now()
 
 
 @router.get("", response_model=PaginatedResponse[SupportTicketRead])
@@ -69,6 +87,15 @@ def list_tickets(
     return paginate(db, statement, page=page, page_size=page_size)
 
 
+@router.get("/{ticket_id}", response_model=SupportTicketDetailRead, responses={404: {"model": ErrorResponse}})
+def get_ticket(ticket_id: str, db: Session = Depends(get_db)) -> SupportTicket:
+    statement = select(SupportTicket).options(selectinload(SupportTicket.messages)).where(SupportTicket.id == ticket_id)
+    ticket = db.scalar(statement)
+    if ticket is None:
+        raise not_found("Support ticket")
+    return ticket
+
+
 @router.post("", response_model=SupportTicketRead, status_code=status.HTTP_201_CREATED)
 def create_ticket(payload: SupportTicketCreate, db: Session = Depends(get_db)) -> SupportTicket:
     tenant = db.get(Tenant, payload.tenant_id)
@@ -84,22 +111,56 @@ def create_ticket(payload: SupportTicketCreate, db: Session = Depends(get_db)) -
         status="open",
         contact_email=payload.contact_email,
         description=payload.description,
+        latest_reply_at=utc_now(),
     )
     db.add(ticket)
+    db.flush()
+
+    initial_message = SupportTicketMessage(
+        ticket_id=ticket.id,
+        author_type="customer",
+        author_name=payload.contact_email,
+        body=payload.description,
+        is_internal=False,
+    )
+    db.add(initial_message)
     return commit_or_409(db, "Support ticket", "ticket_number", ticket)
 
 
-@router.patch("/{ticket_id}", response_model=SupportTicketRead)
+@router.post(
+    "/{ticket_id}/messages",
+    response_model=SupportTicketMessageRead,
+    status_code=status.HTTP_201_CREATED,
+    responses={404: {"model": ErrorResponse}},
+)
+def create_ticket_message(
+    ticket_id: str,
+    payload: SupportTicketMessageCreate,
+    db: Session = Depends(get_db),
+) -> SupportTicketMessage:
+    ticket = db.get(SupportTicket, ticket_id)
+    if ticket is None:
+        raise not_found("Support ticket")
+
+    message = SupportTicketMessage(
+        ticket_id=ticket.id,
+        author_type=payload.author_type,
+        author_name=payload.author_name,
+        body=payload.body,
+        is_internal=payload.is_internal,
+    )
+    db.add(message)
+    _apply_ticket_state(ticket, payload.status, payload.priority)
+    db.commit()
+    db.refresh(message)
+    return message
+
+
+@router.patch("/{ticket_id}", response_model=SupportTicketRead, responses={404: {"model": ErrorResponse}})
 def update_ticket(ticket_id: str, payload: SupportTicketUpdate, db: Session = Depends(get_db)) -> SupportTicket:
     ticket = db.get(SupportTicket, ticket_id)
     if ticket is None:
         raise not_found("Support ticket")
 
-    if payload.status is not None:
-        ticket.status = payload.status
-        if payload.status == "resolved":
-            ticket.resolved_at = utc_now()
-    if payload.priority is not None:
-        ticket.priority = payload.priority
-    ticket.latest_reply_at = utc_now()
+    _apply_ticket_state(ticket, payload.status, payload.priority)
     return commit_or_409(db, "Support ticket", "ticket_number", ticket)
