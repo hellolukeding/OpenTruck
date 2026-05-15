@@ -50,51 +50,52 @@ export function ResourceTableCard<T>({
 }: ResourceTableCardProps<T>) {
   return (
     <>
-      {/* Page Header + Note */}
-      <section className="flex flex-col gap-sm">
-        <div className="flex items-center gap-sm">
-          <span className="font-code-sm text-code-sm text-on-surface-variant uppercase tracking-wider">
-            {eyebrow}
-          </span>
-        </div>
-        <h1 className="font-headline-lg text-headline-lg text-primary">{title}</h1>
-        <p className="font-body-md text-body-md text-on-surface-variant">{description}</p>
+      <section className="flex flex-col gap-3 px-2 pt-2">
+        <span className="font-code-sm uppercase tracking-[0.2em] text-on-surface-variant">
+          {eyebrow}
+        </span>
+        <h1 className="text-[2.35rem] font-semibold tracking-[-0.06em] text-on-surface">
+          {title}
+        </h1>
+        <p className="max-w-[42rem] text-[0.98rem] leading-7 text-on-surface-variant">
+          {description}
+        </p>
       </section>
 
-      {/* Summary Stats */}
-      <section className="grid gap-md grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3">
         {summary.map((item) => (
-          <Card key={item.label}>
-            <CardContent className="p-lg flex flex-col gap-sm">
-              <span className="font-label-md text-label-md text-on-surface-variant">
+          <Card
+            key={item.label}
+            className="rounded-[22px] border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60"
+          >
+            <CardContent className="flex flex-col gap-3 p-5">
+              <span className="text-[0.78rem] uppercase tracking-[0.14em] text-on-surface-variant">
                 {item.label}
               </span>
-              <span className="font-headline-lg text-headline-lg text-primary">
+              <span className="text-[2.6rem] font-semibold leading-none tracking-[-0.05em] text-primary">
                 {item.value}
               </span>
-              <span className="font-code-sm text-code-sm text-on-surface-variant">
-                {item.note}
-              </span>
+              <span className="text-[0.84rem] text-on-surface-variant">{item.note}</span>
             </CardContent>
           </Card>
         ))}
       </section>
 
-      {/* Note Card */}
       {noteTitle && noteBody && (
-        <Card>
-          <CardContent className="p-lg flex flex-col gap-xs border-l-2 border-primary">
-            <span className="font-label-md text-label-md text-primary">{noteTitle}</span>
-            <p className="font-body-md text-body-md text-on-surface-variant">{noteBody}</p>
+        <Card className="rounded-[24px] border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/50">
+          <CardContent className="flex flex-col gap-2 border-l-2 border-primary p-5">
+            <span className="text-[0.82rem] uppercase tracking-[0.12em] text-primary">
+              {noteTitle}
+            </span>
+            <p className="text-[0.95rem] leading-7 text-on-surface-variant">{noteBody}</p>
           </CardContent>
         </Card>
       )}
 
-      {/* Data Table */}
-      <Card>
+      <Card className="overflow-hidden rounded-[24px] border-outline-variant/20 shadow-sm dark:bg-surface-container-low/50">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-surface-container-low">
               {columns.map((column) => (
                 <TableHead key={column.key}>{column.label}</TableHead>
               ))}

@@ -1,12 +1,7 @@
-import Link from "next/link";
-import { KeyRound, LayoutGrid, RadioTower, Route, Users, Waypoints } from "lucide-react";
-
 import type { Locale, DashboardDictionary } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { UserMenu } from "@/components/user-menu";
-import { LocaleSwitcher } from "@/components/locale-switcher";
+import { AdminConsoleFooter } from "@/components/admin-console-footer";
+import { AdminConsoleHeader } from "@/components/admin-console-header";
+import { AdminConsoleSubnav } from "@/components/admin-console-subnav";
 
 type AdminShellProps = {
   locale: Locale;
@@ -17,15 +12,6 @@ type AdminShellProps = {
   children: React.ReactNode;
 };
 
-const navigationIcons = {
-  overview: LayoutGrid,
-  tenants: Users,
-  nodes: RadioTower,
-  apiKeys: KeyRound,
-  models: Route,
-  upstreamAccounts: Waypoints,
-};
-
 export function AdminShell({
   locale,
   currentPath,
@@ -34,112 +20,34 @@ export function AdminShell({
   backendUrl,
   children,
 }: AdminShellProps) {
-  const items = [
-    { key: "overview", href: `/${locale}` },
-    { key: "tenants", href: `/${locale}/tenants` },
-    { key: "nodes", href: `/${locale}/nodes` },
-    { key: "apiKeys", href: `/${locale}/api-keys` },
-    { key: "models", href: `/${locale}/models` },
-    { key: "upstreamAccounts", href: `/${locale}/upstream-accounts` },
-  ] as const;
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      {/* Top Navigation Bar */}
-      <header className="bg-surface border-b border-outline-variant sticky top-0 z-50">
-        <div className="flex items-center justify-between w-full px-gutter py-sm max-w-container-max mx-auto">
-          <div className="flex items-center gap-lg">
-            <span className="text-label-md font-bold tracking-tighter text-primary uppercase">
-              OpenTruck
-            </span>
-            <nav className="hidden md:flex items-center gap-md">
-              {items.map((item) => {
-                const active = currentPath === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "text-label-md font-label-md transition-colors duration-200",
-                      active
-                        ? "text-primary border-b-2 border-primary pb-1"
-                        : "text-on-surface-variant hover:text-primary",
-                    )}
-                  >
-                    {dictionary.nav[item.key]}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-          <div className="flex items-center gap-md">
-            <div className="relative hidden sm:block">
-              <span
-                className="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-outline text-sm select-none pointer-events-none"
-                style={{ fontSize: "16px" }}
-              >
-                search
-              </span>
-              <input
-                className="bg-surface border border-outline-variant text-label-md font-label-md rounded-lg px-sm py-xs pl-7 focus:outline-none focus:border-primary focus:ring-0 w-48 transition-colors placeholder:text-on-surface-variant"
-                placeholder="Search..."
-                type="text"
-              />
-            </div>
-            <ThemeToggle />
-            <UserMenu />
-            <LocaleSwitcher locale={locale} currentPath={currentPath} />
-          </div>
-        </div>
-      </header>
-
-      <div className="flex flex-1 max-w-container-max mx-auto w-full">
-        {/* Side Navigation */}
-        <aside className="hidden md:flex flex-col w-56 border-r border-outline-variant pt-lg bg-background shrink-0">
-          <nav className="flex flex-col gap-xs px-gutter">
-            {items.map((item) => {
-              const Icon = navigationIcons[item.key];
-              const active = currentPath === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-sm px-md py-sm text-label-md font-label-md transition-colors",
-                    active
-                      ? "bg-surface-container text-primary border-l-2 border-primary"
-                      : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low border-l-2 border-transparent",
-                  )}
-                >
-                  <Icon className="h-[18px] w-[18px]" />
-                  {dictionary.nav[item.key]}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Backend Status */}
-          <div className="mt-auto px-gutter pb-lg pt-lg border-t border-outline-variant mx-gutter">
-            <div className="flex items-center justify-between mb-sm">
-              <span className="text-code-sm text-on-surface-variant">
-                {dictionary.backendLabel}
-              </span>
-              <Badge variant={backendReachable ? "success" : "warning"}>
-                {backendReachable
-                  ? dictionary.backendOnline
-                  : dictionary.backendOffline}
-              </Badge>
-            </div>
-            <p className="text-code-sm text-on-surface-variant truncate">{backendUrl}</p>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 py-lg px-gutter flex flex-col gap-lg">
+    <div className="min-h-screen bg-background">
+      <AdminConsoleHeader
+        locale={locale}
+        currentPath={currentPath}
+        dictionary={dictionary}
+      />
+      <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-6 pb-16 pt-24">
+        <AdminConsoleSubnav
+          locale={locale}
+          currentPath={currentPath}
+          dictionary={dictionary}
+        />
+        <div className="rounded-[32px] border border-outline-variant/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.55),rgba(255,255,255,0))] p-0 dark:bg-[linear-gradient(180deg,rgba(58,59,68,0.28),rgba(18,19,24,0))]">
           {children}
-        </main>
-      </div>
+        </div>
+        <section className="rounded-3xl border border-outline-variant/30 bg-surface-container-lowest/90 px-5 py-4 text-[0.82rem] text-on-surface-variant shadow-sm dark:bg-surface-container-low/70">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <span>{backendLabel(backendReachable, dictionary)}</span>
+            <span className="font-code-sm text-primary">{backendUrl}</span>
+          </div>
+        </section>
+      </main>
+      <AdminConsoleFooter />
     </div>
   );
+}
+
+function backendLabel(reachable: boolean, dictionary: DashboardDictionary) {
+  return reachable ? dictionary.backendOnline : dictionary.backendOffline;
 }

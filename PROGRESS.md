@@ -148,3 +148,27 @@
 5. 为新增的 Developer Console、Model Leaderboard、Merchant Dashboard 三页补充真实后端数据接入
 6. 将新增页面的多语言文案整合到 `i18n` 字典中
 7. 把前端新页面的导航入口接入 `PublicNav` 或控制台侧边栏
+
+### 2026-05-15 — 按 design 文件对齐公共页面视觉
+
+- 已将 Pricing 页面 `<main>` 加上 `grid-bg` 背景，对齐 opentruck_8 设计
+- 已将 API Docs 页面 `<main>` 加上 `grid-bg` 背景，代码面板改用 VS Code 语法着色（`#569CD6` 关键字、`#CE9178` 字符串、`#9CDCFE` 属性、`#B5CEA8` 数字），footer 补充社交图标（public、hub、terminal）
+- 已从 `app/api-docs/page.tsx` 提取 `ApiDocsSidebar`、`ApiCodePanel` 到独立组件，保持文件在 300 行以内
+- 已在 `globals.css` 新增 `.grid-bg` 与 `.dark .grid-bg` CSS 类
+- 已将 Model Leaderboard 页头、表格、页脚完全按 opentruck_4 设计重写（自定义 emerald 主题 header、SVG 通知铃图标、用户头像、social 图标 footer）
+- 已将 Leaderboard 表格中所有 `brand-*` 颜色引用替换为已有设计系统 token（`primary-container`、`primary`），消除缺失 CSS 类的渲染问题
+- 已通过 `pnpm build` 验证所有变动构建通过
+- 已将 Merchant Dashboard 页头从 `PublicNav` 替换为 opentruck_6 自定义 header（settings 齿轮 + oidc_5118 用户 badge + expand_more 下拉箭头）
+- 已将 Developer Console 侧边栏头像从字母初始替换为 `<img>` 标签，对齐 opentruck_3 设计
+- 已完成全部非首页页面 vs design 文件的逐页差异审计并修复所有不一致项
+- 已新增独立公共页 `/merchant`，按 `design/opentruck_5/screen.png` 高保真还原商家中心列表页，并通过 `next start` 浏览器验收与 `pnpm build` 构建验证
+- 已将首页、模型页、商家页与排行榜页顶部导航统一到新版固定头部，不再因页面或登录态切换而改变 tab 集合，仅保留当前项高亮
+- 已重做 `/auth/signin` 登录页与 `SignInPanel` 布局，移除横向滑出密码面板，改为稳定的双栏外壳 + 纵向认证卡片，避免公开登录页组件溢出
+- 已按 `design/loginpage` 重新收紧 `/auth/signin` 的卡片宽度、圆角、表单密度与背景氛围，并确保登录卡片在新布局中稳定居中
+- 已在干净的 `next dev --port 3011` 实例上实际验收 `/auth/signin?callbackUrl=%2Fzh-CN`，确认无横向溢出且视觉结构与新设计一致
+- 已将 `/auth/signin` 改成更宽的居中单卡布局，利用横向双栏压缩垂直高度，确保桌面视口下无需滚动即可完整展示
+- 已将登录页主要色彩从硬编码切回设计系统 token，并实际验证亮色 / 暗色两套主题下的背景、卡片和表单视觉都能自然衔接
+- 已将后台 `AdminShell` 从旧的顶栏+侧栏结构重构为 `opentruck_6` 风格的公开顶栏 + 胶囊式控制台子导航 + 轻量页脚
+- 已按 `design/opentruck_6` 重做后台首页 `AdminOverview`，替换为 emerald Hero、三段核心指标和分区信息卡片流
+- 已将后台资源页共用的 `ResourceTableCard` 调整为与新控制台一致的标题、统计卡和圆角表格视觉
+- 已在干净的 `next dev --port 3013` 实例上实际验收 `/zh-CN` 与 `/zh-CN/api-keys`，确认新后台骨架和首页/资源页都可正常渲染
