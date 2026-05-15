@@ -45,13 +45,13 @@ export function AdminOverview({
   ];
 
   return (
-    <div className="space-y-5">
-      <section className="flex items-start justify-between gap-4 rounded-[24px] border border-transparent px-1 py-4">
+    <div className="space-y-6">
+      <section className="flex items-start justify-between gap-4 rounded-[24px] border border-transparent px-1 pt-2 pb-6">
         <div>
           <h1 className="text-[2.15rem] font-semibold tracking-[-0.06em] text-on-surface">
             👋{greeting}，oidc_5118
           </h1>
-          <p className="mt-2 text-[0.9rem] text-on-surface-variant">
+          <p className="mt-3 text-[0.9rem] text-on-surface-variant">
             {dictionary.overview.signalSummary}
           </p>
         </div>
@@ -72,18 +72,18 @@ export function AdminOverview({
 
       <AdminOverviewAnalysis />
 
-      <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+      <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <AdminOverviewNotices
           title="系统公告"
           chip="显示最新20条"
           items={notices}
         />
         <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
-          <div className="flex items-center gap-3 border-b border-outline-variant/10 px-5 py-4">
+          <div className="flex items-center gap-3 border-b border-outline-variant/10 px-6 py-5">
             <SunMedium className="h-5 w-5 text-primary" />
             <h2 className="text-[1.25rem] font-semibold text-on-surface">系统状态</h2>
           </div>
-          <div className="space-y-4 px-5 py-5">
+          <div className="space-y-4 px-6 py-6">
             <StatusRow label="健康节点" value={`${nodes.filter((item) => item.health_status === "ok").length}/${nodes.length || 0}`} />
             <StatusRow label="活跃密钥" value={String(apiKeys.filter((item) => item.status === "active").length)} />
             <StatusRow label="已发布模型" value={String(new Set(nodeModels.map((item) => item.public_model)).size)} />

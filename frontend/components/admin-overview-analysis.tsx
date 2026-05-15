@@ -15,7 +15,7 @@ const points = ["05-15 07:00", "05-15 08:00", "05-15 09:00", "05-15 10:00", "05-
 export function AdminOverviewAnalysis() {
   return (
     <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
-      <div className="flex flex-col gap-4 border-b border-outline-variant/10 px-5 py-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 border-b border-outline-variant/10 px-6 py-5 md:flex-row md:items-center md:justify-between">
 
         <Tabs defaultValue="spend-distribution" className="w-full md:w-auto">
           <TabsList className="w-full justify-start rounded-2xl bg-surface-container-low px-1 py-1 md:w-auto">
@@ -42,7 +42,7 @@ export function AdminOverviewAnalysis() {
 
 function AnalysisCanvas({ title }: { title: string }) {
   return (
-    <div className="px-5 py-6">
+    <div className="px-6 py-7">
       <h3 className="text-[1.05rem] font-semibold text-on-surface">{title}</h3>
       <p className="mt-1 text-[0.86rem] text-on-surface-variant">总计： ¥0.00</p>
       <div className="mt-6 rounded-[20px] border border-outline-variant/10 bg-surface px-4 py-4 dark:bg-surface-container-low">

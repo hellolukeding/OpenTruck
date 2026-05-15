@@ -1,6 +1,6 @@
-import { PublicNav } from "@/components/public-nav";
-import { ApiDocsSidebar } from "@/components/api-docs-sidebar";
 import { ApiCodePanel } from "@/components/api-code-panel";
+import { ApiDocsSidebar } from "@/components/api-docs-sidebar";
+import { PublicNav } from "@/components/public-nav";
 
 const params = [
   {
@@ -112,9 +112,7 @@ export default function ApiDocsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-md px-gutter py-xl max-w-container-max mx-auto">
           <div className="col-span-2">
             <p className="font-display text-body-lg font-bold text-on-surface mb-4">OpenTruck</p>
-            <p className="font-body-sm text-body-sm text-on-secondary-container max-w-xs mb-4 leading-relaxed opacity-80">
-              Built for the decentralized AI future. Connecting top-tier compute with the most ambitious developers.
-            </p>
+
             <div className="flex gap-4">
               <span className="material-symbols-outlined text-on-secondary-container/60 hover:text-primary cursor-pointer transition-colors">public</span>
               <span className="material-symbols-outlined text-on-secondary-container/60 hover:text-primary cursor-pointer transition-colors">hub</span>

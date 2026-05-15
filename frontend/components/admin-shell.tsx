@@ -27,7 +27,7 @@ export function AdminShell({
         currentPath={currentPath}
         dictionary={dictionary}
       />
-      <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-3.5 px-4 pb-12 pt-[4.5rem]">
+      <main className="mx-auto flex w-full max-w-[1280px] flex-col gap-5 px-5 pb-16 pt-[4.5rem]">
         <AdminConsoleSubnav
           locale={locale}
           currentPath={currentPath}

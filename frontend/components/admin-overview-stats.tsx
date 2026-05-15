@@ -17,7 +17,7 @@ export function AdminOverviewStats({ stats }: { stats: StatCard[] }) {
           return (
             <div
               key={stat.label}
-              className="flex min-h-[156px] flex-col items-center justify-center px-3 py-5 text-center"
+              className="flex min-h-[128px] flex-col items-center justify-center px-5 py-7 text-center"
             >
               <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-surface-container-low ${stat.accent}`}>
                 <Icon className="h-5 w-5" />

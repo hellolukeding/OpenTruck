@@ -8,10 +8,10 @@ export default function MerchantMarketplacePage() {
     <div className="min-h-screen bg-[#f7f5fa] text-[#1a1b22]">
       <PublicNav activeId="merchant" ctaLabel="成为供应商" />
 
-      <main className="grid-bg min-h-[calc(100vh-64px)] pb-16">
-        <section className="mx-auto flex max-w-[1400px] flex-col gap-8 px-5 py-10 lg:flex-row lg:items-end lg:justify-between lg:py-12">
+      <main className="grid-bg min-h-[calc(100vh-64px)] pb-20">
+        <section className="mx-auto flex max-w-[1400px] flex-col gap-10 px-5 pt-16 pb-10 lg:flex-row lg:items-end lg:justify-between lg:pt-20 lg:pb-14">
           <div className="max-w-[860px]">
-            <h1 className="mb-4 text-[3.45rem] font-bold tracking-[-0.06em] text-[#11131a] sm:text-[4.1rem]">
+            <h1 className="mb-5 text-[3.45rem] font-bold tracking-[-0.06em] text-[#11131a] sm:text-[4.1rem]">
               算力商家中心
             </h1>
             <p className="max-w-[760px] text-[1.04rem] leading-9 text-[#4e5753]">
@@ -28,7 +28,7 @@ export default function MerchantMarketplacePage() {
           </Link>
         </section>
 
-        <section className="mx-auto max-w-[1400px] px-5">
+        <section className="mx-auto max-w-[1400px] px-5 pb-2">
           <div className="rounded-[24px] border border-[#d7d5dd] bg-white/80 p-3.5 shadow-[0_12px_36px_rgba(28,33,42,0.06)] backdrop-blur-sm">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
               <label className="relative block flex-1">
@@ -61,7 +61,7 @@ export default function MerchantMarketplacePage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-[1400px] px-5 pt-6">
+        <section className="mx-auto max-w-[1400px] px-5 pt-10">
           <MerchantMarketplaceGrid />
         </section>
       </main>
