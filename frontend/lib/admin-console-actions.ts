@@ -33,54 +33,6 @@ function revalidateConsoleViews() {
   }
 }
 
-export async function createPaymentOrderAction(
-  _prevState: ConsoleActionState,
-  formData: FormData,
-): Promise<ConsoleActionState> {
-  const payload = {
-    tenant_id: String(formData.get("tenant_id") ?? "").trim(),
-    amount: String(formData.get("amount") ?? "").trim(),
-    credited_amount: String(formData.get("credited_amount") ?? "").trim() || null,
-    currency: "CNY",
-    payment_provider: String(formData.get("payment_provider") ?? "").trim() || null,
-    payment_channel: String(formData.get("payment_channel") ?? "").trim() || null,
-    note: String(formData.get("note") ?? "").trim() || null,
-  };
-
-  const response = await fetch(`${BACKEND_BASE_URL}/admin/wallet/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    return { status: "error", message: await parseError(response) };
-  }
-
-  revalidateConsoleViews();
-  return { status: "success", message: "充值单已创建。" };
-}
-
-export async function settlePaymentOrderAction(
-  _prevState: ConsoleActionState,
-  formData: FormData,
-): Promise<ConsoleActionState> {
-  const orderId = String(formData.get("order_id") ?? "").trim();
-  const creditedAmount = String(formData.get("credited_amount") ?? "").trim() || null;
-  const response = await fetch(`${BACKEND_BASE_URL}/admin/wallet/orders/${orderId}/settle`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ credited_amount: creditedAmount }),
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    return { status: "error", message: await parseError(response) };
-  }
-
-  revalidateConsoleViews();
-  return { status: "success", message: "充值单已入账。" };
-}
-
 export async function createSupportTicketAction(
   _prevState: ConsoleActionState,
   formData: FormData,

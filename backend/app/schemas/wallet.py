@@ -36,8 +36,21 @@ class PaymentOrderCreate(BaseModel):
     note: str | None = None
 
 
+class PaymentOrderFromPlanCreate(BaseModel):
+    tenant_id: uuid.UUID
+    plan_id: uuid.UUID
+    channel_id: uuid.UUID | None = None
+    note: str | None = None
+
+
 class PaymentOrderSettle(BaseModel):
     credited_amount: Decimal | None = Field(default=None, ge=Decimal("0.01"))
+
+
+class PaymentOrderStatusUpdate(BaseModel):
+    status: str = Field(min_length=4, max_length=32)
+    note: str | None = None
+    checkout_url: str | None = None
 
 
 class PaymentOrderRead(BaseModel):

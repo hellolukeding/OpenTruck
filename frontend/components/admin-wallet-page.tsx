@@ -4,6 +4,7 @@ import { AdminWalletCatalogPanel } from "@/components/admin-wallet-catalog-panel
 import { AdminWalletHistoryCard } from "@/components/admin-wallet-history-card";
 import { AdminWalletOrderForm } from "@/components/admin-wallet-order-form";
 import { AdminWalletOrderRow } from "@/components/admin-wallet-order-row";
+import { AdminWalletPlanPurchase } from "@/components/admin-wallet-plan-purchase";
 import type { WalletOverviewData } from "@/lib/admin-console-api";
 
 function StatPanel({
@@ -88,29 +89,26 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         {/* Left column: recharge */}
         <div className="space-y-6">
-          <div>
-            <label className="text-[0.95rem] font-semibold text-on-surface">充值数量</label>
-            <input
-              defaultValue="7"
-              className="mt-3 h-12 w-full rounded-[16px] border border-outline-variant/20 bg-surface px-4 text-[1rem] text-on-surface outline-none dark:bg-surface-container-low"
+          {wallet ? (
+            <AdminWalletPlanPurchase
+              tenantId={wallet.tenant_id}
+              plans={wallet.payment_plans}
+              channels={wallet.payment_channels}
             />
-            <p className="mt-3 text-[0.96rem] text-on-surface-variant">
-              实付金额: <span className="text-[#ef4444]">¥6.80</span>
-            </p>
-          </div>
+          ) : null}
 
           <div>
             <p className="text-[0.95rem] font-semibold text-on-surface">
-              选择充值额度 <span className="text-[0.82rem] text-on-surface-variant">(1 $ = 6.80 ￥)</span>
+              快速充值提示 <span className="text-[0.82rem] text-on-surface-variant">(1 $ = 6.80 ￥)</span>
             </p>
             <div className="mt-3 rounded-[16px] border border-[#f2cb6b] bg-[#fff8e7] px-4 py-3 text-[0.9rem] text-[#8a4f11]">
               充值以及大客户经理微信: LHSSOS
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {amountOptions.map((item) => (
-                <button
+                <div
                   key={item}
-                  className="rounded-[18px] border border-outline-variant/20 bg-surface px-4 py-4 text-left transition-colors hover:bg-surface-container-low dark:bg-surface-container-low"
+                  className="rounded-[18px] border border-outline-variant/20 bg-surface px-4 py-4 dark:bg-surface-container-low"
                 >
                   <p className="flex items-center gap-2 text-[1.05rem] font-semibold text-on-surface">
                     <CircleDollarSign className="h-5 w-5" />
@@ -119,7 +117,7 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
                   <p className="mt-3 text-[0.84rem] leading-6 text-on-surface-variant">
                     实付 {item.replace(" ￥", ".00")}，节省 ¥0.00
                   </p>
-                </button>
+                </div>
               ))}
             </div>
           </div>

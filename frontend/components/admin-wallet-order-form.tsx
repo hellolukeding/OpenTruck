@@ -2,8 +2,9 @@
 
 import { useActionState, useEffect, useRef } from "react";
 
-import { createPaymentOrderAction, type ConsoleActionState } from "@/lib/admin-console-actions";
 import { FormStatus } from "@/components/form-status";
+import { type ConsoleActionState } from "@/lib/admin-console-actions";
+import { createPaymentOrderAction } from "@/lib/admin-console-wallet-actions";
 
 export function AdminWalletOrderForm({ tenantId }: { tenantId: string }) {
   const formRef = useRef<HTMLFormElement>(null);

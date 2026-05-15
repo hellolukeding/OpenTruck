@@ -20,8 +20,10 @@ from app.models.wallet_ledger import WalletLedger
 from app.schemas.wallet import (
     PaymentChannelRead,
     PaymentOrderCreate,
+    PaymentOrderFromPlanCreate,
     PaymentOrderRead,
     PaymentOrderSettle,
+    PaymentOrderStatusUpdate,
     PaymentPlanRead,
     WalletLedgerEntryRead,
     WalletOverviewRead,
@@ -124,6 +126,53 @@ def create_payment_order(payload: PaymentOrderCreate, db: Session = Depends(get_
         note=payload.note,
     )
     db.add(order)
+    return commit_or_409(db, "Payment order", "order_number", order)
+
+
+@router.post("/orders/from-plan", response_model=PaymentOrderRead, status_code=status.HTTP_201_CREATED)
+def create_payment_order_from_plan(payload: PaymentOrderFromPlanCreate, db: Session = Depends(get_db)) -> PaymentOrder:
+    tenant = db.get(Tenant, payload.tenant_id)
+    if tenant is None:
+        raise not_found("Tenant")
+
+    plan = db.get(PaymentPlan, payload.plan_id)
+    if plan is None:
+        raise not_found("Payment plan")
+
+    channel = db.get(PaymentChannel, payload.channel_id) if payload.channel_id else None
+    order_number = _build_order_number()
+    order = PaymentOrder(
+        tenant_id=tenant.id,
+        order_number=order_number,
+        amount=plan.price_amount,
+        credited_amount=plan.credit_amount,
+        currency=plan.currency,
+        payment_provider=channel.provider if channel else None,
+        payment_channel=channel.channel_code if channel else None,
+        checkout_url=f"/console/wallet/checkout/{order_number}",
+        note=payload.note or f"Purchase plan {plan.name}",
+    )
+    db.add(order)
+    return commit_or_409(db, "Payment order", "order_number", order)
+
+
+@router.patch("/orders/{order_id}", response_model=PaymentOrderRead)
+def update_payment_order_status(
+    order_id: str,
+    payload: PaymentOrderStatusUpdate,
+    db: Session = Depends(get_db),
+) -> PaymentOrder:
+    order = db.get(PaymentOrder, order_id)
+    if order is None:
+        raise not_found("Payment order")
+    if order.status == "paid":
+        return order
+
+    order.status = payload.status
+    if payload.note is not None:
+        order.note = payload.note
+    if payload.checkout_url is not None:
+        order.checkout_url = payload.checkout_url
     return commit_or_409(db, "Payment order", "order_number", order)
 
 

@@ -202,6 +202,12 @@
 - 已将新建工单的首条描述自动写入消息流，线程页不再出现“工单已创建但对话为空”的断层
 - 已将控制台工单页改为左侧列表 + 右侧线程详情，支持查看完整对话、回复工单以及直接调整状态和优先级
 - 已通过 `make check`、`alembic upgrade head` 与 `pnpm --dir frontend build` 验证工单线程能力完整接入前后端
+- 已为钱包后端新增“按套餐下单”接口 `POST /admin/wallet/orders/from-plan`，下单时会自动继承套餐金额与所选支付渠道配置
+- 已为钱包后端新增订单状态更新接口 `PATCH /admin/wallet/orders/{id}`，支持在 `pending / processing / cancelled` 等中间状态间推进
+- 已将钱包页左侧充值区改成后端驱动的套餐下单面板，支持直接选择套餐与支付渠道创建订单
+- 已为充值单列表补充订单状态更新表单，在手动入账之外也能维护订单处理中与取消状态
+- 已将钱包相关 server action 从 `admin-console-actions.ts` 中拆分到 `admin-console-wallet-actions.ts`，继续满足前端单文件不超过 300 行的约束
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证套餐下单、订单状态流转与钱包前端改造全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 
