@@ -20,6 +20,9 @@ export type DashboardDictionary = {
     tenants: string;
     nodes: string;
     apiKeys: string;
+    wallet: string;
+    logs: string;
+    tickets: string;
     models: string;
     upstreamAccounts: string;
   };
@@ -222,6 +225,9 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       tenants: "Tenants",
       nodes: "Nodes",
       apiKeys: "API Keys",
+      wallet: "Wallet",
+      logs: "Logs",
+      tickets: "Tickets",
       models: "Models",
       upstreamAccounts: "Upstream Accounts",
     },
@@ -438,6 +444,9 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       tenants: "租户",
       nodes: "节点",
       apiKeys: "API 密钥",
+      wallet: "钱包",
+      logs: "日志",
+      tickets: "工单",
       models: "模型",
       upstreamAccounts: "上游账号",
     },

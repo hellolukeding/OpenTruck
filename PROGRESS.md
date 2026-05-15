@@ -174,3 +174,5 @@
 - 已在干净的 `next dev --port 3013` 实例上实际验收 `/zh-CN` 与 `/zh-CN/api-keys`，确认新后台骨架和首页/资源页都可正常渲染
 - 已将后台总览页重构为参考图同类结构：问候区、8 项概览指标、分析面板 tabs、公告流与状态卡
 - 已将总览页实现拆分为 `admin-overview-analysis / admin-overview-stats / admin-overview-notices`，保持单文件可读性并控制在 300 行以内
+- 已为控制台新增 `钱包 / 日志 / 工单` 三个子 tab，并补齐 `/{locale}/wallet`、`/{locale}/logs`、`/{locale}/tickets` 路由
+- 已按参考图完成钱包页和日志页的高保真静态骨架，并为工单页补齐同一设计语言下的支持面板与空态
