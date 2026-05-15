@@ -80,3 +80,30 @@ export async function settlePaymentOrderAction(
   revalidateConsoleViews();
   return { status: "success", message: "充值单已入账。" };
 }
+
+export async function createSupportTicketAction(
+  _prevState: ConsoleActionState,
+  formData: FormData,
+): Promise<ConsoleActionState> {
+  const payload = {
+    tenant_id: String(formData.get("tenant_id") ?? "").trim(),
+    subject: String(formData.get("subject") ?? "").trim(),
+    category: String(formData.get("category") ?? "").trim(),
+    priority: String(formData.get("priority") ?? "normal").trim(),
+    contact_email: String(formData.get("contact_email") ?? "").trim(),
+    description: String(formData.get("description") ?? "").trim(),
+  };
+
+  const response = await fetch(`${BACKEND_BASE_URL}/admin/tickets`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+  if (!response.ok) {
+    return { status: "error", message: await parseError(response) };
+  }
+
+  revalidateConsoleViews();
+  return { status: "success", message: "工单已提交。" };
+}

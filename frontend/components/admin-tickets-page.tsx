@@ -1,11 +1,23 @@
 import { CircleHelp, Clock3, FilePlus2, MessageSquareMore, MessagesSquare, ShieldCheck } from "lucide-react";
 
+import { AdminTicketForm } from "@/components/admin-ticket-form";
+import { AdminTicketsFilters } from "@/components/admin-tickets-filters";
 import type { PaginatedResponse, SupportTicket } from "@/lib/admin-console-api";
 
 export function AdminTicketsPage({
   ticketsPage,
+  tenantId,
+  path,
+  query,
 }: {
   ticketsPage: PaginatedResponse<SupportTicket>;
+  tenantId?: string;
+  path: string;
+  query: {
+    search?: string;
+    status?: string;
+    priority?: string;
+  };
 }) {
   const openCount = ticketsPage.items.filter((item) => item.status === "open").length;
   const processingCount = ticketsPage.items.filter((item) => item.status === "processing").length;
@@ -48,20 +60,7 @@ export function AdminTicketsPage({
         <div className="px-5 py-5">
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface p-5 dark:bg-surface-container-low">
             <h3 className="text-[1.05rem] font-semibold text-on-surface">提交建议</h3>
-            <div className="mt-4 space-y-3">
-              <InputRow label="问题类型" placeholder="支付、路由、模型、账单、账号" />
-              <InputRow label="优先级" placeholder="普通 / 紧急 / 严重" />
-              <InputRow label="联系邮箱" placeholder="operator@company.com" />
-              <div>
-                <p className="mb-2 text-[0.88rem] font-medium text-on-surface">问题描述</p>
-                <div className="min-h-[160px] rounded-[16px] border border-outline-variant/20 bg-surface-container-low px-4 py-4 text-[0.9rem] text-on-surface-variant dark:bg-surface">
-                  请尽量提供错误时间、令牌名称、模型名称和 request id，方便快速定位。
-                </div>
-              </div>
-              <button className="w-full rounded-[16px] bg-primary-container px-4 py-3 text-[0.92rem] font-medium text-on-primary">
-                提交工单
-              </button>
-            </div>
+            {tenantId ? <AdminTicketForm tenantId={tenantId} /> : null}
           </div>
         </div>
       </section>
@@ -92,7 +91,8 @@ export function AdminTicketsPage({
           <div className="border-b border-outline-variant/10 px-5 py-4">
             <h3 className="text-[1.2rem] font-semibold text-on-surface">最近工单</h3>
           </div>
-          <div className="px-5 py-5">
+          <div className="space-y-4 px-5 py-5">
+            <AdminTicketsFilters path={path} query={query} />
             {ticketsPage.items.length > 0 ? (
               <div className="space-y-3">
                 {ticketsPage.items.map((item) => (
@@ -129,17 +129,6 @@ export function AdminTicketsPage({
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function InputRow({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <div>
-      <p className="mb-2 text-[0.88rem] font-medium text-on-surface">{label}</p>
-      <div className="rounded-[14px] border border-outline-variant/20 bg-surface-container-low px-4 py-3 text-[0.9rem] text-on-surface-variant dark:bg-surface">
-        {placeholder}
-      </div>
     </div>
   );
 }
