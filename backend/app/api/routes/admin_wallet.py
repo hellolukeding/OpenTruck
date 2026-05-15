@@ -12,13 +12,17 @@ from app.api.utils import commit_or_409
 from app.core.errors import not_found
 from app.models.common import utc_now
 from app.models.gateway_usage_ledger import GatewayUsageLedger
+from app.models.payment_channel import PaymentChannel
 from app.models.payment_order import PaymentOrder
+from app.models.payment_plan import PaymentPlan
 from app.models.tenant import Tenant
 from app.models.wallet_ledger import WalletLedger
 from app.schemas.wallet import (
+    PaymentChannelRead,
     PaymentOrderCreate,
     PaymentOrderRead,
     PaymentOrderSettle,
+    PaymentPlanRead,
     WalletLedgerEntryRead,
     WalletOverviewRead,
 )
@@ -71,6 +75,20 @@ def get_wallet_overview(
             .limit(10)
         ).all()
     )
+    payment_plans = list(
+        db.scalars(
+            select(PaymentPlan)
+            .where(PaymentPlan.status == "active")
+            .order_by(PaymentPlan.sort_order.asc(), PaymentPlan.created_at.asc())
+        ).all()
+    )
+    payment_channels = list(
+        db.scalars(
+            select(PaymentChannel)
+            .where(PaymentChannel.status == "active")
+            .order_by(PaymentChannel.sort_order.asc(), PaymentChannel.created_at.asc())
+        ).all()
+    )
 
     return WalletOverviewRead(
         tenant_id=tenant.id,
@@ -83,6 +101,8 @@ def get_wallet_overview(
         failed_requests=failed_requests,
         recent_orders=[PaymentOrderRead.model_validate(order) for order in recent_orders],
         recent_entries=[WalletLedgerEntryRead.model_validate(entry) for entry in recent_entries],
+        payment_plans=[PaymentPlanRead.model_validate(plan) for plan in payment_plans],
+        payment_channels=[PaymentChannelRead.model_validate(channel) for channel in payment_channels],
     )
 
 

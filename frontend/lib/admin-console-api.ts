@@ -63,6 +63,31 @@ export type PaymentOrder = {
   created_at: string;
 };
 
+export type PaymentPlan = {
+  id: string;
+  name: string;
+  status: string;
+  price_amount: string;
+  credit_amount: string;
+  currency: string;
+  quota_units: number;
+  badge_text: string | null;
+  sort_order: number;
+  is_featured: boolean;
+  description: string | null;
+};
+
+export type PaymentChannel = {
+  id: string;
+  name: string;
+  provider: string;
+  channel_code: string;
+  status: string;
+  sort_order: number;
+  is_recommended: boolean;
+  description: string | null;
+};
+
 export type WalletOverviewData = {
   tenant_id: string;
   tenant_name: string;
@@ -74,6 +99,8 @@ export type WalletOverviewData = {
   failed_requests: number;
   recent_orders: PaymentOrder[];
   recent_entries: WalletLedgerEntry[];
+  payment_plans: PaymentPlan[];
+  payment_channels: PaymentChannel[];
 };
 
 export type GatewayUsageLog = {

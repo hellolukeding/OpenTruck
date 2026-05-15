@@ -39,7 +39,9 @@ check:
 		backend/app/models/node.py \
 		backend/app/models/node_model.py \
 		backend/app/models/oauth_session.py \
+		backend/app/models/payment_channel.py \
 		backend/app/models/payment_order.py \
+		backend/app/models/payment_plan.py \
 		backend/app/models/support_ticket.py \
 		backend/app/models/upstream_account.py \
 		backend/app/models/wallet_ledger.py \
@@ -66,4 +68,5 @@ check:
 		backend/alembic/versions/20260512_0002_oauth_upstream_accounts.py \
 		backend/alembic/versions/20260512_0003_upstream_account_scheduling.py \
 		backend/alembic/versions/20260512_0004_gateway_usage_ledger.py \
-		backend/alembic/versions/20260515_0005_wallet_and_support.py
+		backend/alembic/versions/20260515_0005_wallet_and_support.py \
+		backend/alembic/versions/20260515_0006_wallet_catalog.py

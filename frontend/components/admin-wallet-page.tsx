@@ -1,8 +1,10 @@
 import { BadgeDollarSign, Banknote, CircleDollarSign, Copy, Crown, Gift, WalletCards } from "lucide-react";
 
+import { AdminWalletChannelList } from "@/components/admin-wallet-channel-list";
 import { AdminWalletHistoryCard } from "@/components/admin-wallet-history-card";
 import { AdminWalletOrderForm } from "@/components/admin-wallet-order-form";
 import { AdminWalletOrderRow } from "@/components/admin-wallet-order-row";
+import { AdminWalletPlanList } from "@/components/admin-wallet-plan-list";
 import type { WalletOverviewData } from "@/lib/admin-console-api";
 
 function StatPanel({
@@ -144,23 +146,7 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
 
         {/* Right column: payment methods + affiliate */}
         <div className="space-y-6">
-          <div>
-            <p className="text-[0.95rem] font-semibold text-on-surface">选择支付方式</p>
-            <div className="mt-3 flex flex-wrap gap-3">
-              {["支付宝(推荐)", "Stripe", "USDT/USDC"].map((item, index) => (
-                <button
-                  key={item}
-                  className={`rounded-[16px] border px-5 py-3 text-[0.95rem] font-medium ${
-                    index === 0
-                      ? "border-primary-container bg-surface text-on-surface"
-                      : "border-outline-variant/20 bg-surface text-on-surface dark:bg-surface-container-low"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
+          <AdminWalletChannelList channels={wallet?.payment_channels ?? []} />
 
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
             <div className="border-b border-outline-variant/10 px-5 py-4">
@@ -242,7 +228,11 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
             </div>
             <p className="mt-3 text-[0.88rem] text-on-surface-variant">购买套餐后即可享受模型权益</p>
           </div>
-          <div className="py-12 text-center text-[1rem] text-on-surface-variant">暂无可购买套餐</div>
+          {wallet && wallet.payment_plans.length > 0 ? (
+            <AdminWalletPlanList plans={wallet.payment_plans} />
+          ) : (
+            <div className="py-12 text-center text-[1rem] text-on-surface-variant">暂无可购买套餐</div>
+          )}
         </div>
       </div>
 

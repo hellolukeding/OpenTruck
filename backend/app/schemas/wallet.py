@@ -56,6 +56,35 @@ class PaymentOrderRead(BaseModel):
     created_at: datetime
 
 
+class PaymentPlanRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    status: str
+    price_amount: Decimal
+    credit_amount: Decimal
+    currency: str
+    quota_units: int
+    badge_text: str | None = None
+    sort_order: int
+    is_featured: bool
+    description: str | None = None
+
+
+class PaymentChannelRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    provider: str
+    channel_code: str
+    status: str
+    sort_order: int
+    is_recommended: bool
+    description: str | None = None
+
+
 class WalletOverviewRead(BaseModel):
     tenant_id: uuid.UUID
     tenant_name: str
@@ -67,3 +96,5 @@ class WalletOverviewRead(BaseModel):
     failed_requests: int
     recent_orders: list[PaymentOrderRead]
     recent_entries: list[WalletLedgerEntryRead]
+    payment_plans: list[PaymentPlanRead]
+    payment_channels: list[PaymentChannelRead]
