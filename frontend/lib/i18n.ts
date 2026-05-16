@@ -21,6 +21,7 @@ export type DashboardDictionary = {
     nodes: string;
     apiKeys: string;
     wallet: string;
+    announcements: string;
     logs: string;
     tickets: string;
     models: string;
@@ -226,6 +227,7 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       nodes: "Nodes",
       apiKeys: "API Keys",
       wallet: "Wallet",
+      announcements: "Notices",
       logs: "Logs",
       tickets: "Tickets",
       models: "Models",
@@ -445,6 +447,7 @@ const dictionaries: Record<Locale, DashboardDictionary> = {
       nodes: "节点",
       apiKeys: "API 密钥",
       wallet: "钱包",
+      announcements: "公告",
       logs: "日志",
       tickets: "工单",
       models: "模型",

@@ -30,6 +30,12 @@ export type DashboardNotice = {
   created_at: string;
 };
 
+export type Announcement = DashboardNotice & {
+  status: string;
+  sort_order: number;
+  updated_at: string;
+};
+
 export type DashboardOverviewData = {
   tenant_count: number;
   active_api_keys: number;
@@ -226,4 +232,8 @@ export async function getSupportTicketsPage(query: ConsoleQuery = {}) {
 
 export async function getSupportTicketDetail(ticketId: string) {
   return fetchJson<SupportTicketDetail>(`/admin/tickets/${ticketId}`);
+}
+
+export async function getAnnouncementsPage(query: ConsoleQuery = {}) {
+  return fetchJson<PaginatedResponse<Announcement>>(buildUrl("/admin/announcements", query));
 }

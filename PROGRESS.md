@@ -213,6 +213,9 @@
 - 已将 `/admin/dashboard` 扩展为返回真实公告流，总览页不再依赖硬编码公告数组
 - 已将控制台总览页的“系统公告”卡片切到真实后端数据，支持置顶、严重级别与真实发布时间展示
 - 已通过 `make check`、`alembic upgrade head` 与 `pnpm --dir frontend build` 验证公告系统完整接入前后端
+- 已新增 `/{locale}/announcements` 控制台公告管理页，并把“公告”入口接入控制台胶囊式子导航
+- 已新增前端公告创建、编辑、删除 action 与对应表单/行操作，打通 `/admin/announcements` 的真实管理链路
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证公告管理页、子导航入口与新增前端 action 全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 
