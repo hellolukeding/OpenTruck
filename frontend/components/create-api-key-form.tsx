@@ -23,12 +23,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 export function CreateApiKeyForm({
+  locale,
   form,
   common,
   labels,
   statusLabels,
   tenants,
 }: {
+  locale: "en" | "zh-CN";
   form: DashboardDictionary["forms"]["apiKeys"];
   common: DashboardDictionary["forms"]["common"];
   labels: Pick<
@@ -66,6 +68,7 @@ export function CreateApiKeyForm({
       </CardHeader>
       <CardContent className="grid gap-5 p-lg">
         <form ref={formRef} action={action} className="grid gap-5">
+          <input type="hidden" name="locale" value={locale} />
           <div className="grid gap-5 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="api-key-tenant">{labels.tenant}</Label>

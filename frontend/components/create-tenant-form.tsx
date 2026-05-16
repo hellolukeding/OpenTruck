@@ -21,11 +21,13 @@ import {
 } from "@/components/ui/select";
 
 export function CreateTenantForm({
+  locale,
   form,
   common,
   labels,
   statusLabels,
 }: {
+  locale: "en" | "zh-CN";
   form: DashboardDictionary["forms"]["tenants"];
   common: DashboardDictionary["forms"]["common"];
   labels: Pick<
@@ -61,6 +63,7 @@ export function CreateTenantForm({
       </CardHeader>
       <CardContent className="grid gap-5 p-lg">
         <form ref={formRef} action={action} className="grid gap-5">
+          <input type="hidden" name="locale" value={locale} />
           <div className="grid gap-5 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="tenant-name">{labels.name}</Label>

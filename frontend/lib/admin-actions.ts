@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
+import { getResourceAdminCopy } from "@/lib/resource-admin-copy";
 import { isSupportedLocale, type Locale } from "@/lib/i18n";
 
 const BACKEND_BASE_URL =
@@ -104,6 +105,7 @@ export async function createTenantAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const payload = {
     name: String(formData.get("name") ?? "").trim(),
     status: String(formData.get("status") ?? "active"),
@@ -118,13 +120,14 @@ export async function createTenantAction(
   }
 
   revalidateAdminViews("tenants");
-  return { status: "success", message: "Tenant created successfully." };
+  return { status: "success", message: copy.tenants.messages.created };
 }
 
 export async function updateTenantAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const tenantId = String(formData.get("tenant_id") ?? "").trim();
   const payload = {
     name: String(formData.get("name") ?? "").trim(),
@@ -140,13 +143,14 @@ export async function updateTenantAction(
   }
 
   revalidateAdminViews("tenants");
-  return { status: "success", message: "Tenant updated successfully." };
+  return { status: "success", message: copy.tenants.messages.updated };
 }
 
 export async function deleteTenantAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const tenantId = String(formData.get("tenant_id") ?? "").trim();
   const response = await deleteAdmin(`/admin/tenants/${tenantId}`);
   if (!response.ok) {
@@ -154,13 +158,14 @@ export async function deleteTenantAction(
   }
 
   revalidateAdminViews("tenants");
-  return { status: "success", message: "Tenant deleted successfully." };
+  return { status: "success", message: copy.tenants.messages.deleted };
 }
 
 export async function createNodeAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const tagsValue = String(formData.get("tags") ?? "").trim();
   const payload = {
     name: String(formData.get("name") ?? "").trim(),
@@ -183,13 +188,14 @@ export async function createNodeAction(
   }
 
   revalidateAdminViews("nodes");
-  return { status: "success", message: "Node created successfully." };
+  return { status: "success", message: copy.nodes.messages.created };
 }
 
 export async function updateNodeAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const nodeId = String(formData.get("node_id") ?? "").trim();
   const tagsValue = String(formData.get("tags") ?? "").trim();
   const payload = {
@@ -212,13 +218,14 @@ export async function updateNodeAction(
   }
 
   revalidateAdminViews("nodes");
-  return { status: "success", message: "Node updated successfully." };
+  return { status: "success", message: copy.nodes.messages.updated };
 }
 
 export async function deleteNodeAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const nodeId = String(formData.get("node_id") ?? "").trim();
   const response = await deleteAdmin(`/admin/nodes/${nodeId}`);
   if (!response.ok) {
@@ -226,13 +233,14 @@ export async function deleteNodeAction(
   }
 
   revalidateAdminViews("nodes");
-  return { status: "success", message: "Node deleted successfully." };
+  return { status: "success", message: copy.nodes.messages.deleted };
 }
 
 export async function createApiKeyAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const scopeText = String(formData.get("scope") ?? "{}").trim() || "{}";
   let scope: Record<string, unknown>;
 
@@ -241,7 +249,7 @@ export async function createApiKeyAction(
   } catch {
     return {
       status: "error",
-      message: "Scope must be valid JSON.",
+      message: copy.apiKeys.scopeInvalidJson,
     };
   }
 
@@ -259,13 +267,14 @@ export async function createApiKeyAction(
   }
 
   revalidateAdminViews("api-keys");
-  return { status: "success", message: "API key created successfully." };
+  return { status: "success", message: copy.apiKeys.messages.created };
 }
 
 export async function updateApiKeyAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const apiKeyId = String(formData.get("api_key_id") ?? "").trim();
   const scopeText = String(formData.get("scope") ?? "{}").trim() || "{}";
   let scope: Record<string, unknown>;
@@ -275,7 +284,7 @@ export async function updateApiKeyAction(
   } catch {
     return {
       status: "error",
-      message: "Scope must be valid JSON.",
+      message: copy.apiKeys.scopeInvalidJson,
     };
   }
 
@@ -296,13 +305,14 @@ export async function updateApiKeyAction(
   }
 
   revalidateAdminViews("api-keys");
-  return { status: "success", message: "API key updated successfully." };
+  return { status: "success", message: copy.apiKeys.messages.updated };
 }
 
 export async function deleteApiKeyAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const apiKeyId = String(formData.get("api_key_id") ?? "").trim();
   const response = await deleteAdmin(`/admin/api-keys/${apiKeyId}`);
   if (!response.ok) {
@@ -310,13 +320,14 @@ export async function deleteApiKeyAction(
   }
 
   revalidateAdminViews("api-keys");
-  return { status: "success", message: "API key deleted successfully." };
+  return { status: "success", message: copy.apiKeys.messages.deleted };
 }
 
 export async function createNodeModelAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const payload = {
     node_id: String(formData.get("node_id") ?? "").trim(),
     external_model: String(formData.get("external_model") ?? "").trim(),
@@ -333,13 +344,14 @@ export async function createNodeModelAction(
   }
 
   revalidateAdminViews("models");
-  return { status: "success", message: "Model route created successfully." };
+  return { status: "success", message: copy.models.messages.created };
 }
 
 export async function updateNodeModelAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const nodeModelId = String(formData.get("node_model_id") ?? "").trim();
   const payload = {
     external_model: String(formData.get("external_model") ?? "").trim(),
@@ -356,13 +368,14 @@ export async function updateNodeModelAction(
   }
 
   revalidateAdminViews("models");
-  return { status: "success", message: "Model route updated successfully." };
+  return { status: "success", message: copy.models.messages.updated };
 }
 
 export async function deleteNodeModelAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getResourceAdminCopy(parseLocale(formData));
   const nodeModelId = String(formData.get("node_model_id") ?? "").trim();
   const response = await deleteAdmin(`/admin/node-models/${nodeModelId}`);
   if (!response.ok) {
@@ -370,7 +383,7 @@ export async function deleteNodeModelAction(
   }
 
   revalidateAdminViews("models");
-  return { status: "success", message: "Model route deleted successfully." };
+  return { status: "success", message: copy.models.messages.deleted };
 }
 
 type OpenAIOAuthAuthUrlResponse = {

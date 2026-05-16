@@ -47,6 +47,7 @@ export default async function NodesPage({
       backendUrl={overview.backendUrl}
     >
       <CreateNodeForm
+        locale={typedLocale}
         form={dictionary.forms.nodes}
         common={dictionary.forms.common}
         labels={{

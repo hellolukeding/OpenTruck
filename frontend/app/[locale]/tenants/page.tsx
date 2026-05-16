@@ -50,6 +50,7 @@ export default async function TenantsPage({
       backendUrl={overview.backendUrl}
     >
       <CreateTenantForm
+        locale={typedLocale}
         form={dictionary.forms.tenants}
         common={dictionary.forms.common}
         labels={{

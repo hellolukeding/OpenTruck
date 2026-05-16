@@ -60,6 +60,7 @@ export default async function ApiKeysPage({
       backendUrl={overview.backendUrl}
     >
       <CreateApiKeyForm
+        locale={typedLocale}
         form={dictionary.forms.apiKeys}
         common={dictionary.forms.common}
         labels={{

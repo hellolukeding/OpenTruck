@@ -22,12 +22,14 @@ import {
 } from "@/components/ui/select";
 
 export function CreateNodeModelForm({
+  locale,
   form,
   common,
   labels,
   statusLabels,
   nodes,
 }: {
+  locale: "en" | "zh-CN";
   form: DashboardDictionary["forms"]["models"];
   common: DashboardDictionary["forms"]["common"];
   labels: Pick<
@@ -71,6 +73,7 @@ export function CreateNodeModelForm({
       </CardHeader>
       <CardContent className="grid gap-5 p-lg">
         <form ref={formRef} action={action} className="grid gap-5">
+          <input type="hidden" name="locale" value={locale} />
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             <div className="grid gap-2 md:col-span-2 xl:col-span-1">
               <Label htmlFor="node-model-node">{labels.node}</Label>
