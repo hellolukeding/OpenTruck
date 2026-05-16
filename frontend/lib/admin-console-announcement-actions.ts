@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import type { ConsoleActionState } from "@/lib/admin-console-actions";
+import { getAnnouncementsPageCopy } from "@/lib/announcements-page-copy";
+import { isSupportedLocale, type Locale } from "@/lib/i18n";
 
 type ErrorPayload = {
   error?: {
@@ -28,10 +30,16 @@ function revalidateConsoleViews() {
   }
 }
 
+function parseLocale(formData: FormData): Locale {
+  const locale = String(formData.get("locale") ?? "en").trim();
+  return isSupportedLocale(locale) ? locale : "en";
+}
+
 export async function createAnnouncementAction(
   _prevState: ConsoleActionState,
   formData: FormData,
 ): Promise<ConsoleActionState> {
+  const copy = getAnnouncementsPageCopy(parseLocale(formData));
   const payload = {
     title: String(formData.get("title") ?? "").trim(),
     body: String(formData.get("body") ?? "").trim(),
@@ -48,13 +56,14 @@ export async function createAnnouncementAction(
   });
   if (!response.ok) return { status: "error", message: await parseError(response) };
   revalidateConsoleViews();
-  return { status: "success", message: "公告已创建。" };
+  return { status: "success", message: copy.actions.created };
 }
 
 export async function updateAnnouncementAction(
   _prevState: ConsoleActionState,
   formData: FormData,
 ): Promise<ConsoleActionState> {
+  const copy = getAnnouncementsPageCopy(parseLocale(formData));
   const id = String(formData.get("announcement_id") ?? "").trim();
   const payload = {
     title: String(formData.get("title") ?? "").trim(),
@@ -72,13 +81,14 @@ export async function updateAnnouncementAction(
   });
   if (!response.ok) return { status: "error", message: await parseError(response) };
   revalidateConsoleViews();
-  return { status: "success", message: "公告已更新。" };
+  return { status: "success", message: copy.actions.updated };
 }
 
 export async function deleteAnnouncementAction(
   _prevState: ConsoleActionState,
   formData: FormData,
 ): Promise<ConsoleActionState> {
+  const copy = getAnnouncementsPageCopy(parseLocale(formData));
   const id = String(formData.get("announcement_id") ?? "").trim();
   const response = await fetch(`${BACKEND_BASE_URL}/admin/announcements/${id}`, {
     method: "DELETE",
@@ -86,5 +96,5 @@ export async function deleteAnnouncementAction(
   });
   if (!response.ok) return { status: "error", message: await parseError(response) };
   revalidateConsoleViews();
-  return { status: "success", message: "公告已删除。" };
+  return { status: "success", message: copy.actions.deleted };
 }

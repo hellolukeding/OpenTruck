@@ -4,6 +4,7 @@ import { AdminAnnouncementsPage } from "@/components/admin-announcements-page";
 import { AdminShell } from "@/components/admin-shell";
 import { PaginationControls } from "@/components/pagination-controls";
 import { getAnnouncementsPage } from "@/lib/admin-console-api";
+import { getAnnouncementsPageCopy } from "@/lib/announcements-page-copy";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 
@@ -21,6 +22,7 @@ export default async function AnnouncementsPage({
 
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
+  const copy = getAnnouncementsPageCopy(typedLocale);
   const overview = await getAdminOverview();
   const page = Number(query.page ?? "1");
   const status = query.status?.trim() || undefined;
@@ -44,7 +46,7 @@ export default async function AnnouncementsPage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
-      <AdminAnnouncementsPage announcementsPage={announcementsPage} />
+      <AdminAnnouncementsPage announcementsPage={announcementsPage} copy={copy} locale={typedLocale} />
       <PaginationControls locale={typedLocale} path={path} pagination={announcementsPage.pagination} query={{ status, search }} />
     </AdminShell>
   );

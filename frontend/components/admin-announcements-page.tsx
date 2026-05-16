@@ -3,8 +3,18 @@ import { Megaphone, Pin } from "lucide-react";
 import { AdminAnnouncementForm } from "@/components/admin-announcement-form";
 import { AdminAnnouncementRowActions } from "@/components/admin-announcement-row-actions";
 import type { Announcement, PaginatedResponse } from "@/lib/admin-console-api";
+import type { AnnouncementsPageCopy } from "@/lib/announcements-page-copy";
+import type { Locale } from "@/lib/i18n";
 
-export function AdminAnnouncementsPage({ announcementsPage }: { announcementsPage: PaginatedResponse<Announcement> }) {
+export function AdminAnnouncementsPage({
+  announcementsPage,
+  copy,
+  locale,
+}: {
+  announcementsPage: PaginatedResponse<Announcement>;
+  copy: AnnouncementsPageCopy;
+  locale: Locale;
+}) {
   return (
     <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
       <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm dark:bg-surface-container-low/60">
@@ -13,20 +23,20 @@ export function AdminAnnouncementsPage({ announcementsPage }: { announcementsPag
             <Megaphone className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-[1.55rem] font-semibold text-on-surface">公告管理</h2>
-            <p className="mt-1 text-[0.9rem] text-on-surface-variant">集中维护总览公告、运营提醒和状态播报。</p>
+            <h2 className="text-[1.55rem] font-semibold text-on-surface">{copy.overview.title}</h2>
+            <p className="mt-1 text-[0.9rem] text-on-surface-variant">{copy.overview.subtitle}</p>
           </div>
         </div>
         <div className="mt-6">
-          <AdminAnnouncementForm />
+          <AdminAnnouncementForm copy={copy} locale={locale} />
         </div>
       </section>
 
       <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm dark:bg-surface-container-low/60">
         <div className="flex items-center justify-between border-b border-outline-variant/10 pb-4">
-          <h3 className="text-[1.2rem] font-semibold text-on-surface">当前公告流</h3>
+          <h3 className="text-[1.2rem] font-semibold text-on-surface">{copy.overview.streamTitle}</h3>
           <span className="rounded-full border border-outline-variant/20 px-3 py-1 text-[0.76rem] text-on-surface-variant">
-            共 {announcementsPage.pagination.total} 条
+            {copy.overview.total(announcementsPage.pagination.total)}
           </span>
         </div>
         <div className="space-y-4 pt-5">
@@ -39,10 +49,10 @@ export function AdminAnnouncementsPage({ announcementsPage }: { announcementsPag
                     <p className="text-[1rem] font-semibold text-on-surface">{item.title}</p>
                   </div>
                   <p className="mt-1 text-[0.78rem] text-on-surface-variant">
-                    {item.status} / {item.severity} / {new Date(item.created_at).toLocaleString("zh-CN", { hour12: false })}
+                    {copy.enums.status[item.status] ?? item.status} / {copy.enums.severity[item.severity] ?? item.severity} / {new Date(item.created_at).toLocaleString(copy.overview.dateLocale, { hour12: false })}
                   </p>
                 </div>
-                <AdminAnnouncementRowActions announcement={item} />
+                <AdminAnnouncementRowActions announcement={item} copy={copy} locale={locale} />
               </div>
               <p className="mt-3 whitespace-pre-wrap text-[0.9rem] leading-7 text-on-surface">{item.body}</p>
             </article>
