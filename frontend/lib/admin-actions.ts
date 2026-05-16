@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
+import { isSupportedLocale, type Locale } from "@/lib/i18n";
 
 const BACKEND_BASE_URL =
   process.env.BACKEND_BASE_URL ?? "http://127.0.0.1:8000";
@@ -56,6 +58,11 @@ async function deleteAdmin(path: string): Promise<Response> {
     method: "DELETE",
     cache: "no-store",
   });
+}
+
+function parseLocale(formData: FormData): Locale {
+  const locale = String(formData.get("locale") ?? "en").trim();
+  return isSupportedLocale(locale) ? locale : "en";
 }
 
 function revalidateAdminViews(resource: ResourceKey) {
@@ -377,6 +384,7 @@ export async function generateOpenAIOAuthUrlAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getUpstreamAccountsPageCopy(parseLocale(formData));
   const redirectUri = String(formData.get("redirect_uri") ?? "").trim();
   const proxyUrl = String(formData.get("proxy_url") ?? "").trim();
   const payload = {
@@ -394,7 +402,7 @@ export async function generateOpenAIOAuthUrlAction(
   revalidateAdminViews("upstream-accounts");
   return {
     status: "success",
-    message: "OAuth authorization link created successfully.",
+    message: copy.actions.oauthLinkCreated,
     details: {
       session_id: data.session_id,
       auth_url: data.auth_url,
@@ -408,6 +416,7 @@ export async function createUpstreamAccountFromOAuthAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getUpstreamAccountsPageCopy(parseLocale(formData));
   const payload = {
     tenant_id: String(formData.get("tenant_id") ?? "").trim(),
     session_id: String(formData.get("session_id") ?? "").trim(),
@@ -423,13 +432,14 @@ export async function createUpstreamAccountFromOAuthAction(
   }
 
   revalidateAdminViews("upstream-accounts");
-  return { status: "success", message: "Upstream account connected successfully." };
+  return { status: "success", message: copy.actions.accountConnected };
 }
 
 export async function updateUpstreamAccountAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getUpstreamAccountsPageCopy(parseLocale(formData));
   const accountId = String(formData.get("account_id") ?? "").trim();
   const tokenExpiresAt = String(formData.get("token_expires_at") ?? "").trim();
   const cooldownUntil = String(formData.get("cooldown_until") ?? "").trim();
@@ -447,13 +457,14 @@ export async function updateUpstreamAccountAction(
   }
 
   revalidateAdminViews("upstream-accounts");
-  return { status: "success", message: "Upstream account updated successfully." };
+  return { status: "success", message: copy.actions.accountUpdated };
 }
 
 export async function deleteUpstreamAccountAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getUpstreamAccountsPageCopy(parseLocale(formData));
   const accountId = String(formData.get("account_id") ?? "").trim();
   const response = await deleteAdmin(`/admin/upstream-accounts/${accountId}`);
   if (!response.ok) {
@@ -461,13 +472,14 @@ export async function deleteUpstreamAccountAction(
   }
 
   revalidateAdminViews("upstream-accounts");
-  return { status: "success", message: "Upstream account deleted successfully." };
+  return { status: "success", message: copy.actions.accountDeleted };
 }
 
 export async function refreshUpstreamAccountAction(
   _prevState: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
+  const copy = getUpstreamAccountsPageCopy(parseLocale(formData));
   const accountId = String(formData.get("account_id") ?? "").trim();
   const response = await postAdmin(`/admin/upstream-accounts/${accountId}/refresh`, {});
   if (!response.ok) {
@@ -475,5 +487,5 @@ export async function refreshUpstreamAccountAction(
   }
 
   revalidateAdminViews("upstream-accounts");
-  return { status: "success", message: "Upstream account refreshed successfully." };
+  return { status: "success", message: copy.actions.accountRefreshed };
 }

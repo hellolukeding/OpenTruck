@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import type { UpstreamAccount } from "@/lib/admin-api";
 import type { AdminActionState } from "@/lib/admin-actions";
 import { refreshUpstreamAccountAction } from "@/lib/admin-actions";
+import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 import { FormStatus } from "@/components/form-status";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,22 +32,7 @@ export function UpstreamAccountRefreshDialog({
   open,
   onOpenChange,
 }: UpstreamAccountRefreshDialogProps) {
-  const copy =
-    locale === "zh-CN"
-      ? {
-          refresh: "刷新",
-          cancel: "取消",
-          runRefresh: "立即刷新 Token",
-          refreshTitle: "刷新上游账号",
-          refreshDescription: `尝试为 ${account.name} 拉取新的 access token。`,
-        }
-      : {
-          refresh: "Refresh",
-          cancel: "Cancel",
-          runRefresh: "Refresh Token Now",
-          refreshTitle: "Refresh Upstream Account",
-          refreshDescription: `Attempt to fetch a new access token for ${account.name}.`,
-        };
+  const copy = getUpstreamAccountsPageCopy(locale).dialogs;
 
   const [refreshState, refreshAction, refreshPending] = useActionState(
     refreshUpstreamAccountAction,
@@ -69,10 +55,11 @@ export function UpstreamAccountRefreshDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{copy.refreshTitle}</DialogTitle>
-          <DialogDescription>{copy.refreshDescription}</DialogDescription>
+          <DialogDescription>{copy.refreshDescription(account.name)}</DialogDescription>
         </DialogHeader>
         <form action={refreshAction} className="grid gap-4">
           <input type="hidden" name="account_id" value={account.id} />
+          <input type="hidden" name="locale" value={locale} />
           <FormStatus status={refreshState.status} message={refreshState.message} />
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>

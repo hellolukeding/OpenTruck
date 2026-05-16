@@ -5,6 +5,7 @@ import type { UpstreamAccount } from "@/lib/admin-api";
 import type { AdminActionState } from "@/lib/admin-actions";
 import { updateUpstreamAccountAction } from "@/lib/admin-actions";
 import { toDateTimeLocal } from "@/lib/date-formatters";
+import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 import { FormStatus } from "@/components/form-status";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,22 +35,7 @@ export function UpstreamAccountEditDialog({
   open,
   onOpenChange,
 }: UpstreamAccountEditDialogProps) {
-  const copy =
-    locale === "zh-CN"
-      ? {
-          edit: "编辑",
-          save: "保存修改",
-          cancel: "取消",
-          editTitle: "编辑上游账号",
-          editDescription: "调整调度优先级、状态和时间窗口，方便运营处理账号池。",
-        }
-      : {
-          edit: "Edit",
-          save: "Save Changes",
-          cancel: "Cancel",
-          editTitle: "Edit Upstream Account",
-          editDescription: "Adjust scheduling priority, status, and time windows for account pool management.",
-        };
+  const copy = getUpstreamAccountsPageCopy(locale).dialogs;
 
   const [editState, editAction, editPending] = useActionState(updateUpstreamAccountAction, idleState);
 
@@ -73,16 +59,17 @@ export function UpstreamAccountEditDialog({
         </DialogHeader>
         <form action={editAction} className="grid gap-4">
           <input type="hidden" name="account_id" value={account.id} />
+          <input type="hidden" name="locale" value={locale} />
           <div className="grid gap-2">
-            <Label htmlFor="edit-status">Status</Label>
+            <Label htmlFor="edit-status">{copy.fields.status}</Label>
             <Input id="edit-status" name="status" defaultValue={account.status} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="edit-priority">Priority</Label>
+            <Label htmlFor="edit-priority">{copy.fields.priority}</Label>
             <Input id="edit-priority" name="priority" type="number" defaultValue={account.priority} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="edit-consecutive-failures">Consecutive Failures</Label>
+            <Label htmlFor="edit-consecutive-failures">{copy.fields.consecutiveFailures}</Label>
             <Input
               id="edit-consecutive-failures"
               name="consecutive_failures"
@@ -91,7 +78,7 @@ export function UpstreamAccountEditDialog({
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="edit-cooldown-until">Cooldown Until</Label>
+            <Label htmlFor="edit-cooldown-until">{copy.fields.cooldownUntil}</Label>
             <Input
               id="edit-cooldown-until"
               name="cooldown_until"
@@ -105,7 +92,7 @@ export function UpstreamAccountEditDialog({
               {copy.cancel}
             </Button>
             <Button type="submit" disabled={editPending}>
-              {copy.save}
+              {editPending ? copy.save : copy.save}
             </Button>
           </DialogFooter>
         </form>

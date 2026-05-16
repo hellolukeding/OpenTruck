@@ -11,12 +11,14 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { UpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 import { cn } from "@/lib/utils";
 
 const idleState: AdminActionState = { status: "idle" };
 
 interface CreateUpstreamAccountOAuthStartProps {
   locale: "en" | "zh-CN";
+  copy: UpstreamAccountsPageCopy["intake"]["start"];
   tenants: Tenant[];
   tenantId: string;
   onTenantIdChange: (id: string) => void;
@@ -25,56 +27,12 @@ interface CreateUpstreamAccountOAuthStartProps {
 
 export function CreateUpstreamAccountOAuthStart({
   locale,
+  copy,
   tenants,
   tenantId,
   onTenantIdChange,
   onGenerateSuccess,
 }: CreateUpstreamAccountOAuthStartProps) {
-  const copy =
-    locale === "zh-CN"
-      ? {
-          labels: {
-            tenant: "租户",
-            redirectUri: "回调地址",
-            proxyUrl: "代理地址",
-            authUrl: "授权链接",
-            expiresAt: "过期时间",
-          },
-          hints: {
-            redirectUri: "留空则使用后端默认回调地址",
-            proxyUrl: "可选，用于需要代理访问 OpenAI OAuth 的场景",
-          },
-          actions: {
-            generate: "生成授权链接",
-            open: "打开授权链接",
-          },
-          messages: {
-            generated: "授权链接已生成。",
-          },
-          selectTenant: "选择租户",
-        }
-      : {
-          labels: {
-            tenant: "Tenant",
-            redirectUri: "Redirect URI",
-            proxyUrl: "Proxy URL",
-            authUrl: "Authorization link",
-            expiresAt: "Expires at",
-          },
-          hints: {
-            redirectUri: "Leave blank to use the backend default callback URI",
-            proxyUrl: "Optional, for environments that need a proxy to reach OpenAI OAuth",
-          },
-          actions: {
-            generate: "Generate auth link",
-            open: "Open auth link",
-          },
-          messages: {
-            generated: "Authorization link created.",
-          },
-          selectTenant: "Select a tenant",
-        };
-
   const formRef = useRef<HTMLFormElement>(null);
   const [generateState, generateAction, generatePending] = useActionState(
     generateOpenAIOAuthUrlAction,
@@ -93,12 +51,13 @@ export function CreateUpstreamAccountOAuthStart({
 
   return (
     <form ref={formRef} action={generateAction} className="grid gap-5">
+      <input type="hidden" name="locale" value={locale} />
       <div className="grid gap-5 md:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="oauth-start-tenant">{copy.labels.tenant}</Label>
           <Select value={tenantId} onValueChange={onTenantIdChange}>
             <SelectTrigger id="oauth-start-tenant">
-              <SelectValue placeholder={copy.selectTenant} />
+              <SelectValue placeholder={copy.labels.selectTenant} />
             </SelectTrigger>
             <SelectContent>
               {tenants.map((tenant) => (
@@ -154,13 +113,13 @@ export function CreateUpstreamAccountOAuthStart({
           </div>
           <div className="grid gap-1 md:grid-cols-3">
             <div className="grid gap-1">
-              <span className="font-code-sm text-code-sm text-on-surface-variant">session_id</span>
+              <span className="font-code-sm text-code-sm text-on-surface-variant">{copy.labels.sessionId}</span>
               <span className="font-code-sm text-code-sm text-primary break-all">
                 {generateState.details.session_id}
               </span>
             </div>
             <div className="grid gap-1">
-              <span className="font-code-sm text-code-sm text-on-surface-variant">state</span>
+              <span className="font-code-sm text-code-sm text-on-surface-variant">{copy.labels.state}</span>
               <span className="font-code-sm text-code-sm text-primary break-all">
                 {generateState.details.state}
               </span>

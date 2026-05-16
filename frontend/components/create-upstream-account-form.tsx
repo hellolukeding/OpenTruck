@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreateUpstreamAccountOAuthStart } from "@/components/create-upstream-account-oauth-start";
 import { CreateUpstreamAccountOAuthComplete } from "@/components/create-upstream-account-oauth-complete";
+import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 
 export function CreateUpstreamAccountForm({
   locale,
@@ -14,28 +15,7 @@ export function CreateUpstreamAccountForm({
   locale: "en" | "zh-CN";
   tenants: Tenant[];
 }) {
-  const copy =
-    locale === "zh-CN"
-      ? {
-          eyebrow: "OAuth 接入台",
-          title: "把 Codex 上游账号纳入租户账号池。",
-          description:
-            "先生成 OpenAI OAuth 授权链接，再在拿到 code 和 state 后完成账号落库。这个流程贴近 sub2api 的后台接入方式。",
-          tabs: {
-            start: "1. 生成授权链接",
-            complete: "2. 完成账号接入",
-          },
-        }
-      : {
-          eyebrow: "OAuth intake",
-          title: "Bring Codex upstream identities into the tenant pool.",
-          description:
-            "Generate an OpenAI OAuth authorization link first, then finalize the account after you have the callback code and state. This mirrors the sub2api operator flow.",
-          tabs: {
-            start: "1. Generate auth link",
-            complete: "2. Complete account intake",
-          },
-        };
+  const copy = getUpstreamAccountsPageCopy(locale).intake;
 
   const [tenantId, setTenantId] = useState(tenants[0]?.id ?? "");
   const [accountStatus, setAccountStatus] = useState("active");
@@ -67,6 +47,7 @@ export function CreateUpstreamAccountForm({
           <TabsContent value="start">
             <CreateUpstreamAccountOAuthStart
               locale={locale}
+              copy={copy.start}
               tenants={tenants}
               tenantId={tenantId}
               onTenantIdChange={setTenantId}
@@ -77,6 +58,7 @@ export function CreateUpstreamAccountForm({
           <TabsContent value="complete">
             <CreateUpstreamAccountOAuthComplete
               locale={locale}
+              copy={copy.complete}
               tenants={tenants}
               tenantId={tenantId}
               onTenantIdChange={setTenantId}

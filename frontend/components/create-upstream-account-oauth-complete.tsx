@@ -10,11 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { UpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 
 const idleState: AdminActionState = { status: "idle" };
 
 interface CreateUpstreamAccountOAuthCompleteProps {
   locale: "en" | "zh-CN";
+  copy: UpstreamAccountsPageCopy["intake"]["complete"];
   tenants: Tenant[];
   tenantId: string;
   onTenantIdChange: (id: string) => void;
@@ -24,67 +26,13 @@ interface CreateUpstreamAccountOAuthCompleteProps {
 
 export function CreateUpstreamAccountOAuthComplete({
   locale,
+  copy,
   tenants,
   tenantId,
   onTenantIdChange,
   accountStatus,
   onAccountStatusChange,
 }: CreateUpstreamAccountOAuthCompleteProps) {
-  const copy =
-    locale === "zh-CN"
-      ? {
-          labels: {
-            tenant: "租户",
-            sessionId: "Session ID",
-            state: "State",
-            code: "授权码",
-            name: "账号名称",
-            status: "状态",
-          },
-          hints: {
-            code: "把浏览器回调中的 code 粘贴到这里",
-            state: "使用第一步生成的 state",
-            sessionId: "使用第一步返回的 session_id",
-          },
-          actions: {
-            create: "完成接入",
-          },
-          status: {
-            active: "活跃",
-            disabled: "禁用",
-          },
-          messages: {
-            created: "上游账号已接入。",
-          },
-          selectTenant: "选择租户",
-        }
-      : {
-          labels: {
-            tenant: "Tenant",
-            sessionId: "Session ID",
-            state: "State",
-            code: "Authorization code",
-            name: "Account name",
-            status: "Status",
-          },
-          hints: {
-            code: "Paste the callback code from the browser here",
-            state: "Use the state returned from step one",
-            sessionId: "Use the session_id returned from step one",
-          },
-          actions: {
-            create: "Complete intake",
-          },
-          status: {
-            active: "Active",
-            disabled: "Disabled",
-          },
-          messages: {
-            created: "Upstream account connected.",
-          },
-          selectTenant: "Select a tenant",
-        };
-
   const formRef = useRef<HTMLFormElement>(null);
   const [completeState, completeAction, completePending] = useActionState(
     createUpstreamAccountFromOAuthAction,
@@ -100,12 +48,13 @@ export function CreateUpstreamAccountOAuthComplete({
 
   return (
     <form ref={formRef} action={completeAction} className="grid gap-5">
+      <input type="hidden" name="locale" value={locale} />
       <div className="grid gap-5 md:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="oauth-complete-tenant">{copy.labels.tenant}</Label>
           <Select value={tenantId} onValueChange={onTenantIdChange}>
             <SelectTrigger id="oauth-complete-tenant">
-              <SelectValue placeholder={copy.selectTenant} />
+              <SelectValue placeholder={copy.labels.selectTenant} />
             </SelectTrigger>
             <SelectContent>
               {tenants.map((tenant) => (

@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import type { UpstreamAccount } from "@/lib/admin-api";
 import type { AdminActionState } from "@/lib/admin-actions";
 import { deleteUpstreamAccountAction } from "@/lib/admin-actions";
+import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 import { FormStatus } from "@/components/form-status";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,22 +32,7 @@ export function UpstreamAccountDeleteDialog({
   open,
   onOpenChange,
 }: UpstreamAccountDeleteDialogProps) {
-  const copy =
-    locale === "zh-CN"
-      ? {
-          remove: "删除",
-          cancel: "取消",
-          confirmDelete: "确认删除",
-          deleteTitle: "删除上游账号",
-          deleteDescription: `删除后将把 ${account.name} 从租户账号池中移除。`,
-        }
-      : {
-          remove: "Delete",
-          cancel: "Cancel",
-          confirmDelete: "Confirm Delete",
-          deleteTitle: "Delete Upstream Account",
-          deleteDescription: `This will remove ${account.name} from the tenant account pool.`,
-        };
+  const copy = getUpstreamAccountsPageCopy(locale).dialogs;
 
   const [deleteState, deleteAction, deletePending] = useActionState(
     deleteUpstreamAccountAction,
@@ -63,16 +49,17 @@ export function UpstreamAccountDeleteDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" type="button" className="text-error hover:text-error">
-          {copy.remove}
+          {copy.delete}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{copy.deleteTitle}</DialogTitle>
-          <DialogDescription>{copy.deleteDescription}</DialogDescription>
+          <DialogDescription>{copy.deleteDescription(account.name)}</DialogDescription>
         </DialogHeader>
         <form action={deleteAction} className="grid gap-4">
           <input type="hidden" name="account_id" value={account.id} />
+          <input type="hidden" name="locale" value={locale} />
           <FormStatus status={deleteState.status} message={deleteState.message} />
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
