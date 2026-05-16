@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { getDashboardOverview } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
+import { getOverviewPageCopy } from "@/lib/overview-page-copy";
 
 export default async function LocalePage({
   params,
@@ -19,6 +20,7 @@ export default async function LocalePage({
 
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
+  const copy = getOverviewPageCopy(typedLocale);
   const [overview, dashboard] = await Promise.all([
     getAdminOverview(),
     getDashboardOverview().catch(() => ({
@@ -42,7 +44,7 @@ export default async function LocalePage({
       backendReachable={overview.backendReachable}
       backendUrl={overview.backendUrl}
     >
-      <AdminOverview {...overview} dashboard={dashboard} dictionary={dictionary} />
+      <AdminOverview {...overview} copy={copy} dashboard={dashboard} dictionary={dictionary} />
     </AdminShell>
   );
 }

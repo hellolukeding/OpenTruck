@@ -6,6 +6,7 @@ import type { DashboardDictionary } from "@/lib/i18n";
 import { AdminOverviewAnalysis } from "@/components/admin-overview-analysis";
 import { AdminOverviewNotices } from "@/components/admin-overview-notices";
 import { AdminOverviewStats } from "@/components/admin-overview-stats";
+import type { OverviewPageCopy } from "@/lib/overview-page-copy";
 
 type AdminOverviewProps = {
   tenants: Tenant[];
@@ -14,6 +15,7 @@ type AdminOverviewProps = {
   nodeModels: NodeModel[];
   dashboard: DashboardOverviewData;
   dictionary: DashboardDictionary;
+  copy: OverviewPageCopy;
 };
 
 export function AdminOverview({
@@ -23,23 +25,24 @@ export function AdminOverview({
   nodeModels,
   dashboard,
   dictionary,
+  copy,
 }: AdminOverviewProps) {
   const totalQuota = parseNumber(dashboard.total_balance);
   const totalSpend = dashboard.usage_trend.reduce((sum, item) => sum + parseNumber(item.spend), 0);
   const totalRequests = dashboard.usage_trend.reduce((sum, item) => sum + item.requests, 0);
   const avgRpm = totalRequests / Math.max(dashboard.usage_trend.length, 1);
   const avgTpm = average(tenants.map((item) => item.rate_limit_tpm));
-  const greeting = getGreeting();
+  const greeting = getGreeting(copy);
 
   const stats = [
-    { label: "当前余额", value: money(totalQuota), icon: Wallet, accent: "text-[#12a594]", action: "充值" },
-    { label: "历史消耗", value: money(totalSpend), icon: ChartColumn, accent: "text-[#7b7af7]" },
-    { label: "请求次数", value: String(totalRequests), icon: Rocket, accent: "text-[#22b85a]" },
-    { label: "统计次数", value: String(dashboard.tenant_count), icon: Hash, accent: "text-[#0ea5a7]" },
-    { label: "统计额度", value: money(totalQuota), icon: Coins, accent: "text-[#f59e0b]" },
-    { label: "统计Tokens", value: String(dashboard.recent_failed_requests), icon: Database, accent: "text-[#ef476f]" },
-    { label: "平均RPM", value: avgRpm.toFixed(3), icon: Gauge, accent: "text-[#2aa8ff]" },
-    { label: "平均TPM", value: String(Math.round(avgTpm)), icon: Cpu, accent: "text-[#ff7a1a]" },
+    { label: copy.stats.balance, value: money(totalQuota), icon: Wallet, accent: "text-[#12a594]", action: copy.stats.recharge },
+    { label: copy.stats.spend, value: money(totalSpend), icon: ChartColumn, accent: "text-[#7b7af7]" },
+    { label: copy.stats.requests, value: String(totalRequests), icon: Rocket, accent: "text-[#22b85a]" },
+    { label: copy.stats.tenantCount, value: String(dashboard.tenant_count), icon: Hash, accent: "text-[#0ea5a7]" },
+    { label: copy.stats.quota, value: money(totalQuota), icon: Coins, accent: "text-[#f59e0b]" },
+    { label: copy.stats.failedRequests, value: String(dashboard.recent_failed_requests), icon: Database, accent: "text-[#ef476f]" },
+    { label: copy.stats.avgRpm, value: avgRpm.toFixed(3), icon: Gauge, accent: "text-[#2aa8ff]" },
+    { label: copy.stats.avgTpm, value: String(Math.round(avgTpm)), icon: Cpu, accent: "text-[#ff7a1a]" },
   ];
 
   return (
@@ -72,22 +75,21 @@ export function AdminOverview({
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <AdminOverviewNotices
-          title="系统公告"
-          chip="显示最新20条"
+          copy={copy.notices}
           items={dashboard.notices}
         />
         <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
           <div className="flex items-center gap-3 border-b border-outline-variant/10 px-6 py-5">
             <SunMedium className="h-5 w-5 text-primary" />
-            <h2 className="text-[1.25rem] font-semibold text-on-surface">系统状态</h2>
+            <h2 className="text-[1.25rem] font-semibold text-on-surface">{copy.status.title}</h2>
           </div>
           <div className="space-y-4 px-6 py-6">
-            <StatusRow label="健康节点" value={`${nodes.filter((item) => item.health_status === "ok").length}/${nodes.length || 0}`} />
-            <StatusRow label="活跃密钥" value={String(dashboard.active_api_keys || apiKeys.filter((item) => item.status === "active").length)} />
-            <StatusRow label="已发布模型" value={String(dashboard.published_models || new Set(nodeModels.map((item) => item.public_model)).size)} />
-            <StatusRow label="租户数" value={String(dashboard.tenant_count || tenants.length)} />
+            <StatusRow label={copy.status.healthyNodes} value={`${nodes.filter((item) => item.health_status === "ok").length}/${nodes.length || 0}`} />
+            <StatusRow label={copy.status.activeKeys} value={String(dashboard.active_api_keys || apiKeys.filter((item) => item.status === "active").length)} />
+            <StatusRow label={copy.status.publishedModels} value={String(dashboard.published_models || new Set(nodeModels.map((item) => item.public_model)).size)} />
+            <StatusRow label={copy.status.tenants} value={String(dashboard.tenant_count || tenants.length)} />
             <div className="rounded-[18px] border border-outline-variant/20 bg-surface-container-low px-4 py-4 text-[0.82rem] leading-6 text-on-surface-variant dark:bg-surface-container">
-              当前总览已接入真实近 7 日 usage、余额、失败请求和公告流。下一步会继续补模型维度排行与更细的 tokens 指标。
+              {copy.status.summary}
             </div>
           </div>
         </section>
@@ -105,7 +107,7 @@ function StatusRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function getGreeting() {
+function getGreeting(copy: OverviewPageCopy) {
   const hour = Number(
     new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
@@ -113,10 +115,10 @@ function getGreeting() {
       timeZone: "Asia/Shanghai",
     }).format(new Date()),
   );
-  if (hour < 6) return "凌晨好";
-  if (hour < 12) return "早上好";
-  if (hour < 18) return "中午好";
-  return "晚上好";
+  if (hour < 6) return copy.greeting.lateNight;
+  if (hour < 12) return copy.greeting.morning;
+  if (hour < 18) return copy.greeting.noon;
+  return copy.greeting.evening;
 }
 
 function parseNumber(value: string) {
