@@ -16,6 +16,8 @@ export function AdminLogsPage({
     status?: string;
     model?: string;
     requestKind?: string;
+    startAt?: string;
+    endAt?: string;
   };
 }) {
   const totalSpend = logsPage.items.reduce((sum, item) => sum + Number(item.quota_delta), 0);
@@ -35,8 +37,8 @@ export function AdminLogsPage({
 
       <div className="space-y-5 px-5 py-5">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <InputLike icon={<CalendarDays className="h-4 w-4" />} label="年 / 月 / 日  --:--" />
-          <InputLike icon={<CalendarDays className="h-4 w-4" />} label="年 / 月 / 日  --:--" />
+          <InputLike icon={<CalendarDays className="h-4 w-4" />} label={query.startAt || "年 / 月 / 日  --:--"} />
+          <InputLike icon={<CalendarDays className="h-4 w-4" />} label={query.endAt || "年 / 月 / 日  --:--"} />
           <InputLike icon={<Search className="h-4 w-4" />} label={query.search || "令牌名称"} />
           <InputLike icon={<Search className="h-4 w-4" />} label={query.model || "模型名称"} />
           <InputLike icon={<Search className="h-4 w-4" />} label={query.requestKind || "请求类型"} />

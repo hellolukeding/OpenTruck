@@ -5,6 +5,7 @@ import { DeveloperApiKeys, DeveloperTopModels } from "@/components/developer-ana
 import { DeveloperStats, DeveloperUsageChart } from "@/components/developer-dashboard";
 import { DeveloperFooter } from "@/components/developer-footer";
 import { DeveloperSidebar } from "@/components/developer-sidebar";
+import { DeveloperToolbar } from "@/components/developer-toolbar";
 import { getDashboardOverview, getGatewayLogsPage, getWalletOverview } from "@/lib/admin-console-api";
 import { getAdminOverview, getApiKeysPage, getNodeModelsPage } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
@@ -43,10 +44,9 @@ export default async function DeveloperPage({
   ]);
 
   const stats = buildStats(dashboard, wallet, typedLocale);
-  const chart = buildUsageChart(dashboard);
+  const chart = buildUsageChart(dashboard, typedLocale);
   const newKeyHref = `/${typedLocale}/api-keys#new-api-key`;
   const logsHref = `/${typedLocale}/logs`;
-  const walletHref = `/${typedLocale}/wallet`;
   const keys = (apiKeysPage?.items ?? []).map((item) => ({
     id: item.id,
     name: item.name,
@@ -65,31 +65,12 @@ export default async function DeveloperPage({
       />
 
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-md border-b border-outline-variant/30 h-16 px-gutter flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="md:hidden flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary font-bold">terminal</span>
-            </div>
-            <div className="relative group">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/50">search</span>
-              <input
-                className="pl-10 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg font-body-sm text-body-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 w-64 md:w-96 transition-all"
-                placeholder="Search usage, keys, or endpoints..."
-                type="text"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-md">
-            <Link className="relative p-2 text-on-surface-variant hover:text-primary transition-colors" href={`/${typedLocale}/announcements`}>
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />
-            </Link>
-            <Link className="flex items-center gap-2 px-4 py-1.5 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-all active:scale-95" href={newKeyHref}>
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              <span>Generate New Key</span>
-            </Link>
-          </div>
-        </header>
+        <DeveloperToolbar
+          locale={typedLocale}
+          logsHref={logsHref}
+          newKeyHref={newKeyHref}
+          notices={dashboard?.notices ?? []}
+        />
 
         <div className="p-gutter md:p-margin max-w-max-width mx-auto w-full space-y-lg">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-md">
@@ -177,13 +158,17 @@ function buildStats(
   ];
 }
 
-function buildUsageChart(dashboard: Awaited<ReturnType<typeof getDashboardOverview>> | null) {
+function buildUsageChart(
+  dashboard: Awaited<ReturnType<typeof getDashboardOverview>> | null,
+  locale: string,
+) {
   const points = dashboard?.usage_trend ?? [];
   return points.map((item, index) => ({
     label: new Date(item.bucket).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     requests: item.requests,
     spend: Number(item.spend),
     highlight: index === points.length - 1,
+    href: buildDayLogHref(locale, item.bucket),
   }));
 }
 
@@ -224,6 +209,12 @@ function buildTopModels(
 
 function buildLogHref(locale: string, model: string) {
   return `/${locale}/logs?model=${encodeURIComponent(model)}`;
+}
+
+function buildDayLogHref(locale: string, bucket: string) {
+  const startAt = `${bucket}T00:00:00`;
+  const endAt = `${bucket}T23:59:59`;
+  return `/${locale}/logs?startAt=${encodeURIComponent(startAt)}&endAt=${encodeURIComponent(endAt)}`;
 }
 
 function formatMoney(value: string | number) {

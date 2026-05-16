@@ -147,7 +147,7 @@
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
 5. 将新增页面的多语言文案整合到 `i18n` 字典中
 6. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
-7. 把 Developer Console 的搜索框、图表和通知流继续接成更细的真实交互，而不只停留在入口跳转
+7. 继续把 Developer Console 的日志分析、通知查看和搜索体验做深，例如更细的筛选面板与公告详情联动
 
 ### 2026-05-15 — 按 design 文件对齐公共页面视觉
 
@@ -231,6 +231,10 @@
 - 已将商家控制台胶囊子导航接成真实控制台路由，不再是静态按钮，现可直接跳到总览、令牌、钱包、日志、工单和上游账号页
 - 已将商家控制台 Hero、Key 卡片、收藏商家卡片和模型列表中的主要操作入口接成真实跳转，可前往新建 API Key、筛选 API Key、查看上游账号与按模型筛选日志
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证商家控制台联动入口全部通过
+- 已为 Developer Console 新增独立 `developer-toolbar.tsx`，将顶部搜索框接成真实日志搜索表单，并将通知按钮改成公告流下拉
+- 已为 Developer Console 的使用趋势图补充按天深链，现在点击任意日期柱子会带 `startAt / endAt` 参数跳转到当天日志
+- 已为日志页与日志筛选条补齐 `startAt / endAt` 参数承接，确保从 Developer Console 进入后的筛选状态能够继续分页和重置
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Developer Console 搜索框、图表深链和通知流交互全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 

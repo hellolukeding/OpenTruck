@@ -7,6 +7,8 @@ type Props = {
     status?: string;
     model?: string;
     requestKind?: string;
+    startAt?: string;
+    endAt?: string;
   };
 };
 
@@ -14,6 +16,8 @@ export function AdminLogsFilters({ path, query }: Props) {
   return (
     <form action={path} className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.1fr_0.8fr_0.8fr_auto_auto]">
       <InputField name="search" defaultValue={query.search} placeholder="按 key、模型、response id 搜索" />
+      <InputField name="startAt" defaultValue={query.startAt} placeholder="开始时间 ISO" />
+      <InputField name="endAt" defaultValue={query.endAt} placeholder="结束时间 ISO" />
       <InputField name="model" defaultValue={query.model} placeholder="模型名称" />
       <InputField name="requestKind" defaultValue={query.requestKind} placeholder="请求类型" />
       <select

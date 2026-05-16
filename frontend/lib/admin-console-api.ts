@@ -219,6 +219,8 @@ type ConsoleQuery = {
   priority?: string;
   search?: string;
   ticketId?: string;
+  startAt?: string;
+  endAt?: string;
   page?: number;
   pageSize?: number;
   sortBy?: string;
@@ -246,6 +248,8 @@ function buildUrl(path: string, query: ConsoleQuery = {}) {
   if (query.priority) params.set("priority", query.priority);
   if (query.search) params.set("search", query.search);
   if (query.ticketId) params.set("ticket_id", query.ticketId);
+  if (query.startAt) params.set("start_at", query.startAt);
+  if (query.endAt) params.set("end_at", query.endAt);
   if (query.page) params.set("page", String(query.page));
   if (query.pageSize) params.set("page_size", String(query.pageSize));
   if (query.sortBy) params.set("sort_by", query.sortBy);

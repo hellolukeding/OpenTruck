@@ -21,6 +21,8 @@ export default async function LogsPage({
     status?: string;
     model?: string;
     requestKind?: string;
+    startAt?: string;
+    endAt?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -38,6 +40,8 @@ export default async function LogsPage({
   const status = query.status?.trim() || undefined;
   const model = query.model?.trim() || undefined;
   const requestKind = query.requestKind?.trim() || undefined;
+  const startAt = query.startAt?.trim() || undefined;
+  const endAt = query.endAt?.trim() || undefined;
   const logsPage = await getGatewayLogsPage({
     page: Number.isFinite(page) && page > 0 ? page : 1,
     pageSize: 12,
@@ -45,6 +49,8 @@ export default async function LogsPage({
     status,
     model,
     requestKind,
+    startAt,
+    endAt,
   }).catch(() => ({
     items: [],
     pagination: {
@@ -67,13 +73,13 @@ export default async function LogsPage({
       <AdminLogsPage
         logsPage={logsPage}
         path={path}
-        query={{ search, status, model, requestKind }}
+        query={{ search, status, model, requestKind, startAt, endAt }}
       />
       <PaginationControls
         locale={typedLocale}
         path={path}
         pagination={logsPage.pagination}
-        query={{ search, status, model, requestKind }}
+        query={{ search, status, model, requestKind, startAt, endAt }}
       />
     </AdminShell>
   );

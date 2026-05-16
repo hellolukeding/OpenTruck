@@ -18,6 +18,7 @@ type DeveloperUsageBar = {
   requests: number;
   spend: number;
   highlight?: boolean;
+  href?: string;
 };
 
 export function DeveloperStats({ cards }: { cards: DeveloperStatCard[] }) {
@@ -73,23 +74,35 @@ export function DeveloperUsageChart({ points }: { points: DeveloperUsageBar[] })
       </div>
       <div className="p-lg">
         <div className="h-64 flex items-end justify-between gap-4 px-md">
-          {points.map((day) => (
-            <div key={day.label} className="flex-1 flex flex-col justify-end items-center group">
-              <div
-                className={`mt-0.5 w-full rounded-t transition-all group-hover:bg-primary ${
-                  day.highlight ? "bg-primary" : "bg-on-surface"
-                }`}
-                style={{ height: `${Math.max((day.requests / maxRequests) * 100, 8)}%` }}
-              />
-              <div
-                className="mt-0.5 w-full rounded-t bg-tertiary-container transition-all"
-                style={{ height: `${Math.max((day.spend / maxSpend) * 28, day.spend > 0 ? 8 : 0)}%` }}
-              />
-              <span className={`mt-sm font-label-md text-label-md ${day.highlight ? "text-primary font-bold" : "text-secondary"}`}>
-                {day.label}
-              </span>
-            </div>
-          ))}
+          {points.map((day) => {
+            const content = (
+              <div className="flex-1 flex flex-col justify-end items-center group">
+                <div
+                  className={`mt-0.5 w-full rounded-t transition-all group-hover:bg-primary ${
+                    day.highlight ? "bg-primary" : "bg-on-surface"
+                  }`}
+                  style={{ height: `${Math.max((day.requests / maxRequests) * 100, 8)}%` }}
+                />
+                <div
+                  className="mt-0.5 w-full rounded-t bg-tertiary-container transition-all"
+                  style={{ height: `${Math.max((day.spend / maxSpend) * 28, day.spend > 0 ? 8 : 0)}%` }}
+                />
+                <span className={`mt-sm font-label-md text-label-md ${day.highlight ? "text-primary font-bold" : "text-secondary"}`}>
+                  {day.label}
+                </span>
+              </div>
+            );
+
+            return day.href ? (
+              <Link key={day.label} className="flex-1" href={day.href}>
+                {content}
+              </Link>
+            ) : (
+              <div key={day.label} className="flex-1">
+                {content}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
