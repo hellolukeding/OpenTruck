@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 from app.core.settings import settings
 from app.db.base import Base
 from app.models import (
+    announcement,
     api_key,
     gateway_usage_ledger,
     node,

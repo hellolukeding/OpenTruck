@@ -1,9 +1,11 @@
 import { Megaphone } from "lucide-react";
 
+import type { DashboardNotice } from "@/lib/admin-console-api";
+
 type Props = {
   title: string;
   chip: string;
-  items: string[];
+  items: DashboardNotice[];
 };
 
 export function AdminOverviewNotices({ title, chip, items }: Props) {
@@ -19,16 +21,17 @@ export function AdminOverviewNotices({ title, chip, items }: Props) {
       <div className="space-y-0">
         {items.map((item, index) => (
           <article
-            key={`${index}-${item.slice(0, 12)}`}
+            key={item.id}
             className="border-t border-outline-variant/10 px-6 py-6 first:border-t-0"
           >
             <div className="flex gap-3">
-              <span className="mt-1 h-3 w-3 rounded-full bg-[#64748b]" />
+              <span className={`mt-1 h-3 w-3 rounded-full ${getDotColor(item.severity)}`} />
               <div>
                 <p className="text-[0.86rem] text-on-surface-variant">
-                  {index + 1} 周前 2026-05-0{Math.min(index + 3, 9)} 19:16
+                  {item.is_pinned ? "置顶公告" : `第 ${index + 1} 条`} · {formatNoticeTime(item.created_at)}
                 </p>
-                <p className="mt-2 text-[1rem] leading-8 text-on-surface">{item}</p>
+                <p className="mt-2 text-[1rem] font-semibold leading-7 text-on-surface">{item.title}</p>
+                <p className="mt-2 text-[0.96rem] leading-8 text-on-surface">{item.body}</p>
               </div>
             </div>
           </article>
@@ -36,4 +39,15 @@ export function AdminOverviewNotices({ title, chip, items }: Props) {
       </div>
     </section>
   );
+}
+
+function formatNoticeTime(value: string) {
+  return new Date(value).toLocaleString("zh-CN", { hour12: false });
+}
+
+function getDotColor(severity: string) {
+  if (severity === "success") return "bg-[#059669]";
+  if (severity === "warning") return "bg-[#d97706]";
+  if (severity === "error") return "bg-[#dc2626]";
+  return "bg-[#64748b]";
 }

@@ -30,6 +30,7 @@ export default async function LocalePage({
       recent_failed_requests: 0,
       metrics: [],
       usage_trend: [],
+      notices: [],
     })),
   ]);
 

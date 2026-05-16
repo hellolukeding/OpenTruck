@@ -8,13 +8,14 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
+from app.models.announcement import Announcement
 from app.models.api_key import ApiKey
 from app.models.common import utc_now
 from app.models.gateway_usage_ledger import GatewayUsageLedger
 from app.models.node_model import NodeModel
 from app.models.tenant import Tenant
 from app.models.upstream_account import UpstreamAccount
-from app.schemas.dashboard import DashboardMetric, DashboardOverviewRead, DashboardUsagePoint
+from app.schemas.dashboard import DashboardMetric, DashboardNotice, DashboardOverviewRead, DashboardUsagePoint
 
 
 router = APIRouter(prefix="/dashboard", tags=["admin-dashboard"])
@@ -58,6 +59,14 @@ def get_dashboard_overview(db: Session = Depends(get_db)) -> DashboardOverviewRe
         DashboardUsagePoint(bucket=row.bucket, requests=row.requests, spend=row.spend)
         for row in trend_rows
     ]
+    notices = list(
+        db.scalars(
+            select(Announcement)
+            .where(Announcement.status == "published")
+            .order_by(Announcement.is_pinned.desc(), Announcement.sort_order.asc(), Announcement.created_at.desc())
+            .limit(20)
+        ).all()
+    )
 
     return DashboardOverviewRead(
         tenant_count=tenant_count,
@@ -68,4 +77,15 @@ def get_dashboard_overview(db: Session = Depends(get_db)) -> DashboardOverviewRe
         recent_failed_requests=recent_failed_requests,
         metrics=metrics,
         usage_trend=usage_trend,
+        notices=[
+            DashboardNotice(
+                id=str(item.id),
+                title=item.title,
+                body=item.body,
+                severity=item.severity,
+                is_pinned=item.is_pinned,
+                created_at=item.created_at,
+            )
+            for item in notices
+        ],
     )

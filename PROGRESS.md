@@ -208,6 +208,11 @@
 - 已为充值单列表补充订单状态更新表单，在手动入账之外也能维护订单处理中与取消状态
 - 已将钱包相关 server action 从 `admin-console-actions.ts` 中拆分到 `admin-console-wallet-actions.ts`，继续满足前端单文件不超过 300 行的约束
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证套餐下单、订单状态流转与钱包前端改造全部通过
+- 已新增 `announcements` 公告表，并通过 `20260515_0008_announcements` 迁移写入首批系统公告 seed 数据
+- 已新增 `/admin/announcements` 公告 CRUD 接口，为后续公告管理页和运营后台提供正式 API 入口
+- 已将 `/admin/dashboard` 扩展为返回真实公告流，总览页不再依赖硬编码公告数组
+- 已将控制台总览页的“系统公告”卡片切到真实后端数据，支持置顶、严重级别与真实发布时间展示
+- 已通过 `make check`、`alembic upgrade head` 与 `pnpm --dir frontend build` 验证公告系统完整接入前后端
 
 ### 2026-05-15 — 前端布局与性能优化
 

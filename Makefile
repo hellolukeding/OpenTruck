@@ -13,6 +13,7 @@ check:
 	test -f docs/OPENTRUCK_MVP_BLUEPRINT.md
 	python3 -m py_compile \
 		backend/app/main.py \
+		backend/app/api/routes/admin_announcements.py \
 		backend/app/api/deps.py \
 		backend/app/api/utils.py \
 		backend/app/api/routes/health.py \
@@ -34,6 +35,7 @@ check:
 		backend/app/core/settings.py \
 		backend/app/db/base.py \
 		backend/app/db/session.py \
+		backend/app/models/announcement.py \
 		backend/app/models/common.py \
 		backend/app/models/tenant.py \
 		backend/app/models/api_key.py \
@@ -52,6 +54,7 @@ check:
 		backend/app/services/openai_compat.py \
 		backend/app/services/openai_oauth.py \
 		backend/app/services/security.py \
+		backend/app/schemas/announcement.py \
 		backend/app/schemas/dashboard.py \
 		backend/app/schemas/logs.py \
 		backend/app/schemas/payment_catalog.py \
@@ -74,4 +77,5 @@ check:
 		backend/alembic/versions/20260512_0004_gateway_usage_ledger.py \
 		backend/alembic/versions/20260515_0005_wallet_and_support.py \
 		backend/alembic/versions/20260515_0006_wallet_catalog.py \
-		backend/alembic/versions/20260515_0007_support_ticket_messages.py
+		backend/alembic/versions/20260515_0007_support_ticket_messages.py \
+		backend/alembic/versions/20260515_0008_announcements.py

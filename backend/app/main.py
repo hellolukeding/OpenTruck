@@ -3,6 +3,7 @@ from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.api.routes.admin_announcements import router as admin_announcements_router
 from app.api.routes.admin_payment_channels import router as admin_payment_channels_router
 from app.api.routes.admin_payment_plans import router as admin_payment_plans_router
 from app.api.routes.admin_dashboard import router as admin_dashboard_router
@@ -25,6 +26,7 @@ app.include_router(health_router)
 app.include_router(models_router, prefix="/v1")
 app.include_router(gateway_router)
 app.include_router(admin_dashboard_router, prefix="/admin")
+app.include_router(admin_announcements_router, prefix="/admin")
 app.include_router(admin_payment_channels_router, prefix="/admin")
 app.include_router(admin_payment_plans_router, prefix="/admin")
 app.include_router(admin_tenants_router, prefix="/admin")

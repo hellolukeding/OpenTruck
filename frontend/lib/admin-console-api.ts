@@ -21,6 +21,15 @@ export type DashboardUsagePoint = {
   spend: string;
 };
 
+export type DashboardNotice = {
+  id: string;
+  title: string;
+  body: string;
+  severity: string;
+  is_pinned: boolean;
+  created_at: string;
+};
+
 export type DashboardOverviewData = {
   tenant_count: number;
   active_api_keys: number;
@@ -30,6 +39,7 @@ export type DashboardOverviewData = {
   recent_failed_requests: number;
   metrics: DashboardMetric[];
   usage_trend: DashboardUsagePoint[];
+  notices: DashboardNotice[];
 };
 
 export type WalletLedgerEntry = {

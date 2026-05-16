@@ -42,13 +42,6 @@ export function AdminOverview({
     { label: "平均TPM", value: String(Math.round(avgTpm)), icon: Cpu, accent: "text-[#ff7a1a]" },
   ];
 
-  const notices = [
-    "每日商家推荐：猫佬API Claude Max 特惠 Max 临时特惠渠道，可外接百分百真实 cctest 100分。",
-    "每日商家推荐 AKAClaude 专注供应 Claude 系列模型，专注、稳定、物美价廉。",
-    "今晚会更新一个版本，预计会有 1 分钟左右短暂卡顿，感谢理解。",
-    "智能路由系统正在持续优化，如果遇到断流或疑难问题，可尝试重新生成商户 Key。",
-  ];
-
   return (
     <div className="space-y-6">
       <section className="flex items-start justify-between gap-4 rounded-[24px] border border-transparent px-1 pt-2 pb-6">
@@ -81,7 +74,7 @@ export function AdminOverview({
         <AdminOverviewNotices
           title="系统公告"
           chip="显示最新20条"
-          items={notices}
+          items={dashboard.notices}
         />
         <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
           <div className="flex items-center gap-3 border-b border-outline-variant/10 px-6 py-5">
@@ -94,7 +87,7 @@ export function AdminOverview({
             <StatusRow label="已发布模型" value={String(dashboard.published_models || new Set(nodeModels.map((item) => item.public_model)).size)} />
             <StatusRow label="租户数" value={String(dashboard.tenant_count || tenants.length)} />
             <div className="rounded-[18px] border border-outline-variant/20 bg-surface-container-low px-4 py-4 text-[0.82rem] leading-6 text-on-surface-variant dark:bg-surface-container">
-              当前总览已接入真实近 7 日 usage、余额与失败请求统计。下一步会继续补公告流、模型维度排行和更细的 tokens 指标。
+              当前总览已接入真实近 7 日 usage、余额、失败请求和公告流。下一步会继续补模型维度排行与更细的 tokens 指标。
             </div>
           </div>
         </section>

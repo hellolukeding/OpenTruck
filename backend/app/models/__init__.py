@@ -1,3 +1,4 @@
+from app.models.announcement import Announcement
 from app.models.api_key import ApiKey
 from app.models.gateway_usage_ledger import GatewayUsageLedger
 from app.models.node import Node
@@ -13,6 +14,7 @@ from app.models.upstream_account import UpstreamAccount
 from app.models.wallet_ledger import WalletLedger
 
 __all__ = [
+    "Announcement",
     "ApiKey",
     "GatewayUsageLedger",
     "Node",
