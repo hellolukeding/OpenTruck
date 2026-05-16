@@ -1,19 +1,21 @@
 "use client";
 
-const activeKeys = [
-  { name: "Production-Cluster-A", prefix: "tk_82k", suffix: "92xs", lastUsed: "2 mins ago", status: "Active" as const },
-  { name: "Staging-Sandbox", prefix: "tk_j2l", suffix: "45pq", lastUsed: "12 hours ago", status: "Active" as const },
-  { name: "Legacy-V1-Key", prefix: "tk_f8m", suffix: "11zz", lastUsed: "3 days ago", status: "Inactive" as const },
-];
+type DeveloperKeyItem = {
+  id: string;
+  name: string;
+  fingerprint: string;
+  lastUsed: string;
+  status: string;
+};
 
-const topModels = [
-  { name: "GPT-4 Turbo (Legacy)", usage: "428k req", fill: 85, color: "bg-on-surface" },
-  { name: "GPT-5 Omni (Active)", usage: "312k req", fill: 62, color: "bg-primary-container" },
-  { name: "Claude 3.5 Sonnet", usage: "195k req", fill: 38, color: "bg-on-surface" },
-  { name: "Mistral Large", usage: "44k req", fill: 12, color: "bg-on-surface" },
-];
+type DeveloperModelItem = {
+  name: string;
+  usage: string;
+  fill: number;
+  color: string;
+};
 
-export function DeveloperApiKeys() {
+export function DeveloperApiKeys({ keys }: { keys: DeveloperKeyItem[] }) {
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow flex flex-col">
       <div className="px-lg py-md border-b border-outline-variant/30 flex items-center justify-between">
@@ -30,26 +32,32 @@ export function DeveloperApiKeys() {
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
-            {activeKeys.map((key) => (
+            {keys.length > 0 ? keys.map((key) => (
               <tr key={key.name} className="hover:bg-surface-container transition-colors">
                 <td className="px-lg py-4">
                   <div className="flex flex-col">
                     <span className="font-bold text-on-surface">{key.name}</span>
-                    <span className="text-secondary font-code-md">{key.prefix}...{key.suffix}</span>
+                    <span className="text-secondary font-code-md">{key.fingerprint}</span>
                   </div>
                 </td>
                 <td className="px-lg py-4 text-on-surface-variant">{key.lastUsed}</td>
                 <td className="px-lg py-4 text-right">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
-                    key.status === "Active"
+                    key.status === "active"
                       ? "bg-primary-container/10 text-primary"
                       : "bg-surface-container-highest text-secondary"
                   }`}>
-                    {key.status}
+                    {key.status === "active" ? "Active" : key.status}
                   </span>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td className="px-lg py-8 text-center text-on-surface-variant" colSpan={3}>
+                  暂无可展示的 API Key。
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -57,7 +65,7 @@ export function DeveloperApiKeys() {
   );
 }
 
-export function DeveloperTopModels() {
+export function DeveloperTopModels({ models }: { models: DeveloperModelItem[] }) {
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow p-lg">
       <div className="flex items-center justify-between mb-lg">
@@ -65,7 +73,7 @@ export function DeveloperTopModels() {
         <button className="material-symbols-outlined text-secondary hover:text-on-surface">more_vert</button>
       </div>
       <div className="space-y-md">
-        {topModels.map((m) => (
+        {models.length > 0 ? models.map((m) => (
           <div key={m.name} className="space-y-sm">
             <div className="flex justify-between font-label-md text-label-md">
               <span className="font-bold text-on-surface">{m.name}</span>
@@ -75,12 +83,16 @@ export function DeveloperTopModels() {
               <div className={`${m.color} h-full`} style={{ width: `${m.fill}%` }} />
             </div>
           </div>
-        ))}
+        )) : (
+          <div className="rounded-lg bg-surface-container-low px-md py-lg text-body-sm text-on-surface-variant">
+            暂无模型调用记录，等网关日志进入后这里会自动出现热点模型。
+          </div>
+        )}
       </div>
       <div className="mt-lg p-md bg-surface-container-low rounded-lg flex items-center gap-md">
         <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
         <p className="font-body-sm text-body-sm text-on-secondary-container">
-          You are currently using 85% of your <span className="font-bold">Pro Plan</span> quota. Consider upgrading to avoid rate limiting.
+          实时热点模型来自最近请求日志聚合，可以快速判断当前最常用模型和流量集中位置。
         </p>
       </div>
     </div>
