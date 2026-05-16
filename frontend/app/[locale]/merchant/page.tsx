@@ -29,11 +29,11 @@ export default async function MerchantPage({
     <div className="min-h-screen bg-background font-body-md text-on-background">
       <PublicNav activeId="console" ctaHref={`/${typedLocale}/merchant`} />
       <main className="mx-auto mt-16 max-w-max-width space-y-lg px-margin py-xl">
-        <MerchantSubNav />
-        <MerchantHero dashboard={dashboard} />
-        <MerchantKeysCard dashboard={dashboard} />
-        <MerchantBookmarks dashboard={dashboard} />
-        <MerchantModelsTable dashboard={dashboard} />
+        <MerchantSubNav locale={typedLocale} />
+        <MerchantHero dashboard={dashboard} locale={typedLocale} />
+        <MerchantKeysCard dashboard={dashboard} locale={typedLocale} />
+        <MerchantBookmarks dashboard={dashboard} locale={typedLocale} />
+        <MerchantModelsTable dashboard={dashboard} locale={typedLocale} />
       </main>
 
       <footer className="mt-xl w-full border-t border-outline-variant/20 bg-surface-container-lowest py-xl">

@@ -228,6 +228,9 @@
 - 已将 Developer Console 顶部主按钮、统计卡 CTA、API Key 列表和热点模型模块的入口改成真实跳转，可直接前往新建 API Key、日志筛选、钱包补款和公告页
 - 已为 `CreateApiKeyForm` 增加 `#new-api-key` 锚点，Developer Console 的 `Generate New Key` 按钮现在会落到真实创建表单位置
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Developer Console 动作入口接线全部通过
+- 已将商家控制台胶囊子导航接成真实控制台路由，不再是静态按钮，现可直接跳到总览、令牌、钱包、日志、工单和上游账号页
+- 已将商家控制台 Hero、Key 卡片、收藏商家卡片和模型列表中的主要操作入口接成真实跳转，可前往新建 API Key、筛选 API Key、查看上游账号与按模型筛选日志
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证商家控制台联动入口全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 

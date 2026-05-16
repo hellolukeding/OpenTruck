@@ -1,11 +1,15 @@
 "use client";
 
+import Link from "next/link";
+
 import type { MerchantDashboardData, MerchantModel } from "@/lib/admin-console-api";
 
 export function MerchantModelsTableSection({
   dashboard,
+  locale,
 }: {
   dashboard: MerchantDashboardData | null;
+  locale: string;
 }) {
   const models = dashboard?.models ?? [];
   const grouped = groupModels(models);
@@ -47,7 +51,11 @@ export function MerchantModelsTableSection({
                     key={model.name}
                     className="border-b border-outline-variant/10 transition-colors hover:bg-surface-container-low"
                   >
-                    <td className="px-lg py-md">{model.name}</td>
+                    <td className="px-lg py-md">
+                      <Link className="font-medium hover:text-primary" href={`/${locale}/logs?model=${encodeURIComponent(model.name)}`}>
+                        {model.name}
+                      </Link>
+                    </td>
                     <td className="px-lg py-md text-right">
                       <span className="mr-sm text-secondary">最低价格:</span>
                       <span className={model.free ? "font-bold text-emerald-500" : "font-bold text-primary"}>
