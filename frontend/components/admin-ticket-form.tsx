@@ -2,10 +2,17 @@
 
 import { useActionState, useEffect, useRef } from "react";
 
-import { createSupportTicketAction, type ConsoleActionState } from "@/lib/admin-console-actions";
 import { FormStatus } from "@/components/form-status";
+import { createSupportTicketAction, type ConsoleActionState } from "@/lib/admin-console-actions";
+import type { TicketsPageCopy } from "@/lib/tickets-page-copy";
 
-export function AdminTicketForm({ tenantId }: { tenantId: string }) {
+export function AdminTicketForm({
+  copy,
+  tenantId,
+}: {
+  copy: TicketsPageCopy;
+  tenantId: string;
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const initialState: ConsoleActionState = { status: "idle" };
   const [state, action, pending] = useActionState(createSupportTicketAction, initialState);
@@ -19,14 +26,14 @@ export function AdminTicketForm({ tenantId }: { tenantId: string }) {
   return (
     <form ref={formRef} action={action} className="mt-4 space-y-3">
       <input type="hidden" name="tenant_id" value={tenantId} />
-      <InputField name="subject" label="问题标题" placeholder="例如：钱包入账异常" />
-      <InputField name="category" label="问题类型" placeholder="支付、路由、模型、账单、账号" />
-      <InputField name="priority" label="优先级" placeholder="normal / urgent / critical" />
-      <InputField name="contact_email" label="联系邮箱" placeholder="operator@company.com" />
+      <InputField name="subject" label={copy.form.subjectLabel} placeholder={copy.form.subjectPlaceholder} />
+      <InputField name="category" label={copy.form.categoryLabel} placeholder={copy.form.categoryPlaceholder} />
+      <InputField name="priority" label={copy.form.priorityLabel} placeholder={copy.form.priorityPlaceholder} />
+      <InputField name="contact_email" label={copy.form.contactLabel} placeholder={copy.form.contactPlaceholder} />
       <TextAreaField
         name="description"
-        label="问题描述"
-        placeholder="请尽量提供错误时间、令牌名称、模型名称和 request id，方便快速定位。"
+        label={copy.form.descriptionLabel}
+        placeholder={copy.form.descriptionPlaceholder}
       />
       <FormStatus status={state.status} message={state.message} />
       <button
@@ -34,7 +41,7 @@ export function AdminTicketForm({ tenantId }: { tenantId: string }) {
         disabled={pending}
         className="w-full rounded-[16px] bg-primary-container px-4 py-3 text-[0.92rem] font-medium text-on-primary disabled:opacity-50"
       >
-        {pending ? "提交中..." : "提交工单"}
+        {pending ? copy.form.submitting : copy.form.submit}
       </button>
     </form>
   );

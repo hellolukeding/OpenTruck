@@ -6,6 +6,7 @@ import { getSupportTicketDetail, getSupportTicketsPage } from "@/lib/admin-conso
 import { getAdminOverview } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 import { PaginationControls } from "@/components/pagination-controls";
+import { getTicketsPageCopy } from "@/lib/tickets-page-copy";
 
 // 动态导入工单页面组件
 const AdminTicketsPage = dynamic(() => import("@/components/admin-tickets-page").then(mod => ({ default: mod.AdminTicketsPage })), { ssr: true });
@@ -32,6 +33,7 @@ export default async function TicketsPage({
 
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
+  const copy = getTicketsPageCopy(typedLocale);
   const overview = await getAdminOverview();
   const page = Number(query.page ?? "1");
   const search = query.search?.trim() || undefined;
@@ -68,6 +70,7 @@ export default async function TicketsPage({
       backendUrl={overview.backendUrl}
     >
       <AdminTicketsPage
+        copy={copy}
         ticketsPage={ticketsPage}
         selectedTicket={selectedTicket}
         tenantId={overview.tenants[0]?.id}

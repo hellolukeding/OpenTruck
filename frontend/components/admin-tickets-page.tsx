@@ -4,14 +4,17 @@ import { AdminTicketDetailPanel } from "@/components/admin-ticket-detail-panel";
 import { AdminTicketForm } from "@/components/admin-ticket-form";
 import { AdminTicketsFilters } from "@/components/admin-tickets-filters";
 import type { PaginatedResponse, SupportTicket, SupportTicketDetail } from "@/lib/admin-console-api";
+import type { TicketsPageCopy } from "@/lib/tickets-page-copy";
 
 export function AdminTicketsPage({
+  copy,
   ticketsPage,
   selectedTicket,
   tenantId,
   path,
   query,
 }: {
+  copy: TicketsPageCopy;
   ticketsPage: PaginatedResponse<SupportTicket>;
   selectedTicket: SupportTicketDetail | null;
   tenantId?: string;
@@ -27,9 +30,9 @@ export function AdminTicketsPage({
   const processingCount = ticketsPage.items.filter((item) => item.status === "processing").length;
   const resolvedCount = ticketsPage.items.filter((item) => item.status === "resolved").length;
   const categories = [
-    { label: "待处理", value: String(openCount), color: "bg-[#fff3d6] text-[#b45309]" },
-    { label: "处理中", value: String(processingCount), color: "bg-[#eaf5ff] text-[#2563eb]" },
-    { label: "已解决", value: String(resolvedCount), color: "bg-[#e9fbf2] text-[#059669]" },
+    { label: copy.categories.open, value: String(openCount), color: "bg-[#fff3d6] text-[#b45309]" },
+    { label: copy.categories.processing, value: String(processingCount), color: "bg-[#eaf5ff] text-[#2563eb]" },
+    { label: copy.categories.resolved, value: String(resolvedCount), color: "bg-[#e9fbf2] text-[#059669]" },
   ];
 
   return (
@@ -41,12 +44,12 @@ export function AdminTicketsPage({
               <MessagesSquare className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-[1.55rem] font-semibold text-on-surface">工单中心</h2>
-              <p className="mt-1 text-[0.9rem] text-on-surface-variant">提交问题、跟踪进度、查看历史回复</p>
+              <h2 className="text-[1.55rem] font-semibold text-on-surface">{copy.overview.title}</h2>
+              <p className="mt-1 text-[0.9rem] text-on-surface-variant">{copy.overview.subtitle}</p>
             </div>
           </div>
           <button className="rounded-full bg-primary-container px-4 py-2 text-[0.84rem] font-medium text-on-primary">
-            <span className="inline-flex items-center gap-2"><FilePlus2 className="h-4 w-4" />新建工单</span>
+            <span className="inline-flex items-center gap-2"><FilePlus2 className="h-4 w-4" />{copy.overview.create}</span>
           </button>
         </div>
 
@@ -63,8 +66,8 @@ export function AdminTicketsPage({
 
         <div className="px-5 py-5">
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface p-5 dark:bg-surface-container-low">
-            <h3 className="text-[1.05rem] font-semibold text-on-surface">提交建议</h3>
-            {tenantId ? <AdminTicketForm tenantId={tenantId} /> : null}
+            <h3 className="text-[1.05rem] font-semibold text-on-surface">{copy.overview.submit}</h3>
+            {tenantId ? <AdminTicketForm copy={copy} tenantId={tenantId} /> : null}
           </div>
         </div>
       </section>
@@ -72,13 +75,13 @@ export function AdminTicketsPage({
       <section className="space-y-5">
         <div className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
           <div className="border-b border-outline-variant/10 px-5 py-4">
-            <h3 className="text-[1.2rem] font-semibold text-on-surface">支持说明</h3>
+            <h3 className="text-[1.2rem] font-semibold text-on-surface">{copy.support.title}</h3>
           </div>
           <div className="space-y-4 px-5 py-5">
             {[
-              { icon: Clock3, title: "响应时间", body: "工作日内普通工单通常在 12 小时内首响，紧急工单会优先处理。" },
-              { icon: ShieldCheck, title: "问题升级", body: "涉及支付异常、密钥泄漏、计费错误等问题会自动升级到更高优先级。" },
-              { icon: MessageSquareMore, title: "补充信息", body: "你可以在工单中继续追加截图、request id 和上下游账号信息。" },
+              { icon: Clock3, title: copy.support.responseTitle, body: copy.support.responseBody },
+              { icon: ShieldCheck, title: copy.support.escalationTitle, body: copy.support.escalationBody },
+              { icon: MessageSquareMore, title: copy.support.detailsTitle, body: copy.support.detailsBody },
             ].map((item) => (
               <div key={item.title} className="rounded-[18px] border border-outline-variant/20 bg-surface px-4 py-4 dark:bg-surface-container-low">
                 <div className="flex items-center gap-3">
@@ -93,10 +96,10 @@ export function AdminTicketsPage({
 
         <div className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
           <div className="border-b border-outline-variant/10 px-5 py-4">
-            <h3 className="text-[1.2rem] font-semibold text-on-surface">最近工单</h3>
+            <h3 className="text-[1.2rem] font-semibold text-on-surface">{copy.list.title}</h3>
           </div>
           <div className="space-y-4 px-5 py-5">
-            <AdminTicketsFilters path={path} query={query} />
+            <AdminTicketsFilters copy={copy} path={path} query={query} />
             {ticketsPage.items.length > 0 ? (
               <div className="space-y-3">
                 {ticketsPage.items.map((item) => (
@@ -116,7 +119,7 @@ export function AdminTicketsPage({
                         </p>
                       </div>
                       <span className="rounded-full border border-outline-variant/20 px-3 py-1 text-[0.74rem] text-on-surface-variant">
-                        {item.status}
+                        {copy.enums.status[item.status] ?? item.status}
                       </span>
                     </div>
                     <p className="mt-3 line-clamp-2 text-[0.88rem] leading-7 text-on-surface-variant">
@@ -126,7 +129,7 @@ export function AdminTicketsPage({
                       href={`${path}?${buildTicketQuery(query, item.id)}`}
                       className="mt-4 inline-flex text-[0.82rem] font-medium text-primary"
                     >
-                      查看线程
+                      {copy.list.viewThread}
                     </a>
                   </div>
                 ))}
@@ -136,13 +139,13 @@ export function AdminTicketsPage({
                 <div className="rounded-full bg-surface-container-low p-5 text-on-surface-variant">
                   <CircleHelp className="h-12 w-12" />
                 </div>
-                <p className="mt-6 text-[1.4rem] font-semibold text-on-surface">暂无工单记录</p>
-                <p className="mt-2 text-[0.9rem] text-on-surface-variant">当你提交第一张工单后，处理进度会显示在这里。</p>
+                <p className="mt-6 text-[1.4rem] font-semibold text-on-surface">{copy.list.emptyTitle}</p>
+                <p className="mt-2 text-[0.9rem] text-on-surface-variant">{copy.list.emptyBody}</p>
               </div>
             )}
           </div>
         </div>
-        <AdminTicketDetailPanel ticket={selectedTicket} />
+        <AdminTicketDetailPanel copy={copy} ticket={selectedTicket} />
       </section>
     </div>
   );
