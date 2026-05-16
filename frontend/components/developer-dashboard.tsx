@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { DeveloperPageCopy } from "@/lib/console-page-copy";
 
 type DeveloperStatCard = {
   title: string;
@@ -21,7 +22,11 @@ type DeveloperUsageBar = {
   href?: string;
 };
 
-export function DeveloperStats({ cards }: { cards: DeveloperStatCard[] }) {
+export function DeveloperStats({
+  cards,
+}: {
+  cards: DeveloperStatCard[];
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
       {cards.map((card) => (
@@ -54,21 +59,27 @@ export function DeveloperStats({ cards }: { cards: DeveloperStatCard[] }) {
   );
 }
 
-export function DeveloperUsageChart({ points }: { points: DeveloperUsageBar[] }) {
+export function DeveloperUsageChart({
+  points,
+  copy,
+}: {
+  points: DeveloperUsageBar[];
+  copy: DeveloperPageCopy["chart"];
+}) {
   const maxRequests = Math.max(...points.map((day) => day.requests), 1);
   const maxSpend = Math.max(...points.map((day) => day.spend), 1);
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow overflow-hidden">
       <div className="px-lg py-md border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-lowest">
-        <h3 className="font-headline-md text-body-lg font-bold">API Usage Volume</h3>
+        <h3 className="font-headline-md text-body-lg font-bold">{copy.title}</h3>
         <div className="flex gap-md">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-on-surface rounded-full" />
-            <span className="font-label-md text-label-md text-secondary">Requests</span>
+            <span className="font-label-md text-label-md text-secondary">{copy.requests}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-tertiary-container rounded-full" />
-            <span className="font-label-md text-label-md text-secondary">Spend</span>
+            <span className="font-label-md text-label-md text-secondary">{copy.spend}</span>
           </div>
         </div>
       </div>

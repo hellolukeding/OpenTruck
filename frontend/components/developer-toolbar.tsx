@@ -3,17 +3,20 @@
 import Link from "next/link";
 
 import type { DashboardNotice } from "@/lib/admin-console-api";
+import type { DeveloperPageCopy } from "@/lib/console-page-copy";
 
 export function DeveloperToolbar({
   locale,
   logsHref,
   newKeyHref,
   notices,
+  copy,
 }: {
   locale: string;
   logsHref: string;
   newKeyHref: string;
   notices: DashboardNotice[];
+  copy: DeveloperPageCopy["toolbar"];
 }) {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-outline-variant/30 bg-white/70 px-gutter backdrop-blur-md">
@@ -28,7 +31,7 @@ export function DeveloperToolbar({
           <input
             className="w-64 rounded-lg border border-outline-variant bg-surface-container-low py-1.5 pl-10 pr-4 text-body-sm font-body-sm transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 md:w-96"
             name="search"
-            placeholder="Search usage, keys, or endpoints..."
+            placeholder={copy.searchPlaceholder}
             type="text"
           />
         </form>
@@ -42,11 +45,11 @@ export function DeveloperToolbar({
           <div className="absolute right-0 mt-2 w-[22rem] overflow-hidden rounded-2xl border border-outline-variant/20 bg-white shadow-[0_20px_50px_rgba(15,23,42,0.16)]">
             <div className="flex items-center justify-between border-b border-outline-variant/10 px-4 py-3">
               <div>
-                <p className="text-[0.95rem] font-semibold text-on-surface">系统公告</p>
-                <p className="text-[0.78rem] text-on-surface-variant">最新平台通知与维护消息</p>
+                <p className="text-[0.95rem] font-semibold text-on-surface">{copy.noticesTitle}</p>
+                <p className="text-[0.78rem] text-on-surface-variant">{copy.noticesSubtitle}</p>
               </div>
               <Link className="text-[0.8rem] font-medium text-primary hover:underline" href={`/${locale}/announcements`}>
-                查看全部
+                {copy.noticesViewAll}
               </Link>
             </div>
             <div className="max-h-80 overflow-y-auto">
@@ -62,11 +65,11 @@ export function DeveloperToolbar({
                       <p className="text-[0.86rem] font-semibold text-on-surface">{notice.title}</p>
                     </div>
                     <p className="mt-1 line-clamp-2 text-[0.8rem] text-on-surface-variant">{notice.body}</p>
-                    <p className="mt-2 text-[0.72rem] text-on-surface-variant">{formatDate(notice.created_at)}</p>
+                    <p className="mt-2 text-[0.72rem] text-on-surface-variant">{formatDate(locale, notice.created_at)}</p>
                   </Link>
                 ))
               ) : (
-                <div className="px-4 py-8 text-center text-[0.84rem] text-on-surface-variant">暂无通知</div>
+                <div className="px-4 py-8 text-center text-[0.84rem] text-on-surface-variant">{copy.noticesEmpty}</div>
               )}
             </div>
           </div>
@@ -76,7 +79,7 @@ export function DeveloperToolbar({
           href={newKeyHref}
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          <span>Generate New Key</span>
+          <span>{copy.newKey}</span>
         </Link>
       </div>
     </header>
@@ -89,8 +92,8 @@ function severityTone(severity: string) {
   return "bg-primary";
 }
 
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("zh-CN", {
+function formatDate(locale: string, value: string) {
+  return new Intl.DateTimeFormat(locale, {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",

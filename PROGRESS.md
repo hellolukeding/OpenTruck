@@ -138,6 +138,9 @@
 - 账号密码登录当前仍是首版 operator 入口，凭据来源于环境变量或本地开发回退值，尚未接入独立用户表与密码存储
 - `pnpm --dir frontend exec tsc --noEmit` 仍会受仓库现有 `.next/types` include 噪音影响；当前以 `pnpm build` 通过作为更可靠的前端验证结果
 - JWT 首版已可用于网关，但当前还没有单独的 JWT 撤销/黑名单机制，失效主要依赖过期时间和底层 API Key / tenant 状态校验
+- 已新增 `frontend/lib/console-page-copy.ts`，先将 Developer Console 的页面级文案从组件内部抽离，为后续把新增页面统一并入多语言体系做准备
+- 已将 Developer Console 的页标题、搜索栏、公告下拉、统计卡、趋势图、API Keys、热点模型与相对时间文案改为按 `en / zh-CN` 输出，消除中英混杂
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Developer Console 文案抽离与双语输出全部通过
 
 ## 下一步
 
@@ -145,7 +148,7 @@
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
-5. 将新增页面的多语言文案整合到 `i18n` 字典中
+5. 继续将新增页面的多语言文案抽离并整合到统一字典中，优先处理 Merchant Console、Wallet、Logs 与 Tickets
 6. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
 7. 继续把 Developer Console 的日志分析、通知查看和搜索体验做深，例如更细的筛选面板与公告详情联动
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { DeveloperPageCopy } from "@/lib/console-page-copy";
 
 type DeveloperKeyItem = {
   id: string;
@@ -18,22 +19,30 @@ type DeveloperModelItem = {
   href?: string;
 };
 
-export function DeveloperApiKeys({ keys, locale }: { keys: DeveloperKeyItem[]; locale: string }) {
+export function DeveloperApiKeys({
+  keys,
+  locale,
+  copy,
+}: {
+  keys: DeveloperKeyItem[];
+  locale: string;
+  copy: DeveloperPageCopy["apiKeys"];
+}) {
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow flex flex-col">
       <div className="px-lg py-md border-b border-outline-variant/30 flex items-center justify-between">
-        <h3 className="font-headline-md text-body-lg font-bold">Active API Keys</h3>
+        <h3 className="font-headline-md text-body-lg font-bold">{copy.title}</h3>
         <Link className="font-label-md text-label-md text-primary hover:underline" href={`/${locale}/api-keys`}>
-          View All
+          {copy.viewAll}
         </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left font-body-sm">
           <thead className="bg-surface-container-low text-on-surface-variant/70 border-b border-outline-variant/10 uppercase tracking-tighter text-[11px]">
             <tr>
-              <th className="px-lg py-3 font-bold">Name</th>
-              <th className="px-lg py-3 font-bold">Last Used</th>
-              <th className="px-lg py-3 font-bold text-right">Status</th>
+              <th className="px-lg py-3 font-bold">{copy.name}</th>
+              <th className="px-lg py-3 font-bold">{copy.lastUsed}</th>
+              <th className="px-lg py-3 font-bold text-right">{copy.status}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10">
@@ -52,14 +61,14 @@ export function DeveloperApiKeys({ keys, locale }: { keys: DeveloperKeyItem[]; l
                       ? "bg-primary-container/10 text-primary"
                       : "bg-surface-container-highest text-secondary"
                   }`}>
-                    {key.status === "active" ? "Active" : key.status}
+                    {key.status === "active" ? copy.active : key.status}
                   </span>
                 </td>
               </tr>
             )) : (
               <tr>
                 <td className="px-lg py-8 text-center text-on-surface-variant" colSpan={3}>
-                  暂无可展示的 API Key。
+                  {copy.empty}
                 </td>
               </tr>
             )}
@@ -70,11 +79,19 @@ export function DeveloperApiKeys({ keys, locale }: { keys: DeveloperKeyItem[]; l
   );
 }
 
-export function DeveloperTopModels({ models, locale }: { models: DeveloperModelItem[]; locale: string }) {
+export function DeveloperTopModels({
+  models,
+  locale,
+  copy,
+}: {
+  models: DeveloperModelItem[];
+  locale: string;
+  copy: DeveloperPageCopy["models"];
+}) {
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow p-lg">
       <div className="flex items-center justify-between mb-lg">
-        <h3 className="font-headline-md text-body-lg font-bold">Top Models by Usage</h3>
+        <h3 className="font-headline-md text-body-lg font-bold">{copy.title}</h3>
         <Link className="material-symbols-outlined text-secondary hover:text-on-surface" href={`/${locale}/logs`}>
           more_vert
         </Link>
@@ -98,14 +115,14 @@ export function DeveloperTopModels({ models, locale }: { models: DeveloperModelI
           </div>
         )) : (
           <div className="rounded-lg bg-surface-container-low px-md py-lg text-body-sm text-on-surface-variant">
-            暂无模型调用记录，等网关日志进入后这里会自动出现热点模型。
+            {copy.empty}
           </div>
         )}
       </div>
       <div className="mt-lg p-md bg-surface-container-low rounded-lg flex items-center gap-md">
         <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>info</span>
         <p className="font-body-sm text-body-sm text-on-secondary-container">
-          实时热点模型来自最近请求日志聚合，可以快速判断当前最常用模型和流量集中位置。
+          {copy.footer}
         </p>
       </div>
     </div>
