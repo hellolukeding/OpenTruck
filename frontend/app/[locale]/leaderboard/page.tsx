@@ -1,5 +1,6 @@
 import { PublicNav } from "@/components/public-nav";
 import { LeaderboardTable } from "@/components/leaderboard-table";
+import { getPublicLeaderboard } from "@/lib/public-api";
 
 const categories = [
   { label: "全部", active: true },
@@ -11,7 +12,41 @@ const categories = [
   { label: "Video (视频)" },
 ];
 
-export default function LeaderboardPage() {
+export default async function LeaderboardPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    window?: string;
+    category?: string;
+    search?: string;
+    sort?: string;
+    page?: string;
+  }>;
+}) {
+  const { locale } = await params;
+  const query = await searchParams;
+  const window = query.window?.trim() || "24h";
+  const category = query.category?.trim() || undefined;
+  const search = query.search?.trim() || undefined;
+  const sortBy = query.sort?.trim() || "volume";
+  const page = Number(query.page ?? "1");
+  const leaderboard = await getPublicLeaderboard({
+    window,
+    category,
+    search,
+    sortBy,
+    page: Number.isFinite(page) && page > 0 ? page : 1,
+    pageSize: 10,
+  }).catch(() => ({
+    items: [],
+    total: 0,
+    page: 1,
+    page_size: 10,
+    total_pages: 0,
+  }));
+
   return (
     <div className="bg-white text-slate-900 min-h-screen flex flex-col">
       <PublicNav activeId="leaderboard" />
@@ -26,41 +61,63 @@ export default function LeaderboardPage() {
           <section className="mb-6 space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center p-1 bg-slate-100 rounded-lg w-fit">
-                <button className="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-slate-900">实时 (24h)</button>
-                <button className="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">周榜</button>
-                <button className="px-4 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-700">月榜</button>
+                {[
+                  { label: "实时 (24h)", value: "24h" },
+                  { label: "周榜", value: "7d" },
+                  { label: "月榜", value: "30d" },
+                ].map((item) => (
+                  <a
+                    key={item.value}
+                    href={buildFilterHref(locale, { window: item.value, category, search, sortBy })}
+                    className={`px-4 py-1.5 text-sm font-medium rounded-md ${
+                      window === item.value ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ))}
               </div>
-              <div className="flex items-center gap-3">
+              <form className="flex items-center gap-3" action={`/${locale}/leaderboard`}>
+                <input type="hidden" name="window" value={window} />
+                <input type="hidden" name="category" value={category ?? ""} />
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                   </span>
-                  <input className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-primary-container focus:border-primary-container w-64 bg-slate-50" placeholder="搜索模型名称..." type="text" />
+                  <input name="search" defaultValue={search ?? ""} className="pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-primary-container focus:border-primary-container w-64 bg-slate-50" placeholder="搜索模型名称..." type="text" />
                 </div>
-                <select className="border border-slate-200 rounded-lg text-sm bg-slate-50 py-2 pl-3 pr-8 focus:ring-primary-container focus:border-primary-container">
-                  <option>按调用量排序</option>
-                  <option>按评分排序</option>
-                  <option>按可用性排序</option>
+                <select name="sort" defaultValue={sortBy} className="border border-slate-200 rounded-lg text-sm bg-slate-50 py-2 pl-3 pr-8 focus:ring-primary-container focus:border-primary-container">
+                  <option value="volume">按调用量排序</option>
+                  <option value="score">按评分排序</option>
+                  <option value="availability">按可用性排序</option>
+                  <option value="price">按价格排序</option>
                 </select>
-              </div>
+                <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white">查询</button>
+              </form>
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               {categories.map((cat) => (
-                <button
+                <a
                   key={cat.label}
+                  href={buildFilterHref(locale, {
+                    window,
+                    category: cat.label === "全部" ? undefined : normalizeCategory(cat.label),
+                    search,
+                    sortBy,
+                  })}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ${
-                    cat.active
+                    (category ?? "all") === (cat.label === "全部" ? "all" : normalizeCategory(cat.label))
                       ? "bg-primary-container text-white"
                       : "text-slate-600 bg-slate-100 hover:bg-slate-200"
                   }`}
                 >
                   {cat.label}
-                </button>
+                </a>
               ))}
             </div>
           </section>
 
-          <LeaderboardTable />
+          <LeaderboardTable leaderboard={leaderboard} path={`/${locale}/leaderboard`} query={{ window, category, search, sortBy }} />
         </div>
       </main>
 
@@ -111,4 +168,29 @@ export default function LeaderboardPage() {
       </footer>
     </div>
   );
+}
+
+function buildFilterHref(
+  locale: string,
+  {
+  window,
+  category,
+  search,
+  sortBy,
+}: {
+  window: string;
+  category?: string;
+  search?: string;
+  sortBy: string;
+}) {
+  const params = new URLSearchParams();
+  params.set("window", window);
+  params.set("sort", sortBy);
+  if (category) params.set("category", category);
+  if (search) params.set("search", search);
+  return `/${locale}/leaderboard?${params.toString()}`;
+}
+
+function normalizeCategory(label: string) {
+  return label.toLowerCase().split(" ")[0];
 }

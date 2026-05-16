@@ -216,6 +216,9 @@
 - 已新增 `/{locale}/announcements` 控制台公告管理页，并把“公告”入口接入控制台胶囊式子导航
 - 已新增前端公告创建、编辑、删除 action 与对应表单/行操作，打通 `/admin/announcements` 的真实管理链路
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证公告管理页、子导航入口与新增前端 action 全部通过
+- 已新增公开后端接口 `/leaderboard`，基于 `gateway_usage_ledger` 与 `node_models` 聚合最近请求量、可用性、Token 消耗、商家数和均价
+- 已将 `/{locale}/leaderboard` 从静态表格改为真实后端取数，并接入时间窗口、分类、搜索、排序和分页参数
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证排行榜真实数据页与公开后端聚合接口全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 

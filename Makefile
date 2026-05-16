@@ -19,6 +19,7 @@ check:
 		backend/app/api/routes/health.py \
 		backend/app/api/routes/gateway.py \
 		backend/app/api/routes/models.py \
+		backend/app/api/routes/public_leaderboard.py \
 		backend/app/api/routes/admin_dashboard.py \
 		backend/app/api/routes/admin_payment_channels.py \
 		backend/app/api/routes/admin_payment_plans.py \
@@ -66,6 +67,7 @@ check:
 		backend/app/schemas/jwt.py \
 		backend/app/schemas/openai_oauth.py \
 		backend/app/schemas/pagination.py \
+		backend/app/schemas/public_leaderboard.py \
 		backend/app/schemas/error.py \
 		backend/app/schemas/support_ticket.py \
 		backend/app/schemas/upstream_account.py \
