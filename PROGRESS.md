@@ -158,6 +158,9 @@
 - 已新增 `frontend/lib/announcements-page-copy.ts`，将 Announcements 页的标题、流列表、表单、编辑/删除弹窗和 action 成功提示统一抽离
 - 已将 Announcements 页的状态、严重级别、时间格式以及创建/编辑/删除成功消息切到 `en / zh-CN` 双语输出
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Announcements 页文案抽离与双语输出全部通过
+- 已新增 `frontend/lib/overview-page-copy.ts`，将总览页的问候语、指标标签、公告流 meta 和系统状态文案统一收口
+- 已将总览页公告流的置顶标记、序号、时间格式以及系统状态区文案切到 `en / zh-CN` 双语输出
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证总览页公告与状态文案抽离全部通过
 
 ## 下一步
 
@@ -165,7 +168,7 @@
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
-5. 继续将新增页面的多语言文案抽离并整合到统一字典中，优先处理 Overview Notices 与公告相关入口
+5. 继续将新增页面的多语言文案抽离并整合到统一字典中，优先处理公告相关入口与剩余总览提示
 6. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
 7. 继续把 Developer Console 的日志分析、通知查看和搜索体验做深，例如更细的筛选面板与公告详情联动
 
