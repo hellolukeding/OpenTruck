@@ -1,21 +1,23 @@
 "use client";
 
 import type { DashboardUsagePoint } from "@/lib/admin-console-api";
+import type { OverviewPageCopy } from "@/lib/overview-page-copy";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const tabLabels = [
-  { value: "spend-distribution", label: "消耗分布" },
-  { value: "spend-trend", label: "消耗趋势" },
-  { value: "requests-distribution", label: "调用次数分布" },
-  { value: "requests-ranking", label: "调用次数排行" },
-];
-
 type Props = {
+  copy: OverviewPageCopy["analysis"];
   usageTrend: DashboardUsagePoint[];
 };
 
-export function AdminOverviewAnalysis({ usageTrend }: Props) {
+export function AdminOverviewAnalysis({ copy, usageTrend }: Props) {
+  const tabLabels = [
+    { value: "spend-distribution", label: copy.tabs.spendDistribution },
+    { value: "spend-trend", label: copy.tabs.spendTrend },
+    { value: "requests-distribution", label: copy.tabs.requestsDistribution },
+    { value: "requests-ranking", label: copy.tabs.requestsRanking },
+  ];
+
   return (
     <section className="rounded-[24px] border border-outline-variant/20 bg-surface-container-lowest shadow-sm dark:bg-surface-container-low/60">
       <div className="flex flex-col gap-4 border-b border-outline-variant/10 px-6 py-5 md:flex-row md:items-center md:justify-between">
@@ -35,7 +37,8 @@ export function AdminOverviewAnalysis({ usageTrend }: Props) {
           {tabLabels.map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
               <AnalysisCanvas
-                title={tab.label === "消耗分布" ? "模型消耗分布" : tab.label}
+                copy={copy}
+                title={tab.value === "spend-distribution" ? copy.modelSpendDistribution : tab.label}
                 usageTrend={usageTrend}
               />
             </TabsContent>
@@ -47,9 +50,11 @@ export function AdminOverviewAnalysis({ usageTrend }: Props) {
 }
 
 function AnalysisCanvas({
+  copy,
   title,
   usageTrend,
 }: {
+  copy: OverviewPageCopy["analysis"];
   title: string;
   usageTrend: DashboardUsagePoint[];
 }) {
@@ -69,7 +74,7 @@ function AnalysisCanvas({
     <div className="px-6 py-7">
       <h3 className="text-[1.05rem] font-semibold text-on-surface">{title}</h3>
       <p className="mt-1 text-[0.86rem] text-on-surface-variant">
-        总计： ¥{values.reduce((sum, value) => sum + value, 0).toFixed(2)}
+        {copy.total(values.reduce((sum, value) => sum + value, 0).toFixed(2))}
       </p>
       <div className="mt-6 rounded-[20px] border border-outline-variant/10 bg-surface px-4 py-4 dark:bg-surface-container-low">
         <svg viewBox="0 0 980 360" className="h-[360px] w-full">
@@ -116,7 +121,7 @@ function AnalysisCanvas({
         </svg>
         <div className="mt-3 flex items-center justify-center gap-2 text-[0.84rem] text-on-surface">
           <span className={`h-3 w-3 ${path ? "bg-[#10b981]" : "bg-[#ff9800]"}`} />
-          <span>{path ? "真实近 7 日消耗走势" : "无数据"}</span>
+          <span>{path ? copy.legendActive : copy.legendEmpty}</span>
         </div>
       </div>
     </div>

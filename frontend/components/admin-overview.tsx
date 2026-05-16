@@ -71,7 +71,7 @@ export function AdminOverview({
 
       <AdminOverviewStats stats={stats} />
 
-      <AdminOverviewAnalysis usageTrend={dashboard.usage_trend} />
+      <AdminOverviewAnalysis copy={copy.analysis} usageTrend={dashboard.usage_trend} />
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <AdminOverviewNotices

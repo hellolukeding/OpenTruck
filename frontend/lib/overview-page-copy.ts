@@ -25,6 +25,18 @@ export type OverviewPageCopy = {
     itemNumber: (index: number) => string;
     dateLocale: string;
   };
+  analysis: {
+    tabs: {
+      spendDistribution: string;
+      spendTrend: string;
+      requestsDistribution: string;
+      requestsRanking: string;
+    };
+    modelSpendDistribution: string;
+    total: (amount: string) => string;
+    legendActive: string;
+    legendEmpty: string;
+  };
   status: {
     title: string;
     healthyNodes: string;
@@ -61,6 +73,18 @@ const copy: Record<Locale, OverviewPageCopy> = {
       itemNumber: (index) => `Item ${index + 1}`,
       dateLocale: "en-US",
     },
+    analysis: {
+      tabs: {
+        spendDistribution: "Spend Distribution",
+        spendTrend: "Spend Trend",
+        requestsDistribution: "Request Distribution",
+        requestsRanking: "Request Ranking",
+      },
+      modelSpendDistribution: "Model Spend Distribution",
+      total: (amount) => `Total: ¥${amount}`,
+      legendActive: "Real spend over the last 7 days",
+      legendEmpty: "No data",
+    },
     status: {
       title: "System Status",
       healthyNodes: "Healthy Nodes",
@@ -94,6 +118,18 @@ const copy: Record<Locale, OverviewPageCopy> = {
       pinned: "置顶公告",
       itemNumber: (index) => `第 ${index + 1} 条`,
       dateLocale: "zh-CN",
+    },
+    analysis: {
+      tabs: {
+        spendDistribution: "消耗分布",
+        spendTrend: "消耗趋势",
+        requestsDistribution: "调用次数分布",
+        requestsRanking: "调用次数排行",
+      },
+      modelSpendDistribution: "模型消耗分布",
+      total: (amount) => `总计： ¥${amount}`,
+      legendActive: "真实近 7 日消耗走势",
+      legendEmpty: "无数据",
     },
     status: {
       title: "系统状态",
