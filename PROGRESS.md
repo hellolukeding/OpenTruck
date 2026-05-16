@@ -145,9 +145,9 @@
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
-5. 为新增的 Developer Console、Model Leaderboard、Merchant Dashboard 三页补充真实后端数据接入
+5. 为 Developer Console 补充真实后端数据接入，串起 API Key、模型和日志的开发者视角
 6. 将新增页面的多语言文案整合到 `i18n` 字典中
-7. 把前端新页面的导航入口接入 `PublicNav` 或控制台侧边栏
+7. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
 
 ### 2026-05-15 — 按 design 文件对齐公共页面视觉
 
@@ -219,6 +219,9 @@
 - 已新增公开后端接口 `/leaderboard`，基于 `gateway_usage_ledger` 与 `node_models` 聚合最近请求量、可用性、Token 消耗、商家数和均价
 - 已将 `/{locale}/leaderboard` 从静态表格改为真实后端取数，并接入时间窗口、分类、搜索、排序和分页参数
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证排行榜真实数据页与公开后端聚合接口全部通过
+- 已新增 `/admin/merchant-dashboard` 后端聚合接口，按租户汇总商家控制台所需的 API Key、收藏上游和可用模型数据
+- 已将 `/{locale}/merchant` 从静态示意页改为真实后端取数，并拆出 `merchant-dashboard-models.tsx` 继续满足前端单文件不超过 300 行的约束
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证商家控制台真实数据页接线全部通过，匿名浏览器访问仍会正确跳转到登录门禁
 
 ### 2026-05-15 — 前端布局与性能优化
 

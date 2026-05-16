@@ -173,6 +173,42 @@ export type SupportTicketDetail = SupportTicket & {
   messages: SupportTicketMessage[];
 };
 
+export type MerchantKey = {
+  id: string;
+  name: string;
+  status: string;
+  fingerprint: string;
+  scope_label: string;
+  primary_model: string | null;
+  last_used_at: string | null;
+};
+
+export type MerchantBookmark = {
+  id: string;
+  name: string;
+  plan_type: string | null;
+  status: string;
+};
+
+export type MerchantModel = {
+  name: string;
+  category: string;
+  lowest_price: string;
+  merchant_count: number;
+  free: boolean;
+};
+
+export type MerchantDashboardData = {
+  tenant_id: string;
+  tenant_name: string;
+  active_key_count: number;
+  total_key_count: number;
+  available_model_count: number;
+  keys: MerchantKey[];
+  bookmarks: MerchantBookmark[];
+  models: MerchantModel[];
+};
+
 type ConsoleQuery = {
   tenantId?: string;
   apiKeyId?: string;
@@ -236,4 +272,8 @@ export async function getSupportTicketDetail(ticketId: string) {
 
 export async function getAnnouncementsPage(query: ConsoleQuery = {}) {
   return fetchJson<PaginatedResponse<Announcement>>(buildUrl("/admin/announcements", query));
+}
+
+export async function getMerchantDashboard(tenantId?: string) {
+  return fetchJson<MerchantDashboardData>(buildUrl("/admin/merchant-dashboard", { tenantId }));
 }

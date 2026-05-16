@@ -1,64 +1,75 @@
-import { MerchantSubNav, MerchantHero, MerchantKeysCard, MerchantBookmarks, MerchantModelsTable } from "@/components/merchant-dashboard";
+import { notFound } from "next/navigation";
 
-export default function MerchantPage() {
+import {
+  MerchantBookmarks,
+  MerchantHero,
+  MerchantKeysCard,
+  MerchantModelsTable,
+  MerchantSubNav,
+} from "@/components/merchant-dashboard";
+import { PublicNav } from "@/components/public-nav";
+import { getMerchantDashboard } from "@/lib/admin-console-api";
+import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
+
+export default async function MerchantPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  if (!isSupportedLocale(locale)) {
+    notFound();
+  }
+
+  const typedLocale = locale as Locale;
+  getDictionary(typedLocale);
+  const dashboard = await getMerchantDashboard().catch(() => null);
+
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen">
-      {/* Header matching opentruck_6 design */}
-      <header className="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
-        <div className="flex items-center justify-between px-margin py-sm max-w-max-width mx-auto">
-          <div className="flex items-center gap-xl">
-            <span className="text-headline-md font-headline-md font-bold text-on-background">OpenTruck</span>
-            <nav className="hidden md:flex items-center gap-lg">
-              <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Models</a>
-              <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">API Docs</a>
-              <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Pricing</a>
-              <a className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary" href="#">Console</a>
-            </nav>
-          </div>
-          <div className="flex items-center gap-md">
-            <button className="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <button className="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-            <div className="flex items-center gap-sm pl-sm border-l border-outline-variant/30">
-              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary text-label-md">O</div>
-              <span className="text-body-sm font-medium">oidc_5118</span>
-              <span className="material-symbols-outlined text-[16px]">expand_more</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="mt-[72px] max-w-max-width mx-auto px-margin py-xl space-y-lg">
+    <div className="min-h-screen bg-background font-body-md text-on-background">
+      <PublicNav activeId="console" ctaHref={`/${typedLocale}/merchant`} />
+      <main className="mx-auto mt-16 max-w-max-width space-y-lg px-margin py-xl">
         <MerchantSubNav />
-        <MerchantHero />
-        <MerchantKeysCard />
-        <MerchantBookmarks />
-        <MerchantModelsTable />
+        <MerchantHero dashboard={dashboard} />
+        <MerchantKeysCard dashboard={dashboard} />
+        <MerchantBookmarks dashboard={dashboard} />
+        <MerchantModelsTable dashboard={dashboard} />
       </main>
 
-      <footer className="w-full py-xl bg-surface-container-lowest border-t border-outline-variant/20 mt-xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-gutter px-margin max-w-max-width mx-auto">
+      <footer className="mt-xl w-full border-t border-outline-variant/20 bg-surface-container-lowest py-xl">
+        <div className="mx-auto grid max-w-max-width grid-cols-2 gap-gutter px-margin md:grid-cols-4">
           <div className="col-span-2">
-            <span className="font-headline-md text-on-background block mb-md">OpenTruck</span>
-            <p className="font-body-sm text-body-sm text-secondary opacity-80">&copy; 2024 OpenTruck. High-performance AI infrastructure.</p>
+            <span className="mb-md block font-headline-md text-on-background">OpenTruck</span>
+            <p className="text-body-sm text-secondary opacity-80">
+              &copy; 2024 OpenTruck. High-performance AI infrastructure.
+            </p>
           </div>
           <div className="space-y-sm">
-            <h4 className="font-bold text-body-sm text-on-surface">Resources</h4>
+            <h4 className="text-body-sm font-bold text-on-surface">Resources</h4>
             <nav className="flex flex-col gap-xs">
-              <a className="text-body-sm text-secondary hover:text-primary transition-all" href="#">Documentation</a>
-              <a className="text-body-sm text-secondary hover:text-primary transition-all" href="#">Changelog</a>
-              <a className="text-body-sm text-secondary hover:text-primary transition-all" href="#">Status</a>
+              <a className="text-body-sm text-secondary transition-all hover:text-primary" href="#">
+                Documentation
+              </a>
+              <a className="text-body-sm text-secondary transition-all hover:text-primary" href="#">
+                Changelog
+              </a>
+              <a className="text-body-sm text-secondary transition-all hover:text-primary" href="#">
+                Status
+              </a>
             </nav>
           </div>
           <div className="space-y-sm">
-            <h4 className="font-bold text-body-sm text-on-surface">Company</h4>
+            <h4 className="text-body-sm font-bold text-on-surface">Company</h4>
             <nav className="flex flex-col gap-xs">
-              <a className="text-body-sm text-secondary hover:text-primary transition-all" href="#">Privacy Policy</a>
-              <a className="text-body-sm text-secondary hover:text-primary transition-all" href="#">Terms of Service</a>
-              <a className="text-body-sm text-secondary hover:text-primary transition-all" href="#">Community</a>
+              <a className="text-body-sm text-secondary transition-all hover:text-primary" href="#">
+                Privacy Policy
+              </a>
+              <a className="text-body-sm text-secondary transition-all hover:text-primary" href="#">
+                Terms of Service
+              </a>
+              <a className="text-body-sm text-secondary transition-all hover:text-primary" href="#">
+                Community
+              </a>
             </nav>
           </div>
         </div>

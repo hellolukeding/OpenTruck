@@ -9,6 +9,7 @@ from app.api.routes.admin_payment_plans import router as admin_payment_plans_rou
 from app.api.routes.admin_dashboard import router as admin_dashboard_router
 from app.api.routes.admin_api_keys import router as admin_api_keys_router
 from app.api.routes.admin_logs import router as admin_logs_router
+from app.api.routes.admin_merchant_dashboard import router as admin_merchant_dashboard_router
 from app.api.routes.admin_node_models import router as admin_node_models_router
 from app.api.routes.admin_nodes import router as admin_nodes_router
 from app.api.routes.admin_openai_oauth import router as admin_openai_oauth_router
@@ -28,6 +29,7 @@ app.include_router(models_router, prefix="/v1")
 app.include_router(public_leaderboard_router)
 app.include_router(gateway_router)
 app.include_router(admin_dashboard_router, prefix="/admin")
+app.include_router(admin_merchant_dashboard_router, prefix="/admin")
 app.include_router(admin_announcements_router, prefix="/admin")
 app.include_router(admin_payment_channels_router, prefix="/admin")
 app.include_router(admin_payment_plans_router, prefix="/admin")

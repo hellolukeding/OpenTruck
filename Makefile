@@ -28,6 +28,7 @@ check:
 		backend/app/api/routes/admin_api_keys.py \
 		backend/app/api/routes/admin_node_models.py \
 		backend/app/api/routes/admin_logs.py \
+		backend/app/api/routes/admin_merchant_dashboard.py \
 		backend/app/api/routes/admin_openai_oauth.py \
 		backend/app/api/routes/admin_tickets.py \
 		backend/app/api/routes/admin_upstream_accounts.py \
@@ -58,6 +59,7 @@ check:
 		backend/app/schemas/announcement.py \
 		backend/app/schemas/dashboard.py \
 		backend/app/schemas/logs.py \
+		backend/app/schemas/merchant_dashboard.py \
 		backend/app/schemas/payment_catalog.py \
 		backend/app/schemas/tenant.py \
 		backend/app/schemas/node.py \
