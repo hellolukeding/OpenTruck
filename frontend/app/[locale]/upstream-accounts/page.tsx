@@ -9,6 +9,7 @@ import { UpstreamAccountRowActions } from "@/components/upstream-account-row-act
 import { UpstreamAccountSummary } from "@/components/upstream-account-summary";
 import { getAdminOverview, getTenantsPage, getUpstreamAccountsPage, type UpstreamAccount } from "@/lib/admin-api";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
+import { getUpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 
 function fmt(value: string | null, locale: "en" | "zh-CN", fallback: string) {
   if (!value) return fallback;
@@ -36,13 +37,19 @@ function ErrorBadge({ code }: { code: string | null }) {
   );
 }
 
-function RefreshDot({ has }: { has: boolean }) {
+function RefreshDot({
+  has,
+  labels,
+}: {
+  has: boolean;
+  labels: { hasRefreshToken: string; noRefreshToken: string };
+}) {
   return (
     <span
       className={`inline-block h-2 w-2 rounded-full ${
         has ? "bg-primary" : "bg-on-surface-variant/40"
       }`}
-      title={has ? "Has refresh token" : "No refresh token"}
+      title={has ? labels.hasRefreshToken : labels.noRefreshToken}
     />
   );
 }
@@ -72,6 +79,7 @@ export default async function UpstreamAccountsPage({
 
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
+  const copy = getUpstreamAccountsPageCopy(typedLocale);
   const overview = await getAdminOverview();
   const tenantOptions = await getTenantsPage({ page: 1, pageSize: 100, sortBy: "name", sortOrder: "asc" });
   const page = Number(query.page ?? "1");
@@ -94,53 +102,6 @@ export default async function UpstreamAccountsPage({
     sortOrder,
   });
   const tenantMap = new Map(tenantOptions.items.map((tenant) => [tenant.id, tenant.name]));
-
-  const t =
-    typedLocale === "zh-CN"
-      ? {
-          eyebrow: "上游账号池",
-          title: "把真实 Codex 身份当作可调度资源来运营。",
-          description:
-            "这里展示租户名下的 OpenAI OAuth 上游账号，以及优先级、冷却状态、最近使用时间和最近错误，方便你按 sub2api 的方式管理账号池。",
-          empty: "当前还没有接入任何上游账号。",
-          noteTitle: "调度说明",
-          noteBody:
-            "网关现在会优先选择更低的 priority，并避开冷却中或已过期的账号。这里的字段就是调度层正在使用的真实状态。",
-          labels: {
-            tenant: "租户",
-            status: "状态",
-            priority: "优先级",
-            lastUsed: "最近使用",
-            cooldown: "冷却至",
-            lastError: "最近错误",
-            email: "邮箱",
-            failures: "失败次数",
-            never: "从未",
-            clear: "无",
-          },
-        }
-      : {
-          eyebrow: "Upstream pool",
-          title: "Operate real Codex identities as schedulable inventory.",
-          description:
-            "This page exposes the OpenAI OAuth upstream accounts behind each tenant, including priority, cooldown state, recency, and last error so the pool behaves like sub2api rather than a blind proxy.",
-          empty: "No upstream accounts connected yet.",
-          noteTitle: "Scheduler note",
-          noteBody:
-            "The gateway now prefers lower priority accounts and skips identities that are cooling down or already expired. The table reflects the same live scheduler metadata the backend is using.",
-          labels: {
-            tenant: "Tenant",
-            status: "Status",
-            priority: "Priority",
-            lastUsed: "Last used",
-            cooldown: "Cooldown until",
-            lastError: "Last error",
-            email: "Email",
-            failures: "Failures",
-            never: "Never",
-            clear: "Clear",
-          },
-        };
 
   return (
     <AdminShell
@@ -166,7 +127,7 @@ export default async function UpstreamAccountsPage({
       <UpstreamAccountSummary
         accounts={upstreamPage.items}
         total={upstreamPage.pagination.total}
-        locale={typedLocale}
+        copy={copy.summary}
         path={`/${typedLocale}/upstream-accounts`}
         query={{
           search,
@@ -180,12 +141,12 @@ export default async function UpstreamAccountsPage({
         tenantMap={tenantMap}
       />
       <ResourceTableCard
-        eyebrow={t.eyebrow}
-        title={t.title}
-        description={t.description}
-        emptyLabel={t.empty}
-        noteTitle={t.noteTitle}
-        noteBody={t.noteBody}
+        eyebrow={copy.table.eyebrow}
+        title={copy.table.title}
+        description={copy.table.description}
+        emptyLabel={copy.table.empty}
+        noteTitle={copy.table.noteTitle}
+        noteBody={copy.table.noteBody}
         summary={[]}
         items={upstreamPage.items}
         columns={[
@@ -203,7 +164,7 @@ export default async function UpstreamAccountsPage({
           },
           {
             key: "tenant",
-            label: t.labels.tenant,
+            label: copy.table.labels.tenant,
             render: (account: UpstreamAccount) => (
               <a
                 className="text-on-surface hover:text-primary hover:underline"
@@ -215,17 +176,17 @@ export default async function UpstreamAccountsPage({
           },
           {
             key: "email",
-            label: t.labels.email,
-            render: (account: UpstreamAccount) => account.email ?? t.labels.clear,
+            label: copy.table.labels.email,
+            render: (account: UpstreamAccount) => account.email ?? copy.table.labels.clear,
           },
           {
             key: "status",
-            label: t.labels.status,
+            label: copy.table.labels.status,
             render: (account: UpstreamAccount) => <ResourceStatusBadge status={account.status} />,
           },
           {
             key: "failures",
-            label: t.labels.failures,
+            label: copy.table.labels.failures,
             render: (account: UpstreamAccount) =>
               account.consecutive_failures > 0 ? (
                 <span className="text-code-sm font-code-sm text-error">{account.consecutive_failures}</span>
@@ -235,30 +196,32 @@ export default async function UpstreamAccountsPage({
           },
           {
             key: "last_error_code",
-            label: t.labels.lastError,
+            label: copy.table.labels.lastError,
             render: (account: UpstreamAccount) => <ErrorBadge code={account.last_error_code} />,
           },
           {
             key: "priority",
-            label: t.labels.priority,
+            label: copy.table.labels.priority,
             render: (account: UpstreamAccount) => (
               <span className="text-code-sm font-code-sm">{account.priority}</span>
             ),
           },
           {
             key: "last_used_at",
-            label: t.labels.lastUsed,
-            render: (account: UpstreamAccount) => fmt(account.last_used_at, typedLocale, t.labels.never),
+            label: copy.table.labels.lastUsed,
+            render: (account: UpstreamAccount) => fmt(account.last_used_at, typedLocale, copy.table.labels.never),
           },
           {
             key: "cooldown_until",
-            label: t.labels.cooldown,
-            render: (account: UpstreamAccount) => fmt(account.cooldown_until, typedLocale, t.labels.clear),
+            label: copy.table.labels.cooldown,
+            render: (account: UpstreamAccount) => fmt(account.cooldown_until, typedLocale, copy.table.labels.clear),
           },
           {
             key: "refresh",
-            label: "Refresh",
-            render: (account: UpstreamAccount) => <RefreshDot has={account.has_refresh_token} />,
+            label: copy.table.labels.refresh,
+            render: (account: UpstreamAccount) => (
+              <RefreshDot has={account.has_refresh_token} labels={copy.table.labels} />
+            ),
           },
           {
             key: "actions",

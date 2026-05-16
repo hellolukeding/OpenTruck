@@ -1,11 +1,12 @@
 import Link from "next/link";
 
 import type { UpstreamAccount } from "@/lib/admin-api";
+import type { UpstreamAccountsPageCopy } from "@/lib/upstream-accounts-page-copy";
 
 type Props = {
   accounts: UpstreamAccount[];
   total: number;
-  locale: "en" | "zh-CN";
+  copy: UpstreamAccountsPageCopy["summary"];
   path: string;
   query: {
     search?: string;
@@ -19,9 +20,7 @@ type Props = {
   tenantMap: Map<string, string>;
 };
 
-export function UpstreamAccountSummary({ accounts, total, locale, path, query, tenantMap }: Props) {
-  const t = (en: string, zh: string) => (locale === "zh-CN" ? zh : en);
-
+export function UpstreamAccountSummary({ accounts, total, copy, path, query, tenantMap }: Props) {
   const active = accounts.filter((a) => a.status === "active").length;
   const cooling = accounts.filter((a) => a.cooldown_until !== null).length;
   const disabled = accounts.length - active;
@@ -51,51 +50,51 @@ export function UpstreamAccountSummary({ accounts, total, locale, path, query, t
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="text-code-sm text-on-surface-variant">
-            {t("Total accounts", "账号总数")}
+            {copy.totalAccounts}
           </p>
           <p className="mt-1 font-headline-lg text-headline-lg text-primary">{total}</p>
           <p className="text-code-sm text-on-surface-variant">
-            {t("In the tenant pool", "租户池内记录数")}
+            {copy.inTenantPool}
           </p>
         </div>
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="flex items-center gap-1.5 text-code-sm text-on-surface-variant">
             <span className="h-2 w-2 rounded-full bg-primary" />
-            {t("Active", "活跃")}
+            {copy.active}
           </p>
           <p className="mt-1 font-headline-lg text-headline-lg text-primary">{active}</p>
           <p className="text-code-sm text-on-surface-variant">
-            {t("Eligible for routing", "可参与路由调度")}
+            {copy.eligibleForRouting}
           </p>
         </div>
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="flex items-center gap-1.5 text-code-sm text-on-surface-variant">
             <span className="h-2 w-2 rounded-full bg-tertiary" />
-            {t("Cooling", "冷却中")}
+            {copy.cooling}
           </p>
           <p className="mt-1 font-headline-lg text-headline-lg text-primary">{cooling}</p>
           <p className="text-code-sm text-on-surface-variant">
-            {t("Temporarily removed", "暂时摘除等待恢复")}
+            {copy.temporarilyRemoved}
           </p>
         </div>
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="flex items-center gap-1.5 text-code-sm text-on-surface-variant">
             <span className="h-2 w-2 rounded-full text-on-surface-variant bg-on-surface-variant" />
-            {t("Disabled", "禁用")}
+            {copy.disabled}
           </p>
           <p className="mt-1 font-headline-lg text-headline-lg text-primary">{disabled}</p>
           <p className="text-code-sm text-on-surface-variant">
-            {t("Manually stopped", "手动停止")}
+            {copy.manuallyStopped}
           </p>
         </div>
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="flex items-center gap-1.5 text-code-sm text-on-surface-variant">
             <span className="h-2 w-2 rounded-full bg-[#f59e0b]" />
-            {t("Expiring soon", "即将过期")}
+            {copy.expiringSoon}
           </p>
           <p className="mt-1 font-headline-lg text-headline-lg text-primary">{expiringSoon}</p>
           <p className="text-code-sm text-on-surface-variant">
-            {t("Token needs refresh within 24h", "24 小时内需要刷新 token")}
+            {copy.tokenNeedsRefresh}
           </p>
         </div>
       </div>
@@ -128,7 +127,7 @@ export function UpstreamAccountSummary({ accounts, total, locale, path, query, t
         {topErrors.length > 0 ? (
           <div className="rounded-xl border border-outline-variant bg-surface p-4">
             <p className="text-code-sm uppercase tracking-wide text-on-surface-variant">
-              {t("Top errors (current page)", "高频错误（当前页）")}
+              {copy.topErrors}
             </p>
             <div className="mt-2 space-y-1.5">
               {topErrors.map(([code, count]) => (
@@ -147,14 +146,14 @@ export function UpstreamAccountSummary({ accounts, total, locale, path, query, t
           <div className="rounded-xl border border-outline-variant bg-surface p-4">
             <p className="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
               <span className="material-symbols-outlined text-[16px]">check_circle</span>
-              {t("No recent errors on this page.", "当前页暂无错误记录。")}
+              {copy.noRecentErrors}
             </p>
           </div>
         )}
 
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="text-code-sm uppercase tracking-wide text-on-surface-variant">
-            {t("Top tenants (current page)", "租户视角（当前页）")}
+            {copy.topTenants}
           </p>
           <div className="mt-2 space-y-1.5">
             {topTenants.length > 0 ? topTenants.map(([tenantId, count]) => (
@@ -168,7 +167,7 @@ export function UpstreamAccountSummary({ accounts, total, locale, path, query, t
               </Link>
             )) : (
               <div className="text-body-sm text-on-surface-variant">
-                {t("No tenant distribution yet.", "当前页暂无租户分布。")}
+                {copy.noTenantDistribution}
               </div>
             )}
           </div>
