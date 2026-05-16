@@ -3,17 +3,19 @@
 import Link from "next/link";
 
 import { MerchantModelsTableSection } from "@/components/merchant-dashboard-models";
+import { EmptyState, formatMerchantDate, StatusPill } from "@/components/merchant-dashboard-shared";
 import type { MerchantDashboardData } from "@/lib/admin-console-api";
+import type { MerchantPageCopy } from "@/lib/merchant-page-copy";
 
-export function MerchantSubNav({ locale }: { locale: string }) {
+export function MerchantSubNav({ locale, copy }: { locale: string; copy: MerchantPageCopy["subNav"] }) {
   const tabs = [
-    { label: "OpenTruck 智能路由", icon: "bolt", href: `/${locale}/merchant`, active: true },
-    { label: "总览", icon: "grid_view", href: `/${locale}` },
-    { label: "令牌", icon: "key", href: `/${locale}/api-keys` },
-    { label: "钱包", icon: "account_balance_wallet", href: `/${locale}/wallet` },
-    { label: "日志", icon: "article", href: `/${locale}/logs` },
-    { label: "工单", icon: "support_agent", href: `/${locale}/tickets` },
-    { label: "设置", icon: "settings", href: `/${locale}/upstream-accounts` },
+    { label: copy.home, icon: "bolt", href: `/${locale}/merchant`, active: true },
+    { label: copy.overview, icon: "grid_view", href: `/${locale}` },
+    { label: copy.keys, icon: "key", href: `/${locale}/api-keys` },
+    { label: copy.wallet, icon: "account_balance_wallet", href: `/${locale}/wallet` },
+    { label: copy.logs, icon: "article", href: `/${locale}/logs` },
+    { label: copy.tickets, icon: "support_agent", href: `/${locale}/tickets` },
+    { label: copy.settings, icon: "settings", href: `/${locale}/upstream-accounts` },
   ];
 
   return (
@@ -41,9 +43,11 @@ export function MerchantSubNav({ locale }: { locale: string }) {
 export function MerchantHero({
   dashboard,
   locale,
+  copy,
 }: {
   dashboard: MerchantDashboardData | null;
   locale: string;
+  copy: MerchantPageCopy["hero"];
 }) {
   return (
     <section className="relative overflow-hidden rounded-xl border border-outline-variant/30 bg-primary-container text-on-primary-container shadow-sm">
@@ -53,22 +57,22 @@ export function MerchantHero({
           href={`/${locale}/api-keys#new-api-key`}
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          创建 OpenTruck Key
+          {copy.createKey}
         </Link>
       </div>
       <div className="p-lg pt-xl">
         <div className="mb-xs flex items-center gap-sm">
           <span className="material-symbols-outlined text-display">bolt</span>
-          <h1 className="text-headline-lg font-headline-lg">{dashboard?.tenant_name ?? "OpenTruck"}</h1>
+          <h1 className="text-headline-lg font-headline-lg">{dashboard?.tenant_name ?? copy.defaultTenant}</h1>
         </div>
         <p className="max-w-3xl text-body-md opacity-90">
-          自动路由到最优商家，故障自动切换，统一管理令牌、收藏商家和当前可用模型目录。
+          {copy.summary}
         </p>
       </div>
       <div className="grid grid-cols-3 border-t border-white/20">
-        <HeroMetric label="API Keys" value={dashboard?.total_key_count ?? 0} />
-        <HeroMetric label="已启用" value={dashboard?.active_key_count ?? 0} bordered />
-        <HeroMetric label="可用模型" value={dashboard?.available_model_count ?? 0} bordered />
+        <HeroMetric label={copy.totalKeys} value={dashboard?.total_key_count ?? 0} />
+        <HeroMetric label={copy.activeKeys} value={dashboard?.active_key_count ?? 0} bordered />
+        <HeroMetric label={copy.availableModels} value={dashboard?.available_model_count ?? 0} bordered />
       </div>
     </section>
   );
@@ -94,9 +98,11 @@ function HeroMetric({
 export function MerchantKeysCard({
   dashboard,
   locale,
+  copy,
 }: {
   dashboard: MerchantDashboardData | null;
   locale: string;
+  copy: MerchantPageCopy["keys"];
 }) {
   const keys = dashboard?.keys ?? [];
 
@@ -104,9 +110,9 @@ export function MerchantKeysCard({
     <section className="overflow-hidden rounded-xl border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
       <SectionHeader
         icon="key"
-        title="OpenTruck Keys"
+        title={copy.title}
         count={keys.length}
-        actionLabel="新建"
+        actionLabel={copy.action}
         actionHref={`/${locale}/api-keys#new-api-key`}
       />
       <div className="space-y-md p-lg">
@@ -121,12 +127,12 @@ export function MerchantKeysCard({
                   <div className="flex flex-wrap items-center gap-md">
                     <span className="text-headline-md font-headline-md">{item.name}</span>
                     <StatusPill tone={item.status === "active" ? "success" : "neutral"}>
-                      {item.status === "active" ? "已启用" : item.status}
+                      {item.status === "active" ? copy.active : item.status}
                     </StatusPill>
                     <span className="text-body-sm text-on-surface-variant">{item.scope_label}</span>
                   </div>
                   <p className="text-body-sm font-medium text-on-surface-variant">
-                    {item.primary_model ?? "未限制模型"}
+                    {item.primary_model ?? copy.noPrimaryModel}
                   </p>
                 </div>
                 <div className="flex items-center gap-sm text-on-surface-variant">
@@ -159,12 +165,12 @@ export function MerchantKeysCard({
                 </div>
               </div>
               <p className="text-body-sm text-on-surface-variant opacity-70">
-                {item.last_used_at ? `最近使用 ${formatDate(item.last_used_at)}` : "暂未使用"}
+                {item.last_used_at ? copy.lastUsed(formatMerchantDate(locale, item.last_used_at)) : copy.neverUsed}
               </p>
             </div>
           ))
         ) : (
-          <EmptyState text="还没有可用的 OpenTruck Key，先创建第一枚令牌。" />
+          <EmptyState text={copy.empty} />
         )}
       </div>
     </section>
@@ -174,9 +180,11 @@ export function MerchantKeysCard({
 export function MerchantBookmarks({
   dashboard,
   locale,
+  copy,
 }: {
   dashboard: MerchantDashboardData | null;
   locale: string;
+  copy: MerchantPageCopy["bookmarks"];
 }) {
   const bookmarks = dashboard?.bookmarks ?? [];
 
@@ -186,11 +194,11 @@ export function MerchantBookmarks({
         <div className="flex items-center gap-sm">
           <span className="material-symbols-outlined text-primary">storefront</span>
           <h2 className="text-headline-md font-headline-md">
-            已收藏商家 <span className="ml-xs text-secondary">{bookmarks.length}</span>
+            {copy.title} <span className="ml-xs text-secondary">{bookmarks.length}</span>
           </h2>
         </div>
         <Link className="flex items-center gap-xs text-body-sm text-primary hover:underline" href="/merchant">
-          浏览商家
+          {copy.browse}
           <span className="material-symbols-outlined text-[16px]">open_in_new</span>
         </Link>
       </div>
@@ -207,7 +215,7 @@ export function MerchantBookmarks({
               <div>
                 <p className="text-body-lg font-headline-md">{item.name}</p>
                 <p className="text-body-sm text-on-surface-variant">
-                  {item.plan_type ?? "标准计划"} / {item.status}
+                  {item.plan_type ?? copy.defaultPlan} / {item.status}
                 </p>
               </div>
               <Link
@@ -219,7 +227,7 @@ export function MerchantBookmarks({
             </div>
           ))
         ) : (
-          <EmptyState text="还没有收藏商家，可以先从商家广场添加常用上游。" />
+          <EmptyState text={copy.empty} />
         )}
       </div>
     </section>
@@ -229,11 +237,13 @@ export function MerchantBookmarks({
 export function MerchantModelsTable({
   dashboard,
   locale,
+  copy,
 }: {
   dashboard: MerchantDashboardData | null;
   locale: string;
+  copy: MerchantPageCopy["models"];
 }) {
-  return <MerchantModelsTableSection dashboard={dashboard} locale={locale} />;
+  return <MerchantModelsTableSection dashboard={dashboard} locale={locale} copy={copy} />;
 }
 
 function SectionHeader({
@@ -269,29 +279,4 @@ function SectionHeader({
       ) : null}
     </div>
   );
-}
-
-function StatusPill({ children, tone }: { children: string; tone: "success" | "neutral" }) {
-  return (
-    <span
-      className={`rounded px-sm py-xs text-label-md ${
-        tone === "success" ? "bg-emerald-100 text-emerald-600" : "bg-surface-container text-on-surface-variant"
-      }`}
-    >
-      {children}
-    </span>
-  );
-}
-
-function EmptyState({ text }: { text: string }) {
-  return <div className="rounded-xl bg-surface px-lg py-xl text-body-md text-on-surface-variant">{text}</div>;
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
 }

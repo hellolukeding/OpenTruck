@@ -3,13 +3,16 @@
 import Link from "next/link";
 
 import type { MerchantDashboardData, MerchantModel } from "@/lib/admin-console-api";
+import type { MerchantPageCopy } from "@/lib/merchant-page-copy";
 
 export function MerchantModelsTableSection({
   dashboard,
   locale,
+  copy,
 }: {
   dashboard: MerchantDashboardData | null;
   locale: string;
+  copy: MerchantPageCopy["models"];
 }) {
   const models = dashboard?.models ?? [];
   const grouped = groupModels(models);
@@ -19,7 +22,7 @@ export function MerchantModelsTableSection({
       <div className="flex items-center gap-sm border-b border-outline-variant/20 px-lg py-md">
         <span className="material-symbols-outlined text-primary">model_training</span>
         <h2 className="text-headline-md font-headline-md">
-          可用模型 <span className="ml-xs text-secondary">{models.length}</span>
+          {copy.title} <span className="ml-xs text-secondary">{models.length}</span>
         </h2>
       </div>
       <div className="overflow-x-auto">
@@ -27,13 +30,13 @@ export function MerchantModelsTableSection({
           <thead>
             <tr className="bg-surface-container-low text-left">
               <th className="px-lg py-sm text-label-md font-medium tracking-wider text-secondary uppercase">
-                Model Name
+                {copy.modelName}
               </th>
               <th className="px-lg py-sm text-right text-label-md font-medium tracking-wider text-secondary uppercase">
-                Status / Pricing
+                {copy.statusPricing}
               </th>
               <th className="px-lg py-sm text-right text-label-md font-medium tracking-wider text-secondary uppercase">
-                Merchants
+                {copy.merchants}
               </th>
             </tr>
           </thead>
@@ -57,13 +60,13 @@ export function MerchantModelsTableSection({
                       </Link>
                     </td>
                     <td className="px-lg py-md text-right">
-                      <span className="mr-sm text-secondary">最低价格:</span>
+                      <span className="mr-sm text-secondary">{copy.lowestPrice}</span>
                       <span className={model.free ? "font-bold text-emerald-500" : "font-bold text-primary"}>
-                        {formatPrice(model.lowest_price, model.free)}
+                        {formatPrice(model.lowest_price, model.free, copy)}
                       </span>
                     </td>
                     <td className="px-lg py-md text-right text-on-surface-variant">
-                      {model.merchant_count} 个商家提供
+                      {copy.merchantsProvide(model.merchant_count)}
                     </td>
                   </tr>
                 ))}
@@ -73,7 +76,7 @@ export function MerchantModelsTableSection({
             <tbody>
               <tr>
                 <td className="px-lg py-xl text-center text-body-md text-on-surface-variant" colSpan={3}>
-                  暂无可用模型，等上游节点同步后这里会自动出现。
+                  {copy.empty}
                 </td>
               </tr>
             </tbody>
@@ -94,9 +97,9 @@ function groupModels(models: MerchantModel[]) {
   return Array.from(grouped.entries());
 }
 
-function formatPrice(value: string, free: boolean) {
+function formatPrice(value: string, free: boolean, copy: MerchantPageCopy["models"]) {
   if (free || Number(value) === 0) {
-    return "免费/M";
+    return copy.freePerMillion;
   }
-  return `$${Number(value).toFixed(2)}/M`;
+  return copy.paidPerMillion(`$${Number(value).toFixed(2)}`);
 }
