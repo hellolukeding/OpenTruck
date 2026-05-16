@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { LogsPageCopy } from "@/lib/logs-page-copy";
 
 type Props = {
   path: string;
@@ -10,34 +11,35 @@ type Props = {
     startAt?: string;
     endAt?: string;
   };
+  copy: LogsPageCopy["filters"];
 };
 
-export function AdminLogsFilters({ path, query }: Props) {
+export function AdminLogsFilters({ path, query, copy }: Props) {
   return (
     <form action={path} className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.1fr_0.8fr_0.8fr_auto_auto]">
-      <InputField name="search" defaultValue={query.search} placeholder="按 key、模型、response id 搜索" />
-      <InputField name="startAt" defaultValue={query.startAt} placeholder="开始时间 ISO" />
-      <InputField name="endAt" defaultValue={query.endAt} placeholder="结束时间 ISO" />
-      <InputField name="model" defaultValue={query.model} placeholder="模型名称" />
-      <InputField name="requestKind" defaultValue={query.requestKind} placeholder="请求类型" />
+      <InputField name="search" defaultValue={query.search} placeholder={copy.searchPlaceholder} />
+      <InputField name="startAt" defaultValue={query.startAt} placeholder={copy.startAtPlaceholder} />
+      <InputField name="endAt" defaultValue={query.endAt} placeholder={copy.endAtPlaceholder} />
+      <InputField name="model" defaultValue={query.model} placeholder={copy.modelPlaceholder} />
+      <InputField name="requestKind" defaultValue={query.requestKind} placeholder={copy.requestKindPlaceholder} />
       <select
         name="status"
         defaultValue={query.status ?? ""}
         className="h-12 rounded-[14px] border border-outline-variant/20 bg-surface px-4 text-[0.94rem] text-on-surface dark:bg-surface-container-low"
       >
-        <option value="">全部状态</option>
+        <option value="">{copy.allStatuses}</option>
         <option value="succeeded">succeeded</option>
         <option value="failed">failed</option>
       </select>
       <div className="flex items-center gap-3">
         <button className="rounded-[14px] bg-primary-container px-4 py-3 text-[0.9rem] font-medium text-on-primary">
-          查询
+          {copy.submit}
         </button>
         <Link
           href={path}
           className="rounded-[14px] border border-outline-variant/20 px-4 py-3 text-[0.9rem] text-on-surface"
         >
-          重置
+          {copy.reset}
         </Link>
       </div>
     </form>

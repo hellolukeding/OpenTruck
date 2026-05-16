@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin-shell";
 import { getGatewayLogsPage } from "@/lib/admin-console-api";
 import { getAdminOverview } from "@/lib/admin-api";
+import { getLogsPageCopy } from "@/lib/logs-page-copy";
 import { getDictionary, isSupportedLocale, type Locale } from "@/lib/i18n";
 import { PaginationControls } from "@/components/pagination-controls";
 
@@ -34,6 +35,7 @@ export default async function LogsPage({
 
   const typedLocale = locale as Locale;
   const dictionary = getDictionary(typedLocale);
+  const copy = getLogsPageCopy(typedLocale);
   const overview = await getAdminOverview();
   const page = Number(query.page ?? "1");
   const search = query.search?.trim() || undefined;
@@ -74,6 +76,7 @@ export default async function LogsPage({
         logsPage={logsPage}
         path={path}
         query={{ search, status, model, requestKind, startAt, endAt }}
+        copy={copy}
       />
       <PaginationControls
         locale={typedLocale}
