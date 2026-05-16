@@ -7,8 +7,9 @@ import { FormStatus } from "@/components/form-status";
 import type { PaymentOrder } from "@/lib/admin-console-api";
 import { type ConsoleActionState } from "@/lib/admin-console-actions";
 import { settlePaymentOrderAction } from "@/lib/admin-console-wallet-actions";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 
-export function AdminWalletOrderRow({ order }: { order: PaymentOrder }) {
+export function AdminWalletOrderRow({ order, copy }: { order: PaymentOrder; copy: WalletPageCopy["orders"] }) {
   const initialState: ConsoleActionState = { status: "idle" };
   const [state, action, pending] = useActionState(settlePaymentOrderAction, initialState);
 
@@ -18,7 +19,7 @@ export function AdminWalletOrderRow({ order }: { order: PaymentOrder }) {
         <div>
           <p className="text-[0.92rem] font-medium text-on-surface">{order.order_number}</p>
           <p className="mt-1 text-[0.8rem] text-on-surface-variant">
-            {order.payment_provider ?? "manual"} / {order.status}
+            {order.payment_provider ?? copy.manualProvider} / {order.status}
           </p>
         </div>
         <p className="text-[0.92rem] font-semibold text-on-surface">¥{Number(order.amount).toFixed(2)}</p>
@@ -37,11 +38,11 @@ export function AdminWalletOrderRow({ order }: { order: PaymentOrder }) {
               disabled={pending}
               className="rounded-[12px] bg-primary-container px-3 py-2 text-[0.82rem] font-medium text-on-primary disabled:opacity-50"
             >
-              {pending ? "入账中..." : "手动入账"}
+              {pending ? copy.settling : copy.settle}
             </button>
             <FormStatus status={state.status} message={state.message} />
           </form>
-          <AdminWalletOrderStatusForm order={order} />
+          <AdminWalletOrderStatusForm order={order} copy={copy} />
         </>
       ) : null}
     </div>

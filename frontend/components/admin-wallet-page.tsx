@@ -6,6 +6,7 @@ import { AdminWalletOrderForm } from "@/components/admin-wallet-order-form";
 import { AdminWalletOrderRow } from "@/components/admin-wallet-order-row";
 import { AdminWalletPlanPurchase } from "@/components/admin-wallet-plan-purchase";
 import type { WalletOverviewData } from "@/lib/admin-console-api";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 
 function StatPanel({
   title,
@@ -48,7 +49,15 @@ function StatPanel({
   );
 }
 
-export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null }) {
+export function AdminWalletPage({
+  wallet,
+  locale,
+  copy,
+}: {
+  wallet: WalletOverviewData | null;
+  locale: string;
+  copy: WalletPageCopy;
+}) {
   const amountOptions = ["68 ￥", "136 ￥", "340 ￥", "680 ￥", "1360 ￥", "3400 ￥"];
   const balance = wallet ? formatMoney(wallet.balance) : "¥0.00";
   const spent = wallet ? formatMoney(wallet.total_spent) : "¥0.00";
@@ -66,22 +75,20 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
             <WalletCards className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-[1.55rem] font-semibold text-on-surface">账户充值</h2>
-            <p className="mt-1 text-[0.9rem] text-on-surface-variant">多种充值方式，安全便捷</p>
+            <h2 className="text-[1.55rem] font-semibold text-on-surface">{copy.header.title}</h2>
+            <p className="mt-1 text-[0.9rem] text-on-surface-variant">{copy.header.subtitle}</p>
           </div>
         </div>
-        <button className="rounded-full bg-primary-container px-4 py-2 text-[0.84rem] font-medium text-on-primary">
-          账单
-        </button>
+        <button className="rounded-full bg-primary-container px-4 py-2 text-[0.84rem] font-medium text-on-primary">{copy.header.billing}</button>
       </div>
 
       {/* Stats panel */}
       <StatPanel
-        title="账户统计"
+        title={copy.stats.accountStats}
         values={[
-          { label: "当前余额", value: balance, icon: "account_balance_wallet" },
-          { label: "历史消耗", value: spent, icon: "monitoring" },
-          { label: "请求次数", value: requestCount, icon: "bar_chart" },
+          { label: copy.stats.currentBalance, value: balance, icon: "account_balance_wallet" },
+          { label: copy.stats.historicalSpend, value: spent, icon: "monitoring" },
+          { label: copy.stats.requestCount, value: requestCount, icon: "bar_chart" },
         ]}
       />
 
@@ -94,28 +101,29 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
               tenantId={wallet.tenant_id}
               plans={wallet.payment_plans}
               channels={wallet.payment_channels}
+              copy={copy.purchase}
             />
           ) : null}
 
           <div>
             <p className="text-[0.95rem] font-semibold text-on-surface">
-              快速充值提示 <span className="text-[0.82rem] text-on-surface-variant">(1 $ = 6.80 ￥)</span>
+              {copy.recharge.quickHint} <span className="text-[0.82rem] text-on-surface-variant">{copy.recharge.exchangeRate}</span>
             </p>
             <div className="mt-3 rounded-[16px] border border-[#f2cb6b] bg-[#fff8e7] px-4 py-3 text-[0.9rem] text-[#8a4f11]">
-              充值以及大客户经理微信: LHSSOS
+              {copy.recharge.vipHint}
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {amountOptions.map((item) => (
                 <div
                   key={item}
                   className="rounded-[18px] border border-outline-variant/20 bg-surface px-4 py-4 dark:bg-surface-container-low"
-                >
+                  >
                   <p className="flex items-center gap-2 text-[1.05rem] font-semibold text-on-surface">
                     <CircleDollarSign className="h-5 w-5" />
                     {item}
                   </p>
                   <p className="mt-3 text-[0.84rem] leading-6 text-on-surface-variant">
-                    实付 {item.replace(" ￥", ".00")}，节省 ¥0.00
+                    {copy.recharge.paidAmount(item.replace(" ￥", ".00"))}，{copy.recharge.savedAmount}
                   </p>
                 </div>
               ))}
@@ -125,16 +133,16 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
           {/* Redeem code */}
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
             <div className="border-b border-outline-variant/10 px-5 py-4 text-[1rem] font-semibold text-on-surface">
-              兑换码充值
+              {copy.recharge.redeemTitle}
             </div>
             <div className="px-5 py-5">
               <div className="flex overflow-hidden rounded-[16px] border border-outline-variant/20">
                 <div className="flex flex-1 items-center gap-3 bg-surface px-4 py-3 text-on-surface-variant dark:bg-surface-container-low">
                   <Gift className="h-4 w-4" />
-                  请输入兑换码
+                  {copy.recharge.redeemPlaceholder}
                 </div>
                 <button className="bg-primary-container px-5 text-[0.88rem] font-medium text-on-primary">
-                  兑换额度
+                  {copy.recharge.redeemAction}
                 </button>
               </div>
             </div>
@@ -143,7 +151,7 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
 
         {/* Right column: payment methods + affiliate */}
         <div className="space-y-6">
-          <AdminWalletCatalogPanel wallet={wallet} />
+          <AdminWalletCatalogPanel wallet={wallet} copy={copy.catalog} formsCopy={copy.forms} />
 
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
             <div className="border-b border-outline-variant/10 px-5 py-4">
@@ -152,38 +160,34 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
                   <BadgeDollarSign className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-[1.55rem] font-semibold text-on-surface">平台成长计划</h2>
-                  <p className="mt-1 text-[0.9rem] text-on-surface-variant">邀请好友，持续获得消费佣金</p>
+                  <h2 className="text-[1.55rem] font-semibold text-on-surface">{copy.affiliate.title}</h2>
+                  <p className="mt-1 text-[0.9rem] text-on-surface-variant">{copy.affiliate.subtitle}</p>
                 </div>
               </div>
             </div>
             <div className="p-5">
               <StatPanel
-                title="佣金统计"
-                actions={["提现", "划转到余额"]}
+                title={copy.affiliate.commissionStats}
+                actions={[copy.affiliate.withdraw, copy.affiliate.transferToBalance]}
                 values={[
-                  { label: "累计充值", value: rechargeTotal, icon: "monitoring" },
-                  { label: "成功请求", value: successCount, icon: "bar_chart" },
-                  { label: "失败请求", value: failedCount, icon: "group" },
+                  { label: copy.affiliate.totalRecharged, value: rechargeTotal, icon: "monitoring" },
+                  { label: copy.affiliate.successfulRequests, value: successCount, icon: "bar_chart" },
+                  { label: copy.affiliate.failedRequests, value: failedCount, icon: "group" },
                 ]}
               />
               <div className="mt-5 overflow-hidden rounded-[16px] border border-outline-variant/20">
                 <div className="grid grid-cols-[140px_1fr_96px]">
-                  <div className="bg-surface-container-low px-4 py-3 text-[0.9rem] font-medium text-on-surface-variant">邀请链接</div>
+                  <div className="bg-surface-container-low px-4 py-3 text-[0.9rem] font-medium text-on-surface-variant">{copy.affiliate.inviteLink}</div>
                   <div className="truncate bg-surface px-4 py-3 text-[0.9rem] text-on-surface">https://subrouter.ai/register?aff=40Eq</div>
                   <button className="bg-primary-container px-4 text-[0.9rem] font-medium text-on-primary">
-                    <span className="inline-flex items-center gap-2"><Copy className="h-4 w-4" />复制</span>
+                    <span className="inline-flex items-center gap-2"><Copy className="h-4 w-4" />{copy.affiliate.copy}</span>
                   </button>
                 </div>
               </div>
               <div className="mt-5 rounded-[16px] border border-outline-variant/20">
-                <div className="border-b border-outline-variant/10 px-4 py-3 text-[0.95rem] font-medium text-on-surface-variant">佣金说明</div>
+                <div className="border-b border-outline-variant/10 px-4 py-3 text-[0.95rem] font-medium text-on-surface-variant">{copy.affiliate.commissionNotes}</div>
                 <div className="space-y-4 px-4 py-4 text-[0.9rem] text-on-surface">
-                  {[
-                    "邀请好友注册后，好友每次消费您都将获得 2.5% 的佣金",
-                    "佣金可申请提现或划转到账户余额使用",
-                    "邀请的好友越多，持续收益越高",
-                  ].map((item) => (
+                  {copy.affiliate.notes.map((item) => (
                     <p key={item} className="flex items-start gap-3">
                       <span className="mt-1 h-3 w-3 rounded-full bg-primary-container" />
                       <span>{item}</span>
@@ -192,11 +196,11 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
                 </div>
               </div>
               <div className="mt-5 rounded-[16px] border border-outline-variant/20">
-                <div className="border-b border-outline-variant/10 px-4 py-3 text-[0.95rem] font-medium text-on-surface-variant">KOL 合作</div>
+                <div className="border-b border-outline-variant/10 px-4 py-3 text-[0.95rem] font-medium text-on-surface-variant">{copy.affiliate.kolTitle}</div>
                 <div className="flex items-center justify-between gap-4 px-4 py-4">
-                  <p className="text-[0.9rem] text-on-surface">申请成为 KOL，获得更高返佣比例</p>
+                  <p className="text-[0.9rem] text-on-surface">{copy.affiliate.kolDescription}</p>
                   <button className="rounded-full bg-primary-container px-4 py-2 text-[0.84rem] font-medium text-on-primary">
-                    <span className="inline-flex items-center gap-2"><Crown className="h-4 w-4" />申请成为 KOL</span>
+                    <span className="inline-flex items-center gap-2"><Crown className="h-4 w-4" />{copy.affiliate.applyKol}</span>
                   </button>
                 </div>
               </div>
@@ -207,26 +211,26 @@ export function AdminWalletPage({ wallet }: { wallet: WalletOverviewData | null 
 
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-6">
-          {wallet ? <AdminWalletOrderForm tenantId={wallet.tenant_id} /> : null}
+          {wallet ? <AdminWalletOrderForm tenantId={wallet.tenant_id} copy={copy.orders} /> : null}
           <div className="rounded-[20px] border border-outline-variant/20 bg-surface dark:bg-surface-container-low">
             <div className="border-b border-outline-variant/10 px-5 py-4 text-[1rem] font-semibold text-on-surface">
-              最近充值单
+              {copy.orders.recentOrders}
             </div>
             <div className="space-y-3 px-5 py-5">
               {wallet && wallet.recent_orders.length > 0 ? (
-                wallet.recent_orders.map((order) => <AdminWalletOrderRow key={order.id} order={order} />)
+                wallet.recent_orders.map((order) => <AdminWalletOrderRow key={order.id} order={order} copy={copy.orders} />)
               ) : (
-                <div className="py-8 text-center text-[0.92rem] text-on-surface-variant">暂无充值订单</div>
+                <div className="py-8 text-center text-[0.92rem] text-on-surface-variant">{copy.orders.emptyOrders}</div>
               )}
             </div>
           </div>
         </div>
         <AdminWalletHistoryCard
-          title="最近账本记录"
-          empty="暂无账本变动"
+          title={copy.history.title}
+          empty={copy.history.empty}
           items={(wallet?.recent_entries ?? []).map((item) => ({
             title: item.description,
-            meta: `${item.direction} / 余额 ${formatMoney(item.balance_after)}`,
+            meta: copy.history.balanceMeta(item.direction, formatMoney(item.balance_after)),
             value: formatMoney(item.amount),
           }))}
         />

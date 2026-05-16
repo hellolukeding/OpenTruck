@@ -6,6 +6,7 @@ import { FormStatus } from "@/components/form-status";
 import type { PaymentChannel, PaymentPlan } from "@/lib/admin-console-api";
 import { type ConsoleActionState } from "@/lib/admin-console-actions";
 import { createPaymentOrderFromPlanAction } from "@/lib/admin-console-wallet-actions";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 
 const idleState: ConsoleActionState = { status: "idle" };
 
@@ -13,10 +14,12 @@ export function AdminWalletPlanPurchase({
   tenantId,
   plans,
   channels,
+  copy,
 }: {
   tenantId: string;
   plans: PaymentPlan[];
   channels: PaymentChannel[];
+  copy: WalletPageCopy["purchase"];
 }) {
   const [selectedPlanId, setSelectedPlanId] = useState(plans[0]?.id ?? "");
   const [selectedChannelId, setSelectedChannelId] = useState(channels[0]?.id ?? "");
@@ -27,7 +30,7 @@ export function AdminWalletPlanPurchase({
       <input type="hidden" name="tenant_id" value={tenantId} />
       <input type="hidden" name="plan_id" value={selectedPlanId} />
       <input type="hidden" name="channel_id" value={selectedChannelId} />
-      <h3 className="text-[1rem] font-semibold text-on-surface">按套餐下单</h3>
+      <h3 className="text-[1rem] font-semibold text-on-surface">{copy.title}</h3>
       <div className="grid gap-3 md:grid-cols-2">
         {plans.map((plan) => (
           <button
@@ -43,7 +46,7 @@ export function AdminWalletPlanPurchase({
             <p className="text-[1rem] font-semibold text-on-surface">{plan.name}</p>
             <p className="mt-2 text-[1.2rem] font-semibold text-on-surface">¥{Number(plan.price_amount).toFixed(0)}</p>
             <p className="mt-1 text-[0.82rem] text-on-surface-variant">
-              入账 ¥{Number(plan.credit_amount).toFixed(0)} / 额度 {plan.quota_units.toLocaleString()}
+              {copy.creditAmount(Number(plan.credit_amount).toFixed(0), plan.quota_units.toLocaleString())}
             </p>
           </button>
         ))}
@@ -66,7 +69,7 @@ export function AdminWalletPlanPurchase({
       </div>
       <input
         name="note"
-        placeholder="备注，例如自动购买 Growth 680"
+        placeholder={copy.notePlaceholder}
         className="h-12 w-full rounded-[14px] border border-outline-variant/20 bg-surface-container-low px-4 text-[0.9rem] text-on-surface dark:bg-surface"
       />
       <FormStatus status={state.status} message={state.message} />
@@ -75,7 +78,7 @@ export function AdminWalletPlanPurchase({
         disabled={pending || !selectedPlanId}
         className="rounded-[14px] bg-primary-container px-4 py-3 text-[0.9rem] font-medium text-on-primary disabled:opacity-50"
       >
-        {pending ? "创建中..." : "创建套餐订单"}
+        {pending ? copy.submitting : copy.submit}
       </button>
     </form>
   );

@@ -145,6 +145,10 @@
 - 已将 Merchant Console 的主要页面文案切到 `en / zh-CN` 双语输出，并补齐商家页日期格式与模型价格/数量文案的本地化
 - 已新增 `merchant-dashboard-shared.tsx` 提取商家控制台共享小组件与日期格式化工具，继续满足前端单文件不超过 300 行的约束
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Merchant Console 文案抽离与双语输出全部通过
+- 已新增 `frontend/lib/wallet-page-copy.ts` 与 `wallet-page-copy-types.ts`，将 Wallet 页的页面文案与类型定义独立出来，便于后续继续统一新增控制台页的多语言结构
+- 已将 Wallet 页的头部、统计卡、套餐下单、目录面板、成长计划、充值单、账本记录以及套餐/渠道管理弹窗切到 `en / zh-CN` 双语输出
+- 已将 Wallet 相关表单与行组件接入统一 copy，并保持 `admin-wallet-page.tsx`、`wallet-page-copy.ts` 等文件仍满足前端单文件不超过 300 行的约束
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Wallet 文案抽离与双语输出全部通过
 
 ## 下一步
 
@@ -152,7 +156,7 @@
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
-5. 继续将新增页面的多语言文案抽离并整合到统一字典中，优先处理 Wallet、Logs 与 Tickets
+5. 继续将新增页面的多语言文案抽离并整合到统一字典中，优先处理 Logs 与 Tickets
 6. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
 7. 继续把 Developer Console 的日志分析、通知查看和搜索体验做深，例如更细的筛选面板与公告详情联动
 

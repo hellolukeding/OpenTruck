@@ -19,10 +19,11 @@ import {
   type ConsoleActionState,
   updatePaymentPlanAction,
 } from "@/lib/admin-console-actions";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 
 const idleState: ConsoleActionState = { status: "idle" };
 
-export function AdminWalletPlanActions({ plan }: { plan: PaymentPlan }) {
+export function AdminWalletPlanActions({ plan, copy }: { plan: PaymentPlan; copy: WalletPageCopy["forms"] }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editState, editAction, editPending] = useActionState(updatePaymentPlanAction, idleState);
@@ -41,13 +42,13 @@ export function AdminWalletPlanActions({ plan }: { plan: PaymentPlan }) {
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
           <button type="button" className="text-[0.78rem] font-medium text-primary">
-            编辑
+            {copy.edit}
           </button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>编辑套餐</DialogTitle>
-            <DialogDescription>调整价格、额度、排序与展示标签。</DialogDescription>
+            <DialogTitle>{copy.planEditTitle}</DialogTitle>
+            <DialogDescription>{copy.planEditDescription}</DialogDescription>
           </DialogHeader>
           <form action={editAction} className="grid gap-4">
             <input type="hidden" name="plan_id" value={plan.id} />
@@ -58,20 +59,20 @@ export function AdminWalletPlanActions({ plan }: { plan: PaymentPlan }) {
               <InputField name="credit_amount" defaultValue={plan.credit_amount} />
               <InputField name="quota_units" defaultValue={String(plan.quota_units)} />
               <InputField name="sort_order" defaultValue={String(plan.sort_order)} />
-              <SelectField name="status" defaultValue={plan.status} />
+              <SelectField name="status" defaultValue={plan.status} copy={copy} />
               <label className="flex items-center gap-2 rounded-[12px] border border-outline-variant/20 px-4 py-3 text-[0.88rem] text-on-surface">
                 <input type="checkbox" name="is_featured" defaultChecked={plan.is_featured} />
-                设为推荐套餐
+                {copy.newPlanFeatured}
               </label>
             </div>
             <InputField name="description" defaultValue={plan.description ?? ""} className="md:col-span-2" />
             <FormStatus status={editState.status} message={editState.message} />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setEditOpen(false)}>
-                取消
+                {copy.cancel}
               </Button>
               <Button type="submit" disabled={editPending}>
-                {editPending ? "保存中..." : "保存修改"}
+                {editPending ? copy.saving : copy.save}
               </Button>
             </DialogFooter>
           </form>
@@ -81,23 +82,23 @@ export function AdminWalletPlanActions({ plan }: { plan: PaymentPlan }) {
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogTrigger asChild>
           <button type="button" className="text-[0.78rem] font-medium text-error">
-            删除
+            {copy.remove}
           </button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>删除套餐</DialogTitle>
-            <DialogDescription>删除后将移除套餐 “{plan.name}” 的控制台展示。</DialogDescription>
+            <DialogTitle>{copy.planDeleteTitle}</DialogTitle>
+            <DialogDescription>{copy.planDeleteDescription(plan.name)}</DialogDescription>
           </DialogHeader>
           <form action={deleteAction} className="grid gap-4">
             <input type="hidden" name="plan_id" value={plan.id} />
             <FormStatus status={deleteState.status} message={deleteState.message} />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setDeleteOpen(false)}>
-                取消
+                {copy.cancel}
               </Button>
               <Button type="submit" disabled={deletePending}>
-                {deletePending ? "删除中..." : "确认删除"}
+                {deletePending ? copy.deleting : copy.confirmDelete}
               </Button>
             </DialogFooter>
           </form>
@@ -125,15 +126,23 @@ function InputField({
   );
 }
 
-function SelectField({ name, defaultValue }: { name: string; defaultValue: string }) {
+function SelectField({
+  name,
+  defaultValue,
+  copy,
+}: {
+  name: string;
+  defaultValue: string;
+  copy: WalletPageCopy["forms"];
+}) {
   return (
     <select
       name={name}
       defaultValue={defaultValue}
       className="h-11 rounded-[12px] border border-outline-variant/20 bg-surface px-4 text-[0.88rem] text-on-surface dark:bg-surface-container-low"
     >
-      <option value="active">active</option>
-      <option value="disabled">disabled</option>
+      <option value="active">{copy.statusActive}</option>
+      <option value="disabled">{copy.statusDisabled}</option>
     </select>
   );
 }

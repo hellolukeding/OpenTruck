@@ -1,10 +1,19 @@
 import type { PaymentChannel } from "@/lib/admin-console-api";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 import { AdminWalletChannelActions } from "@/components/admin-wallet-channel-actions";
 
-export function AdminWalletChannelList({ channels }: { channels: PaymentChannel[] }) {
+export function AdminWalletChannelList({
+  channels,
+  copy,
+  formsCopy,
+}: {
+  channels: PaymentChannel[];
+  copy: WalletPageCopy["catalog"];
+  formsCopy: WalletPageCopy["forms"];
+}) {
   return (
     <div>
-      <p className="text-[0.95rem] font-semibold text-on-surface">选择支付方式</p>
+      <p className="text-[0.95rem] font-semibold text-on-surface">{copy.chooseChannel}</p>
       <div className="mt-3 flex flex-wrap gap-3">
         {channels.map((item) => (
           <div
@@ -22,7 +31,7 @@ export function AdminWalletChannelList({ channels }: { channels: PaymentChannel[
                   {item.provider} / {item.channel_code} / {item.status}
                 </p>
               </div>
-              <AdminWalletChannelActions channel={item} />
+              <AdminWalletChannelActions channel={item} copy={formsCopy} />
             </div>
           </div>
         ))}

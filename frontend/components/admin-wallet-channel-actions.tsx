@@ -19,10 +19,11 @@ import {
   type ConsoleActionState,
   updatePaymentChannelAction,
 } from "@/lib/admin-console-actions";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 
 const idleState: ConsoleActionState = { status: "idle" };
 
-export function AdminWalletChannelActions({ channel }: { channel: PaymentChannel }) {
+export function AdminWalletChannelActions({ channel, copy }: { channel: PaymentChannel; copy: WalletPageCopy["forms"] }) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editState, editAction, editPending] = useActionState(updatePaymentChannelAction, idleState);
@@ -41,13 +42,13 @@ export function AdminWalletChannelActions({ channel }: { channel: PaymentChannel
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogTrigger asChild>
           <button type="button" className="text-[0.78rem] font-medium text-primary">
-            编辑
+            {copy.edit}
           </button>
         </DialogTrigger>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>编辑支付渠道</DialogTitle>
-            <DialogDescription>调整 provider、渠道编码、排序和推荐状态。</DialogDescription>
+            <DialogTitle>{copy.channelEditTitle}</DialogTitle>
+            <DialogDescription>{copy.channelEditDescription}</DialogDescription>
           </DialogHeader>
           <form action={editAction} className="grid gap-4">
             <input type="hidden" name="channel_id" value={channel.id} />
@@ -56,20 +57,20 @@ export function AdminWalletChannelActions({ channel }: { channel: PaymentChannel
               <InputField name="provider" defaultValue={channel.provider} />
               <InputField name="channel_code" defaultValue={channel.channel_code} />
               <InputField name="sort_order" defaultValue={String(channel.sort_order)} />
-              <SelectField name="status" defaultValue={channel.status} />
+              <SelectField name="status" defaultValue={channel.status} copy={copy} />
               <label className="flex items-center gap-2 rounded-[12px] border border-outline-variant/20 px-4 py-3 text-[0.88rem] text-on-surface">
                 <input type="checkbox" name="is_recommended" defaultChecked={channel.is_recommended} />
-                设为推荐渠道
+                {copy.newChannelRecommended}
               </label>
             </div>
             <InputField name="description" defaultValue={channel.description ?? ""} className="md:col-span-2" />
             <FormStatus status={editState.status} message={editState.message} />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setEditOpen(false)}>
-                取消
+                {copy.cancel}
               </Button>
               <Button type="submit" disabled={editPending}>
-                {editPending ? "保存中..." : "保存修改"}
+                {editPending ? copy.saving : copy.save}
               </Button>
             </DialogFooter>
           </form>
@@ -79,23 +80,23 @@ export function AdminWalletChannelActions({ channel }: { channel: PaymentChannel
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogTrigger asChild>
           <button type="button" className="text-[0.78rem] font-medium text-error">
-            删除
+            {copy.remove}
           </button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>删除支付渠道</DialogTitle>
-            <DialogDescription>删除后将移除渠道 “{channel.name}” 的充值入口。</DialogDescription>
+            <DialogTitle>{copy.channelDeleteTitle}</DialogTitle>
+            <DialogDescription>{copy.channelDeleteDescription(channel.name)}</DialogDescription>
           </DialogHeader>
           <form action={deleteAction} className="grid gap-4">
             <input type="hidden" name="channel_id" value={channel.id} />
             <FormStatus status={deleteState.status} message={deleteState.message} />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setDeleteOpen(false)}>
-                取消
+                {copy.cancel}
               </Button>
               <Button type="submit" disabled={deletePending}>
-                {deletePending ? "删除中..." : "确认删除"}
+                {deletePending ? copy.deleting : copy.confirmDelete}
               </Button>
             </DialogFooter>
           </form>
@@ -123,15 +124,23 @@ function InputField({
   );
 }
 
-function SelectField({ name, defaultValue }: { name: string; defaultValue: string }) {
+function SelectField({
+  name,
+  defaultValue,
+  copy,
+}: {
+  name: string;
+  defaultValue: string;
+  copy: WalletPageCopy["forms"];
+}) {
   return (
     <select
       name={name}
       defaultValue={defaultValue}
       className="h-11 rounded-[12px] border border-outline-variant/20 bg-surface px-4 text-[0.88rem] text-on-surface dark:bg-surface-container-low"
     >
-      <option value="active">active</option>
-      <option value="disabled">disabled</option>
+      <option value="active">{copy.statusActive}</option>
+      <option value="disabled">{copy.statusDisabled}</option>
     </select>
   );
 }

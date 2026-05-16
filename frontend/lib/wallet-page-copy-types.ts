@@ -1,0 +1,115 @@
+export type WalletPageCopy = {
+  header: {
+    title: string;
+    subtitle: string;
+    billing: string;
+  };
+  stats: {
+    accountStats: string;
+    currentBalance: string;
+    historicalSpend: string;
+    requestCount: string;
+  };
+  recharge: {
+    quickHint: string;
+    exchangeRate: string;
+    vipHint: string;
+    paidAmount: (amount: string) => string;
+    savedAmount: string;
+    redeemTitle: string;
+    redeemPlaceholder: string;
+    redeemAction: string;
+  };
+  purchase: {
+    title: string;
+    creditAmount: (amount: string, quota: string) => string;
+    notePlaceholder: string;
+    submitting: string;
+    submit: string;
+  };
+  catalog: {
+    chooseChannel: string;
+    subscriptionTitle: string;
+    subscriptionSubtitle: string;
+    subscriptionAction: string;
+    emptyPlans: string;
+    featuredPlanFallback: string;
+    planCreditSummary: (amount: string, quota: string) => string;
+    createPlan: string;
+    createChannel: string;
+  };
+  affiliate: {
+    title: string;
+    subtitle: string;
+    commissionStats: string;
+    withdraw: string;
+    transferToBalance: string;
+    totalRecharged: string;
+    successfulRequests: string;
+    failedRequests: string;
+    inviteLink: string;
+    copy: string;
+    commissionNotes: string;
+    notes: string[];
+    kolTitle: string;
+    kolDescription: string;
+    applyKol: string;
+  };
+  orders: {
+    createOrder: string;
+    amountPlaceholder: string;
+    creditedAmountPlaceholder: string;
+    providerPlaceholder: string;
+    channelPlaceholder: string;
+    notePlaceholder: string;
+    submitting: string;
+    submit: string;
+    recentOrders: string;
+    emptyOrders: string;
+    manualProvider: string;
+    settling: string;
+    settle: string;
+    updateNotePlaceholder: string;
+    updating: string;
+    update: string;
+    delete: string;
+  };
+  history: {
+    title: string;
+    empty: string;
+    balanceMeta: (direction: string, amount: string) => string;
+  };
+  forms: {
+    newPlanTitle: string;
+    newPlanBadgePlaceholder: string;
+    newPlanDescriptionPlaceholder: string;
+    newPlanFeatured: string;
+    newPlanSubmitting: string;
+    newPlanSubmit: string;
+    newChannelTitle: string;
+    newChannelNamePlaceholder: string;
+    newChannelDescriptionPlaceholder: string;
+    newChannelRecommended: string;
+    newChannelSubmitting: string;
+    newChannelSubmit: string;
+    edit: string;
+    remove: string;
+    cancel: string;
+    save: string;
+    saving: string;
+    deleting: string;
+    confirmDelete: string;
+    planEditTitle: string;
+    planEditDescription: string;
+    planDeleteTitle: string;
+    planDeleteDescription: (name: string) => string;
+    channelEditTitle: string;
+    channelEditDescription: string;
+    channelDeleteTitle: string;
+    channelDeleteDescription: (name: string) => string;
+    featuredBadge: string;
+    recommendedBadge: string;
+    statusActive: string;
+    statusDisabled: string;
+  };
+};

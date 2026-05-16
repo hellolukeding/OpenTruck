@@ -6,10 +6,11 @@ import { FormStatus } from "@/components/form-status";
 import type { PaymentOrder } from "@/lib/admin-console-api";
 import { type ConsoleActionState } from "@/lib/admin-console-actions";
 import { updatePaymentOrderStatusAction } from "@/lib/admin-console-wallet-actions";
+import type { WalletPageCopy } from "@/lib/wallet-page-copy-types";
 
 const idleState: ConsoleActionState = { status: "idle" };
 
-export function AdminWalletOrderStatusForm({ order }: { order: PaymentOrder }) {
+export function AdminWalletOrderStatusForm({ order, copy }: { order: PaymentOrder; copy: WalletPageCopy["orders"] }) {
   const [state, action, pending] = useActionState(updatePaymentOrderStatusAction, idleState);
 
   return (
@@ -28,7 +29,7 @@ export function AdminWalletOrderStatusForm({ order }: { order: PaymentOrder }) {
         <input
           name="note"
           defaultValue={order.note ?? ""}
-          placeholder="更新备注，例如等待回调"
+          placeholder={copy.updateNotePlaceholder}
           className="h-10 rounded-[12px] border border-outline-variant/20 bg-surface px-3 text-[0.84rem] text-on-surface dark:bg-surface-container-low"
         />
         <button
@@ -36,7 +37,7 @@ export function AdminWalletOrderStatusForm({ order }: { order: PaymentOrder }) {
           disabled={pending}
           className="rounded-[12px] border border-outline-variant/20 px-3 py-2 text-[0.82rem] font-medium text-on-surface disabled:opacity-50"
         >
-          {pending ? "更新中..." : "更新订单"}
+          {pending ? copy.updating : copy.update}
         </button>
       </div>
       <FormStatus status={state.status} message={state.message} />
