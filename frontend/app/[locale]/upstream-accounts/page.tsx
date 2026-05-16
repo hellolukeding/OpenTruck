@@ -167,6 +167,17 @@ export default async function UpstreamAccountsPage({
         accounts={upstreamPage.items}
         total={upstreamPage.pagination.total}
         locale={typedLocale}
+        path={`/${typedLocale}/upstream-accounts`}
+        query={{
+          search,
+          status,
+          tenant_id: tenantId,
+          account_type: accountType,
+          platform,
+          sort_by: sortBy,
+          sort_order: sortOrder,
+        }}
+        tenantMap={tenantMap}
       />
       <ResourceTableCard
         eyebrow={t.eyebrow}
@@ -182,13 +193,25 @@ export default async function UpstreamAccountsPage({
             key: "name",
             label: dictionary.labels.name,
             render: (account: UpstreamAccount) => (
-              <span className="font-medium text-primary">{account.name}</span>
+              <a
+                className="font-medium text-primary hover:underline"
+                href={`/${typedLocale}/upstream-accounts?search=${encodeURIComponent(account.name)}`}
+              >
+                {account.name}
+              </a>
             ),
           },
           {
             key: "tenant",
             label: t.labels.tenant,
-            render: (account: UpstreamAccount) => tenantMap.get(account.tenant_id) ?? account.tenant_id,
+            render: (account: UpstreamAccount) => (
+              <a
+                className="text-on-surface hover:text-primary hover:underline"
+                href={`/${typedLocale}/upstream-accounts?tenant_id=${account.tenant_id}`}
+              >
+                {tenantMap.get(account.tenant_id) ?? account.tenant_id}
+              </a>
+            ),
           },
           {
             key: "email",

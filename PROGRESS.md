@@ -235,6 +235,9 @@
 - 已为 Developer Console 的使用趋势图补充按天深链，现在点击任意日期柱子会带 `startAt / endAt` 参数跳转到当天日志
 - 已为日志页与日志筛选条补齐 `startAt / endAt` 参数承接，确保从 Developer Console 进入后的筛选状态能够继续分页和重置
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Developer Console 搜索框、图表深链和通知流交互全部通过
+- 已为上游账号页摘要区补充“即将过期 token”“高频错误”“租户视角分布”三类运营信息，并将错误码与租户分布接成真实过滤入口
+- 已将上游账号表格里的账号名与租户名接成真实筛选跳转，可从列表直接聚焦某个账号或某个 tenant 的账号池
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证上游账号页运营视角增强全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 

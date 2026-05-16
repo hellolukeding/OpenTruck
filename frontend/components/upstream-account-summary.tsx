@@ -1,17 +1,31 @@
+import Link from "next/link";
+
 import type { UpstreamAccount } from "@/lib/admin-api";
 
 type Props = {
   accounts: UpstreamAccount[];
   total: number;
   locale: "en" | "zh-CN";
+  path: string;
+  query: {
+    search?: string;
+    status?: string;
+    tenant_id?: string;
+    account_type?: string;
+    platform?: string;
+    sort_by?: string;
+    sort_order?: string;
+  };
+  tenantMap: Map<string, string>;
 };
 
-export function UpstreamAccountSummary({ accounts, total, locale }: Props) {
+export function UpstreamAccountSummary({ accounts, total, locale, path, query, tenantMap }: Props) {
   const t = (en: string, zh: string) => (locale === "zh-CN" ? zh : en);
 
   const active = accounts.filter((a) => a.status === "active").length;
   const cooling = accounts.filter((a) => a.cooldown_until !== null).length;
   const disabled = accounts.length - active;
+  const expiringSoon = accounts.filter((a) => isExpiringSoon(a.token_expires_at)).length;
 
   const errorCodes = accounts
     .map((a) => a.last_error_code)
@@ -23,6 +37,13 @@ export function UpstreamAccountSummary({ accounts, total, locale }: Props) {
   const topErrors = Object.entries(errorMap)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
+  const tenantCounts = new Map<string, number>();
+  for (const account of accounts) {
+    tenantCounts.set(account.tenant_id, (tenantCounts.get(account.tenant_id) ?? 0) + 1);
+  }
+  const topTenants = Array.from(tenantCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
 
   return (
     <section className="space-y-4">
@@ -67,6 +88,16 @@ export function UpstreamAccountSummary({ accounts, total, locale }: Props) {
             {t("Manually stopped", "手动停止")}
           </p>
         </div>
+        <div className="rounded-xl border border-outline-variant bg-surface p-4">
+          <p className="flex items-center gap-1.5 text-code-sm text-on-surface-variant">
+            <span className="h-2 w-2 rounded-full bg-[#f59e0b]" />
+            {t("Expiring soon", "即将过期")}
+          </p>
+          <p className="mt-1 font-headline-lg text-headline-lg text-primary">{expiringSoon}</p>
+          <p className="text-code-sm text-on-surface-variant">
+            {t("Token needs refresh within 24h", "24 小时内需要刷新 token")}
+          </p>
+        </div>
       </div>
 
       {/* Status distribution bar */}
@@ -93,29 +124,74 @@ export function UpstreamAccountSummary({ accounts, total, locale }: Props) {
         </div>
       )}
 
-      {/* Top errors */}
-      {topErrors.length > 0 ? (
+      <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        {topErrors.length > 0 ? (
+          <div className="rounded-xl border border-outline-variant bg-surface p-4">
+            <p className="text-code-sm uppercase tracking-wide text-on-surface-variant">
+              {t("Top errors (current page)", "高频错误（当前页）")}
+            </p>
+            <div className="mt-2 space-y-1.5">
+              {topErrors.map(([code, count]) => (
+                <Link
+                  key={code}
+                  href={buildHref(path, query, { search: code })}
+                  className="flex items-center justify-between rounded-lg px-2 py-1 transition-colors hover:bg-surface-container-low"
+                >
+                  <span className="text-code-sm font-code-sm text-error">{code}</span>
+                  <span className="text-code-sm text-on-surface-variant">{count}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-outline-variant bg-surface p-4">
+            <p className="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+              <span className="material-symbols-outlined text-[16px]">check_circle</span>
+              {t("No recent errors on this page.", "当前页暂无错误记录。")}
+            </p>
+          </div>
+        )}
+
         <div className="rounded-xl border border-outline-variant bg-surface p-4">
           <p className="text-code-sm uppercase tracking-wide text-on-surface-variant">
-            {t("Top errors (current page)", "高频错误（当前页）")}
+            {t("Top tenants (current page)", "租户视角（当前页）")}
           </p>
           <div className="mt-2 space-y-1.5">
-            {topErrors.map(([code, count]) => (
-              <div key={code} className="flex items-center justify-between">
-                <span className="text-code-sm font-code-sm text-error">{code}</span>
+            {topTenants.length > 0 ? topTenants.map(([tenantId, count]) => (
+              <Link
+                key={tenantId}
+                href={buildHref(path, query, { tenant_id: tenantId })}
+                className="flex items-center justify-between rounded-lg px-2 py-1 transition-colors hover:bg-surface-container-low"
+              >
+                <span className="text-body-sm text-on-surface">{tenantMap.get(tenantId) ?? tenantId}</span>
                 <span className="text-code-sm text-on-surface-variant">{count}</span>
+              </Link>
+            )) : (
+              <div className="text-body-sm text-on-surface-variant">
+                {t("No tenant distribution yet.", "当前页暂无租户分布。")}
               </div>
-            ))}
+            )}
           </div>
         </div>
-      ) : (
-        <div className="rounded-xl border border-outline-variant bg-surface p-4">
-          <p className="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
-            <span className="material-symbols-outlined text-[16px]">check_circle</span>
-            {t("No recent errors on this page.", "当前页暂无错误记录。")}
-          </p>
-        </div>
-      )}
+      </div>
     </section>
   );
+}
+
+function isExpiringSoon(value: string | null) {
+  if (!value) return false;
+  const expiresAt = new Date(value).getTime();
+  return expiresAt > Date.now() && expiresAt - Date.now() <= 24 * 60 * 60 * 1000;
+}
+
+function buildHref(
+  path: string,
+  query: Props["query"],
+  overrides: Partial<Props["query"]>,
+) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries({ ...query, ...overrides })) {
+    if (value) params.set(key, value);
+  }
+  return `${path}?${params.toString()}`;
 }
