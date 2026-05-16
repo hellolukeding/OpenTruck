@@ -145,9 +145,9 @@
 2. 继续把上游账号调度往 `sub2api` 方向推进，补跨进程并发协调、精细计费策略与更细的故障恢复策略
 3. 把 `upstream_accounts` 页面继续往运营后台方向补强，例如更细的状态聚合、失败原因聚合与 tenant 视角的详情串联
 4. 配置并验证至少一个真实 OAuth provider，完成登录回跳和 session 落地的端到端验证
-5. 把 Developer Console 的动作入口继续接成真实能力，例如创建 API Key、跳转日志筛选和钱包补款
-6. 将新增页面的多语言文案整合到 `i18n` 字典中
-7. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
+5. 将新增页面的多语言文案整合到 `i18n` 字典中
+6. 继续把商家控制台与控制台子导航做细化联动，例如真实跳转、筛选与操作入口
+7. 把 Developer Console 的搜索框、图表和通知流继续接成更细的真实交互，而不只停留在入口跳转
 
 ### 2026-05-15 — 按 design 文件对齐公共页面视觉
 
@@ -225,6 +225,9 @@
 - 已将 `/{locale}/developer` 从硬编码示意页改为真实后端取数，复用 `dashboard / wallet / logs / api-keys / node-models` 现有接口拼出开发者视图
 - 已将 Developer Console 的统计卡、使用趋势图、API Keys 表和 Top Models 模块切到真实数据，并把侧边栏导航接到现有控制台子页面
 - 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Developer Console 数据接线全部通过，匿名浏览器访问仍会正确跳转到登录门禁
+- 已将 Developer Console 顶部主按钮、统计卡 CTA、API Key 列表和热点模型模块的入口改成真实跳转，可直接前往新建 API Key、日志筛选、钱包补款和公告页
+- 已为 `CreateApiKeyForm` 增加 `#new-api-key` 锚点，Developer Console 的 `Generate New Key` 按钮现在会落到真实创建表单位置
+- 已通过 `make check` 与 `pnpm --dir frontend build` 验证 Developer Console 动作入口接线全部通过
 
 ### 2026-05-15 — 前端布局与性能优化
 

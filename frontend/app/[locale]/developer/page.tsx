@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 import { DeveloperApiKeys, DeveloperTopModels } from "@/components/developer-analytics";
 import { DeveloperStats, DeveloperUsageChart } from "@/components/developer-dashboard";
@@ -41,8 +42,11 @@ export default async function DeveloperPage({
     getNodeModelsPage({ pageSize: 100, sortBy: "priority", sortOrder: "asc" }).catch(() => null),
   ]);
 
-  const stats = buildStats(dashboard, wallet);
+  const stats = buildStats(dashboard, wallet, typedLocale);
   const chart = buildUsageChart(dashboard);
+  const newKeyHref = `/${typedLocale}/api-keys#new-api-key`;
+  const logsHref = `/${typedLocale}/logs`;
+  const walletHref = `/${typedLocale}/wallet`;
   const keys = (apiKeysPage?.items ?? []).map((item) => ({
     id: item.id,
     name: item.name,
@@ -50,7 +54,7 @@ export default async function DeveloperPage({
     lastUsed: item.last_used_at ? formatRelative(item.last_used_at) : "Never",
     status: item.status,
   }));
-  const topModels = buildTopModels(logsPage?.items ?? [], nodeModelsPage?.items ?? []);
+  const topModels = buildTopModels(logsPage?.items ?? [], nodeModelsPage?.items ?? [], typedLocale);
 
   return (
     <div className="flex min-h-screen bg-background text-on-surface font-body-md">
@@ -76,14 +80,14 @@ export default async function DeveloperPage({
             </div>
           </div>
           <div className="flex items-center gap-md">
-            <button className="relative p-2 text-on-surface-variant hover:text-primary transition-colors">
+            <Link className="relative p-2 text-on-surface-variant hover:text-primary transition-colors" href={`/${typedLocale}/announcements`}>
               <span className="material-symbols-outlined">notifications</span>
               <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full" />
-            </button>
-            <button className="flex items-center gap-2 px-4 py-1.5 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-all active:scale-95">
+            </Link>
+            <Link className="flex items-center gap-2 px-4 py-1.5 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-surface-tint transition-all active:scale-95" href={newKeyHref}>
               <span className="material-symbols-outlined text-[18px]">add</span>
               <span>Generate New Key</span>
-            </button>
+            </Link>
           </div>
         </header>
 
@@ -102,14 +106,14 @@ export default async function DeveloperPage({
               </p>
             </div>
             <div className="flex gap-sm">
-              <button className="px-4 py-2 bg-white border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-high transition-all">
+              <Link className="px-4 py-2 bg-white border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container-high transition-all" href={logsHref}>
                 <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                 Last 7 Days
-              </button>
-              <button className="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-tint shadow-sm transition-all active:scale-95">
+              </Link>
+              <Link className="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-tint shadow-sm transition-all active:scale-95" href={newKeyHref}>
                 <span className="material-symbols-outlined text-[18px]">vpn_key</span>
                 Generate New Key
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -117,8 +121,8 @@ export default async function DeveloperPage({
           <DeveloperUsageChart points={chart} />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg">
-            <DeveloperApiKeys keys={keys} />
-            <DeveloperTopModels models={topModels} />
+            <DeveloperApiKeys keys={keys} locale={typedLocale} />
+            <DeveloperTopModels models={topModels} locale={typedLocale} />
           </div>
 
           <DeveloperFooter />
@@ -131,6 +135,7 @@ export default async function DeveloperPage({
 function buildStats(
   dashboard: Awaited<ReturnType<typeof getDashboardOverview>> | null,
   wallet: Awaited<ReturnType<typeof getWalletOverview>> | null,
+  locale: string,
 ) {
   const recentRequests = dashboard?.usage_trend.reduce((sum, item) => sum + item.requests, 0) ?? 0;
   const recentSpend = dashboard?.usage_trend.reduce((sum, item) => sum + Number(item.spend), 0) ?? 0;
@@ -148,6 +153,8 @@ function buildStats(
       supporting: `过去 7 天请求 ${formatNumber(recentRequests)} 次`,
       icon: "insights",
       trend: `+${trend.replace("+", "")}`,
+      ctaLabel: "查看日志",
+      href: `/${locale}/logs`,
     },
     {
       title: "Estimated Cost",
@@ -155,6 +162,8 @@ function buildStats(
       accent: "text-on-secondary-container",
       supporting: `Projected monthly spend: ${formatMoney(projectedMonthlySpend.toFixed(2))}`,
       icon: "payments",
+      ctaLabel: "账务详情",
+      href: `/${locale}/wallet`,
     },
     {
       title: "Remaining Credit",
@@ -162,6 +171,8 @@ function buildStats(
       accent: "text-tertiary",
       supporting: daysLeft > 0 ? `${daysLeft} days left at current run-rate` : "Waiting for more spend history",
       icon: "account_balance_wallet",
+      ctaLabel: "Refill Balance",
+      href: `/${locale}/wallet`,
     },
   ];
 }
@@ -179,6 +190,7 @@ function buildUsageChart(dashboard: Awaited<ReturnType<typeof getDashboardOvervi
 function buildTopModels(
   logs: Awaited<ReturnType<typeof getGatewayLogsPage>>["items"],
   nodeModels: Awaited<ReturnType<typeof getNodeModelsPage>>["items"],
+  locale: string,
 ) {
   const usage = new Map<string, number>();
   for (const item of logs) {
@@ -194,6 +206,7 @@ function buildTopModels(
       usage: `${formatNumber(count)} req`,
       fill: Math.max(Math.round((count / max) * 100), 10),
       color: index === 1 ? "bg-primary-container" : "bg-on-surface",
+      href: buildLogHref(locale, name),
     }));
 
   if (items.length > 0) {
@@ -205,7 +218,12 @@ function buildTopModels(
     usage: `${formatMoney((Number(item.input_price) + Number(item.output_price)).toFixed(2))}/M`,
     fill: Math.max(100 - index * 18, 25),
     color: index === 0 ? "bg-primary-container" : "bg-on-surface",
+    href: buildLogHref(locale, item.public_model),
   }));
+}
+
+function buildLogHref(locale: string, model: string) {
+  return `/${locale}/logs?model=${encodeURIComponent(model)}`;
 }
 
 function formatMoney(value: string | number) {

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 type DeveloperKeyItem = {
   id: string;
   name: string;
@@ -13,14 +15,17 @@ type DeveloperModelItem = {
   usage: string;
   fill: number;
   color: string;
+  href?: string;
 };
 
-export function DeveloperApiKeys({ keys }: { keys: DeveloperKeyItem[] }) {
+export function DeveloperApiKeys({ keys, locale }: { keys: DeveloperKeyItem[]; locale: string }) {
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow flex flex-col">
       <div className="px-lg py-md border-b border-outline-variant/30 flex items-center justify-between">
         <h3 className="font-headline-md text-body-lg font-bold">Active API Keys</h3>
-        <button className="font-label-md text-label-md text-primary">View All</button>
+        <Link className="font-label-md text-label-md text-primary hover:underline" href={`/${locale}/api-keys`}>
+          View All
+        </Link>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left font-body-sm">
@@ -65,18 +70,26 @@ export function DeveloperApiKeys({ keys }: { keys: DeveloperKeyItem[] }) {
   );
 }
 
-export function DeveloperTopModels({ models }: { models: DeveloperModelItem[] }) {
+export function DeveloperTopModels({ models, locale }: { models: DeveloperModelItem[]; locale: string }) {
   return (
     <div className="bg-white border border-outline-variant/30 rounded-xl airy-shadow p-lg">
       <div className="flex items-center justify-between mb-lg">
         <h3 className="font-headline-md text-body-lg font-bold">Top Models by Usage</h3>
-        <button className="material-symbols-outlined text-secondary hover:text-on-surface">more_vert</button>
+        <Link className="material-symbols-outlined text-secondary hover:text-on-surface" href={`/${locale}/logs`}>
+          more_vert
+        </Link>
       </div>
       <div className="space-y-md">
         {models.length > 0 ? models.map((m) => (
           <div key={m.name} className="space-y-sm">
             <div className="flex justify-between font-label-md text-label-md">
-              <span className="font-bold text-on-surface">{m.name}</span>
+              {m.href ? (
+                <Link className="font-bold text-on-surface hover:text-primary" href={m.href}>
+                  {m.name}
+                </Link>
+              ) : (
+                <span className="font-bold text-on-surface">{m.name}</span>
+              )}
               <span className="text-secondary">{m.usage}</span>
             </div>
             <div className="w-full bg-surface-container h-2 rounded-full overflow-hidden">

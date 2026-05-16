@@ -54,7 +54,7 @@ export function CreateApiKeyForm({
   }, [state.status]);
 
   return (
-    <Card>
+    <Card id="new-api-key">
       <CardHeader>
         <p className="font-label-md text-label-md text-on-surface-variant">
           {form.eyebrow}

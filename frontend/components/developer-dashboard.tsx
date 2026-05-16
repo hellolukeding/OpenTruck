@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 type DeveloperStatCard = {
   title: string;
   value: string;
@@ -7,6 +9,8 @@ type DeveloperStatCard = {
   supporting: string;
   icon: string;
   trend?: string;
+  ctaLabel?: string;
+  href?: string;
 };
 
 type DeveloperUsageBar = {
@@ -32,7 +36,14 @@ export function DeveloperStats({ cards }: { cards: DeveloperStatCard[] }) {
             <span className="font-display text-headline-lg">{card.value}</span>
             {card.trend ? <span className="font-label-md text-label-md text-primary">{card.trend}</span> : null}
           </div>
-          <p className="mt-md font-body-sm text-body-sm text-secondary">{card.supporting}</p>
+          <div className="mt-md flex items-center justify-between gap-4">
+            <p className="font-body-sm text-body-sm text-secondary">{card.supporting}</p>
+            {card.ctaLabel && card.href ? (
+              <Link className="shrink-0 font-label-md text-label-md font-bold text-primary hover:underline" href={card.href}>
+                {card.ctaLabel}
+              </Link>
+            ) : null}
+          </div>
           <div className="w-full bg-surface-container h-1.5 rounded-full mt-sm overflow-hidden">
             <div className={`h-full rounded-full ${card.accent.replace("text-", "bg-")}`} style={{ width: "66%" }} />
           </div>
